@@ -9,4 +9,5 @@ import type { ChildProfile } from './childProfile';
 
 export interface GuardianFamily {
   children: ChildProfile[];
+  testingAdmin: boolean;
 }

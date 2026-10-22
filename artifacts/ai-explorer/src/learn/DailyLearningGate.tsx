@@ -26,7 +26,12 @@ function DailyLimitNotice({ childId, resetAt }: { childId: string; resetAt: stri
   </main>;
 }
 
-export function DailyLearningGate({ childId, children }: { childId: string; children: ReactNode }) {
+export function DailyLearningGate({ childId, children, testingAdmin = false }: { childId: string; children: ReactNode; testingAdmin?: boolean }) {
+  if (testingAdmin) return <>{children}</>;
+  return <DailyLearningTimer childId={childId}>{children}</DailyLearningTimer>;
+}
+
+function DailyLearningTimer({ childId, children }: { childId: string; children: ReactNode }) {
   const { data, isLoading, isError, refetch } = useGetChildDailyUsage(childId);
   const { mutate } = useRecordChildDailyUsage();
   const [remaining, setRemaining] = useState<number | null>(null);

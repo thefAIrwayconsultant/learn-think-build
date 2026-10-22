@@ -86,7 +86,8 @@ export const GetFamilyResponse = zod.object({
   "reviewPoints": zod.number().int().min(getFamilyResponseChildrenItemScoreBreakdownReviewPointsMin)
 }),
   "createdAt": zod.coerce.date()
-}))
+})),
+  "testingAdmin": zod.boolean()
 })
 
 

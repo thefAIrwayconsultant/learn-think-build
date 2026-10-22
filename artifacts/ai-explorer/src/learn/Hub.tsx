@@ -40,7 +40,7 @@ function ProjectBox({ child, level }: { child: ChildProfile; level: Level }) {
   </div>;
 }
 
-export function LearnerHub({ child, familyLearners }: { child: ChildProfile; familyLearners: ChildProfile[] }) {
+export function LearnerHub({ child, familyLearners, testingAdmin = false }: { child: ChildProfile; familyLearners: ChildProfile[]; testingAdmin?: boolean }) {
   const client = useQueryClient();
   const save = useUpdateChildLearningState();
   const [pledgeError, setPledgeError] = useState('');
@@ -54,7 +54,7 @@ export function LearnerHub({ child, familyLearners }: { child: ChildProfile; fam
   const weekly = lessonsThisWeek(child).length;
   const agreeable = s.learnerAgreedLevel < target;
   const learnerPledge = () => { setPledgeError(''); save.mutate({ childId: child.id, data: { ...s, learnerAgreedLevel: target } }, { onSuccess: () => void client.invalidateQueries({ queryKey: getGetFamilyQueryKey() }), onError: (e) => { setPledgeError(apiErrorBody(e).message); void client.invalidateQueries({ queryKey: getGetFamilyQueryKey() }); } }); };
-  const pledgeOpen = s.learnerAgreedLevel < target || s.pledgeLevel < target;
+  const pledgeOpen = !testingAdmin && (s.learnerAgreedLevel < target || s.pledgeLevel < target);
   const pct = Math.min(100, Math.round((weekly / s.weeklyGoal) * 100));
   return <main className="page-content">
     <Link href="/family" className="back-link"><ArrowLeft size={15} /> Family account</Link>
@@ -66,6 +66,7 @@ export function LearnerHub({ child, familyLearners }: { child: ChildProfile; fam
       <div><strong>{done.size} / {all.length}</strong><span>missions done</span></div>
     </div>
     <FamilyLeaderboard learners={familyLearners} focusChildId={child.id} />
+    {testingAdmin && <div className="family-note" role="status" data-testid="testing-admin-mode"><ShieldCheck size={18} /><span>Testing mode opens all lessons and mastery checks and skips the daily timer. Progress and scores still save to this learner profile. Use a separate test learner, not a real child’s profile.</span></div>}
     {pledgeOpen && <section className="pledge-card" aria-labelledby="pledge-heading">
       <div className="eyebrow">Chapter {target} pledge</div><h2 id="pledge-heading">AI is a tool. I’ll keep my judgment in the lead.</h2>
       <p>I will protect private information, check important answers, follow the rules, and stop to ask a trusted adult if anything feels wrong.</p>
@@ -76,7 +77,7 @@ export function LearnerHub({ child, familyLearners }: { child: ChildProfile; fam
     </section>}
     <section className="levels-list" aria-labelledby="trails-heading"><div className="section-heading"><div><h2 id="trails-heading">Your learning path</h2><p>Explore one short mission each day. Finish the chapter, pass its mastery check, and make a project for your guardian to review before the next chapter opens.</p></div></div>
       {levels.map((level, li) => {
-        const unlocked = levelUnlocked(child, li);
+        const unlocked = testingAdmin || levelUnlocked(child, li);
         const lessons = level.lessonIds.map((id) => all.find((l) => l.id === id)).filter((l): l is NonNullable<typeof l> => !!l);
         const lessonsDone = levelLessonsDone(child, level.id);
         const mastered = child.masteredLevelIds.includes(level.id);
@@ -86,11 +87,11 @@ export function LearnerHub({ child, familyLearners }: { child: ChildProfile; fam
           <div className="level-heading"><div><div className="eyebrow">Chapter {li + 1} of {levels.length} · {level.domain}</div><h3 id={`level-${level.id}`}>{level.title}</h3><p>{level.description}</p></div><span className={`level-status${mastered && approved ? ' is-graduated' : ''}`}>{mastered && approved ? 'Finished' : unlocked ? 'In progress' : 'Locked'}</span></div>
           {unlocked ? <>
             <div className="lesson-list">{lessons.map((lesson) => {
-              const ok = lessonUnlocked(child, lesson.id); const isDone = done.has(lesson.id);
+              const ok = testingAdmin || lessonUnlocked(child, lesson.id); const isDone = done.has(lesson.id);
               const inner = <><span className="lesson-card-body"><span className="lesson-meta"><span>{lesson.topic}</span>{isDone && <span className="done-mark" aria-label="Completed"><Check size={14} /></span>}{!ok && <LockKeyhole size={13} />}</span><span className="lesson-card-title"><h3>{lesson.title}</h3></span><span className="lesson-card-desc"><p>{lesson.summary}</p></span><span className="lesson-card-foot"><span>Day {lesson.sessionNumber} of {lesson.chapterSessionCount} · {isDone ? 'Revisit' : ok ? 'Start' : 'Finish the earlier lesson first'} · about {lesson.durationMinutes} min</span>{ok && <ArrowRight size={17} />}</span></span></>;
               return ok ? <Link key={lesson.id} href={`/learn/${child.id}/lesson/${lesson.id}`} className="lesson-card" data-testid={`link-lesson-${lesson.id}`}>{inner}</Link> : <div key={lesson.id} className="lesson-card is-locked" aria-disabled="true">{inner}</div>;
             })}</div>
-            {mastered ? <div className="level-result"><CheckCircle2 size={18} /> Chapter mastery check passed.</div> : masteryUnlocked(child, level.id) ? <Link href={`/learn/${child.id}/level/${level.id}/test`} className="primary-button level-test-link" data-testid={`link-assessment-${level.id}`}>Take the Chapter {li + 1} mastery check <ArrowRight size={16} /></Link> : <p className="level-hint">Finish every mission to unlock the mastery check. You need {PASS}%.</p>}
+            {mastered ? <div className="level-result"><CheckCircle2 size={18} /> Chapter mastery check passed.</div> : testingAdmin || masteryUnlocked(child, level.id) ? <Link href={`/learn/${child.id}/level/${level.id}/test`} className="primary-button level-test-link" data-testid={`link-assessment-${level.id}`}>{testingAdmin ? 'Test' : 'Take'} the Chapter {li + 1} mastery check <ArrowRight size={16} /></Link> : <p className="level-hint">Finish every mission to unlock the mastery check. You need {PASS}%.</p>}
             {lessonsDone && <ProjectBox child={child} level={level} />}
           </> : <p className="level-hint"><LockKeyhole size={15} /> {reason}</p>}
         </section>;

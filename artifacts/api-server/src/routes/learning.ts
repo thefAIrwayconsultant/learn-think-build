@@ -9,6 +9,7 @@ import {
   CompleteChildLessonBody, CompleteChildLessonResponse, SubmitLevelAssessmentBody, SubmitLevelAssessmentResponse,
 } from "@workspace/api-zod";
 import { canonicalIds, normalizeState, lessonReady, levelReady, pickQuestions, gradeQuestions, validReflection, summarizeDailyLearning } from "../lib/learning-rules";
+import { isTestingAdmin } from "../lib/testing-admin";
 
 const router = Router();
 async function context(req: Request, res: Response) {
@@ -23,14 +24,15 @@ async function context(req: Request, res: Response) {
   const mastery = await db.select().from(childLevelMasteryTable).where(eq(childLevelMasteryTable.childId, profile.id));
   const [dailyRecord] = await db.select().from(childDailyLearningTable)
     .where(eq(childDailyLearningTable.childId, profile.id)).limit(1);
+  const testingAdmin = await isTestingAdmin(guardianId);
   return { profile, completed: new Set(canonicalIds(progress.map(row => row.lessonId))),
     mastered: new Set(mastery.map(row => row.levelId).filter(id => levels.some(level => level.id === id))), state: normalizeState(profile.learningState),
-    dailyUsage: summarizeDailyLearning(dailyRecord),
+    dailyUsage: summarizeDailyLearning(dailyRecord), testingAdmin,
     ageBand: (profile.ageBand ?? "10-12") as AgeBand };
 }
 
 function requireLearningTime(ctx: Awaited<ReturnType<typeof context>>, res: Response): boolean {
-  if (!ctx || ctx.dailyUsage.remainingSeconds > 0) return true;
+  if (!ctx || ctx.testingAdmin || ctx.dailyUsage.remainingSeconds > 0) return true;
   res.status(429).json({ error: "Your ten minutes of learning time are up for now. Your daily time window will reset automatically." });
   return false;
 }
@@ -47,7 +49,7 @@ router.post("/family/children/:childId/quiz", async (req, res): Promise<void> =>
   if (kind === "lesson") {
     selected = lessons.filter(lesson => lesson.id === targetId);
     if (!selected.length) { res.status(404).json({ error: "Lesson not found." }); return; }
-    if (!lessonReady(targetId, ctx.completed, ctx.mastered, ctx.state)) {
+    if (!ctx.testingAdmin && !lessonReady(targetId, ctx.completed, ctx.mastered, ctx.state)) {
       res.status(403).json({ error: "Finish the earlier lessons, both pledges, and previous level approval first." }); return;
     }
   }
@@ -55,8 +57,8 @@ router.post("/family/children/:childId/quiz", async (req, res): Promise<void> =>
     const index = levels.findIndex(level => level.id === targetId);
     const level = levels[index];
     if (!level) { res.status(404).json({ error: "Level not found." }); return; }
-    if (!level.lessonIds.every(id => ctx.completed.has(id)) || !levelReady(index, ctx.completed, ctx.mastered, ctx.state)
-      || ctx.state.pledgeLevel < index + 1 || ctx.state.learnerAgreedLevel < index + 1) {
+    if (!ctx.testingAdmin && (!level.lessonIds.every(id => ctx.completed.has(id)) || !levelReady(index, ctx.completed, ctx.mastered, ctx.state)
+      || ctx.state.pledgeLevel < index + 1 || ctx.state.learnerAgreedLevel < index + 1)) {
       res.status(403).json({ error: "Complete this level's lessons and pledges, and the previous level's mastery and project first." }); return;
     }
     selected = lessons.filter(lesson => level.lessonIds.includes(lesson.id));
@@ -65,7 +67,7 @@ router.post("/family/children/:childId/quiz", async (req, res): Promise<void> =>
   const [previous] = await db.select().from(quizAttemptsTable).where(and(
     eq(quizAttemptsTable.childId, ctx.profile.id), eq(quizAttemptsTable.kind, kind), eq(quizAttemptsTable.targetId, targetId),
   )).orderBy(desc(quizAttemptsTable.createdAt)).limit(1);
-  if (kind === "level") {
+  if (kind === "level" && !ctx.testingAdmin) {
     // Starting an abandoned attempt must not bypass a previous failed attempt's review requirement.
     const failed = await db.select().from(quizAttemptsTable).where(and(
       eq(quizAttemptsTable.childId, ctx.profile.id), eq(quizAttemptsTable.kind, "level"), eq(quizAttemptsTable.targetId, targetId),
@@ -111,6 +113,7 @@ class SubmissionError extends Error {
 async function gradeAttempt(
   childId: string, ageBand: AgeBand, attemptId: string, kind: string, targetId: string, answers: number[][],
   onPass?: (tx: Parameters<Parameters<typeof db.transaction>[0]>[0], score: number) => Promise<void>,
+  testingAdmin = false,
 ) {
   if (!z.uuid().safeParse(attemptId).success) throw new SubmissionError(400, "Start a new check before submitting.");
   return db.transaction(async tx => {
@@ -121,7 +124,7 @@ async function gradeAttempt(
     if (!attempt || attempt.kind !== kind || attempt.targetId !== targetId) throw new SubmissionError(400, "This check does not belong to this lesson or learner.");
     if (attempt.ageBand !== ageBand) throw new SubmissionError(409, "The age path changed. Please start a new check.");
     if (attempt.finishedAt) throw new SubmissionError(409, "This check was already submitted. Start a fresh check.");
-    if (kind === "level") {
+    if (kind === "level" && !testingAdmin) {
       const previous = await tx.select().from(quizAttemptsTable).where(and(
         eq(quizAttemptsTable.childId, childId), eq(quizAttemptsTable.kind, "level"), eq(quizAttemptsTable.targetId, targetId),
       ));
@@ -153,7 +156,7 @@ router.post("/family/children/:childId/progress", async (req, res): Promise<void
   if (!parsed.success) { res.status(400).json({ error: "Finish the explainer, activity, reflection, and all check questions." }); return; }
   const body = parsed.data;
   const id = normalizeLessonId(body.lessonId);
-  if (!lessonReady(id, ctx.completed, ctx.mastered, ctx.state)) {
+  if (!ctx.testingAdmin && !lessonReady(id, ctx.completed, ctx.mastered, ctx.state)) {
     res.status(403).json({ error: "Finish earlier lessons, both pledges, and the previous level project first." }); return;
   }
   if (!validReflection(body.reflection, id, ctx.ageBand)) {
@@ -174,7 +177,7 @@ router.post("/family/children/:childId/progress", async (req, res): Promise<void
             durationSeconds: sql`${childProgressTable.durationSeconds} + ${body.durationSeconds}`,
             quizScore: sql`greatest(coalesce(${childProgressTable.quizScore}, 0), ${score})` },
         });
-      });
+      }, ctx.testingAdmin);
     if (!grade.passed) { res.status(422).json({ error: "You need 80% to complete this lesson. Review the explanations and try a new check.", ...grade }); return; }
     res.json(CompleteChildLessonResponse.parse({ completedLessonIds: canonicalIds([...ctx.completed, id]) }));
   } catch (error) { submissionError(error, res); }
@@ -188,7 +191,7 @@ router.post("/family/children/:childId/assessments", async (req, res): Promise<v
   const body = parsed.data;
   const index = levels.findIndex(level => level.id === body.levelId);
   const level = levels[index];
-  if (!level || !level.lessonIds.every(id => ctx.completed.has(id)) || !levelReady(index, ctx.completed, ctx.mastered, ctx.state)) {
+  if (!level || (!ctx.testingAdmin && (!level.lessonIds.every(id => ctx.completed.has(id)) || !levelReady(index, ctx.completed, ctx.mastered, ctx.state)))) {
     res.status(403).json({ error: "Complete this level and the previous level's mastery and approved project first." }); return;
   }
   try {
@@ -197,7 +200,7 @@ router.post("/family/children/:childId/assessments", async (req, res): Promise<v
         await tx.insert(childLevelMasteryTable).values({ childId: ctx.profile.id, levelId: level.id, score })
           .onConflictDoUpdate({ target: [childLevelMasteryTable.childId, childLevelMasteryTable.levelId],
             set: { score: sql`greatest(${childLevelMasteryTable.score}, ${score})` } });
-      });
+      }, ctx.testingAdmin);
     if (grade.passed) ctx.mastered.add(level.id);
     res.json(SubmitLevelAssessmentResponse.parse({ levelId: level.id, ...grade, masteredLevelIds: [...ctx.mastered] }));
   } catch (error) { submissionError(error, res); }

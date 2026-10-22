@@ -287,6 +287,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
           <div><div className="eyebrow">The grown-up’s corner</div><h1>Your family workshop.</h1><p>Manage learner profiles and saved progress.</p></div>
           <div className="account-pill"><span className="initial-badge">{parentName.trim().charAt(0).toUpperCase()}</span><span>{parentName}</span><button className="signout-button" type="button" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={14} /> Sign out</button></div>
         </div>
+        {family.testingAdmin && <div className="family-note" role="status" data-testid="testing-admin-banner"><ShieldCheck size={18} /><span>Testing admin access is active for this account. Use a separate learner profile for testing; lesson progress and scores still save to your family account.</span></div>}
         {family.children.length > 0 && <FamilyLeaderboard learners={family.children} />}
         <div className="family-grid">
           <section className="family-panel subscription-panel" aria-labelledby="subscription-heading">
@@ -366,22 +367,22 @@ function AgeBandSetup({ child }: { child: ChildProfile }) {
 
 function LearnerRoute() {
   const [, params] = useRoute('/learn/:childId');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(family, child) => child ? <DailyLearningGate childId={child.id}><LearnerHub child={child} familyLearners={family.children} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(family, child) => child ? <DailyLearningGate childId={child.id} testingAdmin={family.testingAdmin}><LearnerHub child={child} familyLearners={family.children} testingAdmin={family.testingAdmin} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function ReviewRoute() {
   const [, params] = useRoute('/learn/:childId/review');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <DailyLearningGate childId={child.id}><ReviewFlow key={`${child.id}-${child.ageBand}`} child={child} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(family, child) => child ? <DailyLearningGate childId={child.id} testingAdmin={family.testingAdmin}><ReviewFlow key={`${child.id}-${child.ageBand}`} child={child} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function LevelAssessmentRoute() {
   const [, params] = useRoute('/learn/:childId/level/:levelId/test');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <DailyLearningGate childId={child.id}><MasteryFlow key={`${child.id}-${child.ageBand}-${params?.levelId}`} child={child} levelId={params?.levelId || ''} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(family, child) => child ? <DailyLearningGate childId={child.id} testingAdmin={family.testingAdmin}><MasteryFlow key={`${child.id}-${child.ageBand}-${params?.levelId}`} child={child} levelId={params?.levelId || ''} testingAdmin={family.testingAdmin} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function LessonRoute() {
   const [, params] = useRoute('/learn/:childId/lesson/:id');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <DailyLearningGate childId={child.id}><LessonFlow child={child} lessonId={params?.id || ''} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(family, child) => child ? <DailyLearningGate childId={child.id} testingAdmin={family.testingAdmin}><LessonFlow child={child} lessonId={params?.id || ''} testingAdmin={family.testingAdmin} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function NotFound() {

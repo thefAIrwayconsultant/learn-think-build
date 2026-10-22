@@ -74,6 +74,12 @@ Parent-guided AI literacy for learners ages 10+, with age-banded lessons, hands-
 - The single family price is $4.99/month; keep it labeled “coming soon” until Stripe billing is enabled. Do not show other plan or price amounts.
 - Keep the phone/iOS-width navigation labels and order consistent with desktop. This is one responsive website, not a separate native iOS application.
 
+### Testing access
+
+- `LTB_TEST_ADMIN_EMAIL` is a server-only allowlist for a verified primary Clerk email. Resolve it through Clerk on the server; fail closed if verification or lookup fails. Never put the allowlisted address in source code or client-visible configuration.
+- Testing access opens lessons and chapter checks out of order and bypasses the daily learning timer. It does not bypass family ownership, server-side quiz grading, or lesson completion evidence, and it never grants access to another family's profiles.
+- Testing progress, scores, reflections, and mastery records are saved to the administrator's own family profile. Display a clear warning and recommend using a separate test learner.
+
 ## Gotchas
 
 - Production schema changes are applied through Replit Publish; use the Drizzle push command only for the development database.

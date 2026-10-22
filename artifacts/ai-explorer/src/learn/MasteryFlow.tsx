@@ -11,7 +11,7 @@ import { WatchStep } from './WatchStep';
 import { useSpeechSafety } from './speech';
 import './learn.css';
 
-export function MasteryFlow({ child, levelId }: { child: ChildProfile; levelId: string }) {
+export function MasteryFlow({ child, levelId, testingAdmin = false }: { child: ChildProfile; levelId: string; testingAdmin?: boolean }) {
   const level = levels.find((l) => l.id === levelId);
   const client = useQueryClient();
   const submit = useSubmitLevelAssessment();
@@ -25,7 +25,7 @@ export function MasteryFlow({ child, levelId }: { child: ChildProfile; levelId: 
   useSpeechSafety(child.id, levelId, quiz?.attemptId);
   if (!level) return <main className="page-content not-found"><h1>That chapter isn’t here.</h1><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
   const lessons = getLessonsForAgeBand(child.ageBand ?? '10-12');
-  const canTake = masteryUnlocked(child, level.id);
+  const canTake = testingAdmin || masteryUnlocked(child, level.id);
   if (!canTake) return <main className="page-content not-found"><h1>Keep exploring first.</h1><p>Finish every mission in this chapter (and the previous chapter) before the mastery check.</p><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
 
   const begin = async () => {

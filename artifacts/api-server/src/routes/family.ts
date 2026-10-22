@@ -19,6 +19,7 @@ import {
 } from "@workspace/db";
 import { isLegacyChapterId, levels, normalizeLessonId } from "@workspace/curriculum";
 import { advanceDailyLearning, calculateLearningScore, canonicalIds, normalizeState, levelReady, mergeProgressRecords, summarizeDailyLearning, weakTopicCounts } from "../lib/learning-rules";
+import { isTestingAdmin } from "../lib/testing-admin";
 import learningRouter from "./learning";
 import {
   CompleteChildLessonBody,
@@ -109,6 +110,7 @@ router.get("/family", async (req, res): Promise<void> => {
     res.status(500).json({ error: "Could not load the family account." });
     return;
   }
+  const testingAdmin = await isTestingAdmin(guardianId);
 
   const profiles = await db
     .select()
@@ -152,6 +154,7 @@ router.get("/family", async (req, res): Promise<void> => {
   }
 
   const response = {
+    testingAdmin,
     children: profiles.map((profile) => {
       const completedLessonIds = canonicalIds(completedByChild.get(profile.id) ?? []);
       const masteredLevelIds = (masteredByChild.get(profile.id) ?? []).filter((id) => levels.some((level) => level.id === id));

@@ -378,11 +378,12 @@ components:
           $ref: "#/components/schemas/AgeBand"
     GuardianFamily:
       type: object
-      required: [children]
+      required: [children, testingAdmin]
       properties:
         children:
           type: array
           items: { $ref: "#/components/schemas/ChildProfile" }
+        testingAdmin: { type: boolean }
     LessonProgressInput:
       type: object
       required: [lessonId, reflection, durationSeconds, activityCompleted, watchCompleted, attemptId, answers, activityEvidence]

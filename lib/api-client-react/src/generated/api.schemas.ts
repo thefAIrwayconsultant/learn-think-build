@@ -128,6 +128,7 @@ export interface AgeBandResponse {
 
 export interface GuardianFamily {
   children: ChildProfile[];
+  testingAdmin: boolean;
 }
 
 /**

@@ -27,21 +27,21 @@ function copiesLesson(text: string, lesson: Lesson) {
   return false;
 }
 
-export function LessonFlow({ child, lessonId }: { child: ChildProfile; lessonId: string }) {
+export function LessonFlow({ child, lessonId, testingAdmin = false }: { child: ChildProfile; lessonId: string; testingAdmin?: boolean }) {
   const ageBand = child.ageBand ?? '10-12';
   const all = useMemo(() => getLessonsForAgeBand(ageBand), [ageBand]);
   const canonical = normalizeLessonId(lessonId);
   const lesson = all.find((l) => l.id === canonical);
   if (!lesson) return <main className="page-content not-found"><h1>That lesson isn’t here.</h1><p>Pick a lesson from your learning path.</p><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
-  return <FlowInner key={`${child.id}-${lesson.id}-${ageBand}`} child={child} lesson={lesson} all={all} />;
+  return <FlowInner key={`${child.id}-${lesson.id}-${ageBand}`} child={child} lesson={lesson} all={all} testingAdmin={testingAdmin} />;
 }
 
-function FlowInner({ child, lesson, all }: { child: ChildProfile; lesson: Lesson; all: Lesson[] }) {
+function FlowInner({ child, lesson, all, testingAdmin }: { child: ChildProfile; lesson: Lesson; all: Lesson[]; testingAdmin: boolean }) {
   const client = useQueryClient();
   const completedIds = child.completedLessonIds.map(normalizeLessonId);
   const index = all.findIndex((l) => l.id === lesson.id);
   const already = completedIds.includes(lesson.id);
-  const unlocked = lessonUnlocked(child, lesson.id);
+  const unlocked = testingAdmin || lessonUnlocked(child, lesson.id);
   const warmups = useMemo(() => {
     const pool = all.slice(0, index).filter((l) => completedIds.includes(l.id)).flatMap((l) => l.questionBank.filter((q) => q.type === 'choice'));
     return [...pool].sort(() => Math.random() - 0.5).slice(0, 2);
@@ -128,7 +128,7 @@ function FlowInner({ child, lesson, all }: { child: ChildProfile; lesson: Lesson
       <p className="step-count" data-testid="text-step-count">Step {step + 1} of {steps.length}: {name}</p>
     </>}
     <section className="lesson-card-panel">
-      {done ? <FinishCard lesson={lesson} child={child} nextLesson={nextLesson} missedQuestions={passedMisses} onRevisit={() => { setDone(false); setQuiz(null); go(0); }} /> : <>
+      {done ? <FinishCard lesson={lesson} child={child} nextLesson={nextLesson} missedQuestions={passedMisses} testingAdmin={testingAdmin} onRevisit={() => { setDone(false); setQuiz(null); go(0); }} /> : <>
         {name === 'Warm-up' && <div>
           <h2>Warm up your memory</h2><p className="step-explanation">Two quick questions from lessons you finished earlier.</p>
           {warmups.map((q, i) => <div key={q.id}><QuestionView q={q} value={warm[i]} disabled={warmChecked && sameAnswer(warm[i], q.answer)} onChange={(v) => { setWarmChecked(false); setWarm((w) => w.map((x, k) => k === i ? v : x)); }} status={warmChecked ? (sameAnswer(warm[i], q.answer) ? 'right' : 'wrong') : undefined} />
@@ -182,7 +182,7 @@ function FlowInner({ child, lesson, all }: { child: ChildProfile; lesson: Lesson
   </main>;
 }
 
-function FinishCard({ lesson, child, nextLesson, missedQuestions, onRevisit }: { lesson: Lesson; child: ChildProfile; nextLesson?: Lesson; missedQuestions: Question[]; onRevisit: () => void }) {
+function FinishCard({ lesson, child, nextLesson, missedQuestions, testingAdmin, onRevisit }: { lesson: Lesson; child: ChildProfile; nextLesson?: Lesson; missedQuestions: Question[]; testingAdmin: boolean; onRevisit: () => void }) {
   const [corrections, setCorrections] = useState<number[][]>(() => missedQuestions.map(() => []));
   const ready = missedQuestions.every((question, index) => sameAnswer(corrections[index] ?? [], question.answer));
   return <div className="complete-panel" data-testid="lesson-completion">
@@ -203,7 +203,7 @@ function FinishCard({ lesson, child, nextLesson, missedQuestions, onRevisit }: {
     <div className="family-card"><MessageCircle size={18} /><div><strong>Talk it over with your family</strong><p>{lesson.familyPrompt}</p><ReadButton id="family" text={lesson.familyPrompt} /></div></div>
     <div className="family-card break"><Coffee size={18} /><div><strong>{lesson.sessionNumber === lesson.chapterSessionCount ? 'Take a break · chapter milestone' : 'Take a break · good place to pause'}</strong><p>{lesson.sessionNumber === lesson.chapterSessionCount ? 'You reached the end of this chapter’s missions. Stretch, get water, and celebrate your progress. Come back tomorrow—or whenever you are ready. There is no streak.' : 'Stretch, get water, or look out a window. This is a natural stopping point. Come back tomorrow—or whenever you feel ready. There is no streak to keep.'}</p></div></div>
     <div className="complete-actions">
-      {ready && nextLesson && lessonUnlocked(child, nextLesson.id) && <Link href={`/learn/${child.id}/lesson/${nextLesson.id}`} className="primary-button" data-testid="link-next-lesson">Next mission · {nextLesson.durationMinutes} min <ArrowRight size={16} /></Link>}
+      {ready && nextLesson && (testingAdmin || lessonUnlocked(child, nextLesson.id)) && <Link href={`/learn/${child.id}/lesson/${nextLesson.id}`} className="primary-button" data-testid="link-next-lesson">Next mission · {nextLesson.durationMinutes} min <ArrowRight size={16} /></Link>}
       {ready && <Link href={`/learn/${child.id}`} className="secondary-button" data-testid="link-finish-home">Learning path</Link>}
       <button type="button" className="secondary-button" onClick={onRevisit}><RotateCcw size={15} /> Revisit</button>
     </div>
