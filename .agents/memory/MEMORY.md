@@ -1,0 +1,1 @@
+- [Stripe connector access](stripe-connector-access.md) — Use the connected proxy API; the integration may withhold raw keys from app code.

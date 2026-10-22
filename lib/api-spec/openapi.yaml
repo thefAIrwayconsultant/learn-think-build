@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: family
+    description: Guardian family accounts, learner profiles, and progress
+  - name: billing
+    description: Subscription checkout and management
 paths:
   /healthz:
     get:
@@ -24,6 +28,120 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /family:
+    get:
+      operationId: getFamily
+      tags: [family]
+      summary: Get the signed-in guardian's family
+      responses:
+        "200":
+          description: Family profile and subscription status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GuardianFamily"
+        "401":
+          description: Sign-in required
+  /family/children:
+    post:
+      operationId: createChildProfile
+      tags: [family]
+      summary: Create a learner profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChildProfileInput"
+      responses:
+        "201":
+          description: Learner profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChildProfile"
+        "400":
+          description: Invalid profile name
+        "401":
+          description: Sign-in required
+        "402":
+          description: Active subscription required
+  /family/children/{childId}:
+    delete:
+      operationId: deleteChildProfile
+      tags: [family]
+      summary: Delete a learner profile and its progress
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Learner profile deleted
+        "401":
+          description: Sign-in required
+        "404":
+          description: Learner profile not found
+  /family/children/{childId}/progress:
+    post:
+      operationId: completeChildLesson
+      tags: [family]
+      summary: Save a completed lesson for a learner
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LessonProgressInput"
+      responses:
+        "200":
+          description: Updated learner progress
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonProgress"
+        "401":
+          description: Sign-in required
+        "404":
+          description: Learner profile not found
+  /billing/checkout:
+    post:
+      operationId: createCheckoutSession
+      tags: [billing]
+      summary: Start the monthly family subscription checkout
+      responses:
+        "200":
+          description: Stripe Checkout URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "401":
+          description: Sign-in required
+  /billing/portal:
+    post:
+      operationId: createBillingPortalSession
+      tags: [billing]
+      summary: Open subscription management
+      responses:
+        "200":
+          description: Stripe billing portal URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "401":
+          description: Sign-in required
+        "404":
+          description: No Stripe customer exists for this guardian
 components:
   schemas:
     HealthStatus:
@@ -33,4 +151,50 @@ components:
           type: string
       required:
         - status
+    ChildProfile:
+      type: object
+      required: [id, displayName, completedLessonIds, createdAt]
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+        completedLessonIds:
+          type: array
+          items: { type: string }
+        createdAt: { type: string, format: date-time }
+    ChildProfileInput:
+      type: object
+      required: [displayName]
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 40 }
+    GuardianFamily:
+      type: object
+      required: [subscriptionStatus, subscriptionPeriodEnd, subscriptionCancelAtPeriodEnd, children]
+      properties:
+        subscriptionStatus:
+          type: string
+          enum: [none, active, trialing, past_due, unpaid, canceled, incomplete, incomplete_expired, paused]
+        subscriptionPeriodEnd: { type: ["string", "null"], format: date-time }
+        subscriptionCancelAtPeriodEnd: { type: boolean }
+        children:
+          type: array
+          items: { $ref: "#/components/schemas/ChildProfile" }
+    LessonProgressInput:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId:
+          type: string
+          enum: [what-is-ai, clear-instructions, check-the-answer, privacy-safe-use]
+    LessonProgress:
+      type: object
+      required: [completedLessonIds]
+      properties:
+        completedLessonIds:
+          type: array
+          items: { type: string }
+    CheckoutSession:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, format: uri }
 

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AI Explorer"
+description = "An interactive, age-appropriate learning app for children 10+ to understand AI, practice writing clear instructions, and learn to question AI answers safely."
+version = "1.0.0"
+id = "artifacts/ai-explorer"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23936
+
+[services.development]
+run = "pnpm --filter @workspace/ai-explorer run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai-explorer", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ai-explorer/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23936"
+BASE_PATH = "/"
