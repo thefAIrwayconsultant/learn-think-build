@@ -106,7 +106,7 @@ function BrandHeader() {
       <nav className="header-actions" aria-label="Account navigation">
         <Link href="/sample-feedback" className="header-cta" data-testid="link-sample-feedback">Sample feedback</Link>
         {isSignedIn
-          ? <Link href="/family" className="header-cta solid" data-testid="link-family">Family account</Link>
+          ? <><Link href="/" className="header-cta" data-testid="link-home-signed-in">Home</Link><Link href="/family" className="header-cta solid" data-testid="link-family">Family account</Link></>
           : <><Link href="/sign-in" className="header-cta" data-testid="link-sign-in">Sign in</Link><Link href="/sign-up" className="header-cta solid" data-testid="link-sign-up">Get started</Link></>}
       </nav>
     </header>
@@ -159,8 +159,6 @@ function SampleFeedbackPage() {
 }
 
 function LandingPage() {
-  const { isLoaded, isSignedIn } = useUser();
-  if (isLoaded && isSignedIn) return <Redirect to="/family" />;
   return (
     <>
       <main className="page-content">
