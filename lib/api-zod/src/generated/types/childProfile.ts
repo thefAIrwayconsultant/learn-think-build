@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ChildProfileAgeBand } from './childProfileAgeBand';
+import type { LearningState } from './learningState';
+import type { LessonRecord } from './lessonRecord';
 
 export interface ChildProfile {
   id: string;
@@ -14,5 +16,7 @@ export interface ChildProfile {
   ageBand: ChildProfileAgeBand;
   completedLessonIds: string[];
   masteredLevelIds: string[];
+  learningState: LearningState;
+  lessonRecords: LessonRecord[];
   createdAt: Date;
 }

@@ -20,9 +20,14 @@ export type Lesson = {
   ageBand: AgeBand;
   demoKind: LessonDemoKind;
   steps: LessonStep[];
+  activity: { title: string; instruction: string; placeholder: string };
+  reflectionPrompt: string;
+  sentenceStarters?: string[];
+  familyPrompt: string;
+  safetyNote: string;
 };
 
-type BaseLesson = Omit<Lesson, 'introduction' | 'ageBand' | 'demoKind'>;
+type BaseLesson = Omit<Lesson, 'introduction' | 'ageBand' | 'demoKind' | 'activity' | 'reflectionPrompt' | 'sentenceStarters' | 'familyPrompt' | 'safetyNote'>;
 
 export type Progress = { completedLessonIds: string[] };
 
@@ -350,15 +355,89 @@ const ageExtensions: Record<string, Record<AgeBand, AgeExtension>> = {
   },
 };
 
+const lessonSupports: Record<string, Pick<Lesson, 'activity' | 'reflectionPrompt' | 'familyPrompt' | 'safetyNote'>> = {
+  'ai-basics': {
+    activity: { title: 'Pattern spotter', instruction: 'Choose a familiar recommendation (music, videos, or books). Write one pattern it might notice and one thing it cannot know.', placeholder: 'A pattern it might notice… / Something it cannot know…' },
+    reflectionPrompt: 'What is one thing an AI pattern can suggest, and one thing it cannot know about you?',
+    familyPrompt: 'Talk about a recommendation you have seen. What clues might shape it, and what might it miss?',
+    safetyNote: 'Examples here are simulated. A recommendation is a guess, not a person who knows you.',
+  },
+  'clear-prompts': {
+    activity: { title: 'Prompt tune-up', instruction: 'Turn a vague request into a small, clear brief. Add a goal, useful context, a format, and one limit. Use fictional details only.', placeholder: 'Goal / context / format / limit…' },
+    reflectionPrompt: 'Which detail made your request easier to understand?',
+    familyPrompt: 'Choose a safe everyday task and compare a vague request with a clearer one.',
+    safetyNote: 'Use made-up details in practice. Never include a real name, school, location, password, or private image.',
+  },
+  'check-answers': {
+    activity: { title: 'Claim-check plan', instruction: 'Write one surprising claim you might encounter, then name an independent source that could check it.', placeholder: 'Claim to check… / Source to consult…' },
+    reflectionPrompt: 'What would count as good evidence for a claim?',
+    familyPrompt: 'Share a claim that surprised you. Where could you check it independently?',
+    safetyNote: 'All sample AI claims are fictional. For important information, verify with trusted sources and a knowledgeable adult.',
+  },
+  'privacy-safe-use': {
+    activity: { title: 'Privacy edit', instruction: 'Rewrite a sample request so it gives useful context without identifying a real person or place.', placeholder: 'A safer, made-up version…' },
+    reflectionPrompt: 'What detail did you remove, and why?',
+    familyPrompt: 'Name a few kinds of information your family agrees should stay out of AI tools.',
+    safetyNote: 'Never enter personal details into an AI tool. Stop and tell a trusted adult if a request or response feels uncomfortable.',
+  },
+  'school-integrity': {
+    activity: { title: 'Help or hand-off?', instruction: 'Pick a school task and sort one kind of help that could support learning from one part that must remain your own work.', placeholder: 'Helpful practice… / Work I must do…' },
+    reflectionPrompt: 'How will you check what help your teacher allows?',
+    familyPrompt: 'Discuss how to tell the difference between a learning hint and having work done for you.',
+    safetyNote: 'Classroom and teacher rules come first. These examples do not replace your school’s instructions.',
+  },
+  'responsible-use': {
+    activity: { title: 'Pause, decide, tell', instruction: 'For a fictional high-stakes question, write who should help and one safe next step. Do not enter a real personal situation.', placeholder: 'A trusted person to ask… / A safe next step…' },
+    reflectionPrompt: 'What kind of question should go to a trusted person instead of AI?',
+    familyPrompt: 'Agree on a trusted adult a learner can approach when an online interaction feels wrong.',
+    safetyNote: 'AI is not emergency, medical, or emotional support. For danger or serious concerns, contact a trusted adult or qualified professional.',
+  },
+  'prompt-design': {
+    activity: { title: 'Write a bounded brief', instruction: 'Draft a fictional prompt with a goal, safe context, output format, and limit. Then name how you would check its answer.', placeholder: 'Goal / context / format / limit / check…' },
+    reflectionPrompt: 'Which constraint would make the result easier to evaluate?',
+    familyPrompt: 'Try improving a harmless request by adding a format and a clear boundary.',
+    safetyNote: 'Practice prompts are not sent to a live AI. Leave out personal or confidential information in any real tool.',
+  },
+  'plan-an-app': {
+    activity: { title: 'One-screen app sketch', instruction: 'Plan a tiny app: who it helps, one problem, one screen, and one main action. Keep personal data out of the plan.', placeholder: 'User… / problem… / screen… / main action…' },
+    reflectionPrompt: 'What did you leave out to keep the first version small and safe?',
+    familyPrompt: 'Ask someone at home about one small everyday task an app could help organize.',
+    safetyNote: 'This is a planning activity, not a live app builder. Avoid features that collect unnecessary personal information.',
+  },
+  'test-app': {
+    activity: { title: 'Three-case test plan', instruction: 'For a pretend checklist app, write one normal case, one empty or boundary case, and one unexpected case to test.', placeholder: 'Normal… / boundary… / unexpected…' },
+    reflectionPrompt: 'Which test could reveal a problem that a normal example would miss?',
+    familyPrompt: 'Pick a simple everyday object or app and think of one unusual case it should handle.',
+    safetyNote: 'Use fictional test data only. Generated code needs human review and should not be published without adult guidance.',
+  },
+  'iterate-app': {
+    activity: { title: 'One careful improvement', instruction: 'Suggest one small improvement to a pretend app. Describe what to test so the original useful behavior still works.', placeholder: 'One change… / What I would retest…' },
+    reflectionPrompt: 'How would you explain the change and check that it did not break something?',
+    familyPrompt: 'Talk about a small improvement to a familiar tool and what should be tested afterward.',
+    safetyNote: 'All app scenarios are simulated. Make one understandable change at a time and ask an adult to review real projects.',
+  },
+};
+
 export function getLessonsForAgeBand(ageBand: AgeBand): Lesson[] {
   return lessons.map((lesson) => {
     const ageExtension = ageExtensions[lesson.id][ageBand];
+    const support = lessonSupports[lesson.id];
+    const ageDuration = ageBand === '10-12' ? 11 : ageBand === '13-15' ? 14 : 18;
+    const reflectionPrompt = ageBand === '10-12'
+      ? `In your own words: ${support.reflectionPrompt}`
+      : ageBand === '13-15'
+        ? `Explain your thinking: ${support.reflectionPrompt}`
+        : `Evaluate your choice: ${support.reflectionPrompt}`;
     return {
       ...lesson,
       ageBand,
+      durationMinutes: ageDuration,
       demoKind: demoKinds[lesson.id],
       introduction: ageExtension.introduction,
       steps: [...lesson.steps, ageExtension.challenge],
+      ...support,
+      reflectionPrompt,
+      sentenceStarters: ageBand === '10-12' ? ['I noticed…', 'I chose this because…', 'Next time I will…'] : undefined,
     };
   });
 }

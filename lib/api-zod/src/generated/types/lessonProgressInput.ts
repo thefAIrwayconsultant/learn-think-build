@@ -9,4 +9,21 @@ import type { LessonProgressInputLessonId } from './lessonProgressInputLessonId'
 
 export interface LessonProgressInput {
   lessonId: LessonProgressInputLessonId;
+  /**
+     * @minLength 30
+     * @maxLength 2000
+     */
+  reflection: string;
+  /**
+     * @minimum 1
+     * @maximum 7200
+     */
+  durationSeconds: number;
+  /**
+     * @minimum 80
+     * @maximum 100
+     */
+  quizScore: number;
+  activityCompleted: true;
+  watchCompleted: true;
 }

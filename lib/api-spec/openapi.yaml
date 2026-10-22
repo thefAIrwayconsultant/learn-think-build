@@ -137,6 +137,61 @@ paths:
           description: Sign-in required
         "404":
           description: Learner profile not found
+  /family/children/{childId}/learning-state:
+    patch:
+      operationId: updateChildLearningState
+      tags: [family]
+      summary: Save guardian-owned learning goals, pledges, and project approvals
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LearningState"
+      responses:
+        "200":
+          description: Updated family learning state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LearningState"
+        "401":
+          description: Sign-in required
+        "404":
+          description: Learner profile not found
+  /family/children/{childId}/lessons/{lessonId}/talk:
+    patch:
+      operationId: markLessonTalkDiscussed
+      tags: [family]
+      summary: Mark a lesson's family conversation as discussed
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: lessonId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Conversation discussion timestamp
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [talkDiscussedAt]
+                properties:
+                  talkDiscussedAt: { type: string, format: date-time }
+        "401":
+          description: Sign-in required
+        "404":
+          description: Completed lesson not found
   /family/children/{childId}/assessments:
     post:
       operationId: submitLevelAssessment
@@ -177,7 +232,7 @@ components:
         - status
     ChildProfile:
       type: object
-      required: [id, displayName, ageBand, completedLessonIds, masteredLevelIds, createdAt]
+      required: [id, displayName, ageBand, completedLessonIds, masteredLevelIds, learningState, lessonRecords, createdAt]
       properties:
         id: { type: string }
         displayName: { type: string }
@@ -190,6 +245,12 @@ components:
         masteredLevelIds:
           type: array
           items: { type: string }
+        learningState:
+          $ref: "#/components/schemas/LearningState"
+        lessonRecords:
+          type: array
+          items:
+            $ref: "#/components/schemas/LessonRecord"
         createdAt: { type: string, format: date-time }
     ChildProfileInput:
       type: object
@@ -222,11 +283,41 @@ components:
           items: { $ref: "#/components/schemas/ChildProfile" }
     LessonProgressInput:
       type: object
-      required: [lessonId]
+      required: [lessonId, reflection, durationSeconds, quizScore, activityCompleted, watchCompleted]
       properties:
         lessonId:
           type: string
           enum: [what-is-ai, clear-instructions, check-the-answer, privacy-safe-use, school-integrity, responsible-use, prompt-design, plan-an-app, test-app, iterate-app]
+        reflection: { type: string, minLength: 30, maxLength: 2000 }
+        durationSeconds: { type: integer, minimum: 1, maximum: 7200 }
+        quizScore: { type: integer, minimum: 80, maximum: 100 }
+        activityCompleted: { type: boolean, const: true }
+        watchCompleted: { type: boolean, const: true }
+    LessonRecord:
+      type: object
+      required: [lessonId, durationSeconds]
+      properties:
+        lessonId: { type: string }
+        reflection: { type: ["string", "null"] }
+        durationSeconds: { type: integer }
+        quizScore: { type: ["integer", "null"] }
+        talkDiscussedAt: { type: ["string", "null"], format: date-time }
+        completedAt: { type: string, format: date-time }
+    LearningState:
+      type: object
+      required: [weeklyGoal, pledgeLevel, learnerAgreedLevel, projects]
+      properties:
+        weeklyGoal: { type: integer, minimum: 1, maximum: 7 }
+        pledgeLevel: { type: integer, minimum: 0, maximum: 4 }
+        learnerAgreedLevel: { type: integer, minimum: 0, maximum: 4 }
+        projects:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              content: { type: string, maxLength: 4000 }
+              approved: { type: boolean }
+              reviewedAt: { type: ["string", "null"], format: date-time }
     LessonProgress:
       type: object
       required: [completedLessonIds]

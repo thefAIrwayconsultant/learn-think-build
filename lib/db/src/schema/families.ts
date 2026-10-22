@@ -2,6 +2,7 @@ import { createInsertSchema } from "drizzle-zod";
 import {
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -28,6 +29,7 @@ export const childProfilesTable = pgTable(
       .references(() => guardiansTable.id, { onDelete: "cascade" }),
     displayName: varchar("display_name", { length: 40 }).notNull(),
     ageBand: varchar("age_band", { length: 10 }),
+    learningState: jsonb("learning_state").notNull().default({ weeklyGoal: 3, pledgeLevel: 0, projects: {} }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -42,6 +44,10 @@ export const childProgressTable = pgTable(
       .notNull()
       .references(() => childProfilesTable.id, { onDelete: "cascade" }),
     lessonId: text("lesson_id").notNull(),
+    reflection: text("reflection"),
+    durationSeconds: integer("duration_seconds").notNull().default(0),
+    quizScore: integer("quiz_score"),
+    talkDiscussedAt: timestamp("talk_discussed_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

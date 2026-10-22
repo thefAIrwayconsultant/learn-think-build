@@ -27,6 +27,10 @@ import {
   SubmitLevelAssessmentBody,
   SubmitLevelAssessmentParams,
   SubmitLevelAssessmentResponse,
+  UpdateChildLearningStateBody,
+  UpdateChildLearningStateParams,
+  UpdateChildLearningStateResponse,
+  MarkLessonTalkDiscussedParams,
 } from "@workspace/api-zod";
 const router: IRouter = Router();
 const validLessonIds = new Set([
@@ -136,6 +140,17 @@ router.get("/family", async (req, res): Promise<void> => {
       ageBand: profile.ageBand,
       completedLessonIds: completedByChild.get(profile.id) ?? [],
       masteredLevelIds: masteredByChild.get(profile.id) ?? [],
+      learningState: profile.learningState ?? { weeklyGoal: 3, pledgeLevel: 0, learnerAgreedLevel: 0, projects: {} },
+      lessonRecords: progressRows
+        .filter((row) => row.childId === profile.id)
+        .map((row) => ({
+          lessonId: row.lessonId,
+          reflection: row.reflection,
+          durationSeconds: row.durationSeconds,
+          quizScore: row.quizScore,
+          talkDiscussedAt: row.talkDiscussedAt?.toISOString() ?? null,
+          completedAt: row.completedAt.toISOString(),
+        })),
       createdAt: profile.createdAt.toISOString(),
     })),
   };
@@ -175,6 +190,8 @@ router.post("/family/children", async (req, res): Promise<void> => {
         ...profile,
         completedLessonIds: [],
         masteredLevelIds: [],
+        learningState: profile.learningState ?? { weeklyGoal: 3, pledgeLevel: 0, learnerAgreedLevel: 0, projects: {} },
+        lessonRecords: [],
       }),
     );
 });
@@ -214,6 +231,76 @@ router.patch(
     res.json(UpdateChildAgeBandResponse.parse(updated));
   },
 );
+
+router.patch("/family/children/:childId/learning-state", async (req, res): Promise<void> => {
+  const guardianId = getGuardianId(req);
+  if (!guardianId) {
+    res.status(401).json({ error: "Sign in with a parent or guardian account." });
+    return;
+  }
+  const params = UpdateChildLearningStateParams.safeParse(req.params);
+  const body = UpdateChildLearningStateBody.safeParse(req.body);
+  if (!params.success || !body.success) {
+    res.status(400).json({ error: "Check the weekly goal, pledge, and project details." });
+    return;
+  }
+  const [profile] = await db
+    .select({ id: childProfilesTable.id, learningState: childProfilesTable.learningState })
+    .from(childProfilesTable)
+    .where(and(
+      eq(childProfilesTable.id, params.data.childId),
+      eq(childProfilesTable.guardianId, guardianId),
+    ))
+    .limit(1);
+  if (!profile) {
+    res.status(404).json({ error: "Learner profile not found." });
+    return;
+  }
+  const [updated] = await db
+    .update(childProfilesTable)
+    .set({ learningState: { ...(profile.learningState ?? {}), ...body.data } })
+    .where(eq(childProfilesTable.id, profile.id))
+    .returning({ learningState: childProfilesTable.learningState });
+  res.json(UpdateChildLearningStateResponse.parse(updated.learningState));
+});
+
+router.patch("/family/children/:childId/lessons/:lessonId/talk", async (req, res): Promise<void> => {
+  const guardianId = getGuardianId(req);
+  if (!guardianId) {
+    res.status(401).json({ error: "Sign in with a parent or guardian account." });
+    return;
+  }
+  const params = MarkLessonTalkDiscussedParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Choose a completed lesson." });
+    return;
+  }
+  const [profile] = await db
+    .select({ id: childProfilesTable.id })
+    .from(childProfilesTable)
+    .where(and(
+      eq(childProfilesTable.id, params.data.childId),
+      eq(childProfilesTable.guardianId, guardianId),
+    ))
+    .limit(1);
+  if (!profile) {
+    res.status(404).json({ error: "Completed lesson not found." });
+    return;
+  }
+  const [record] = await db
+    .update(childProgressTable)
+    .set({ talkDiscussedAt: new Date() })
+    .where(and(
+      eq(childProgressTable.childId, profile.id),
+      eq(childProgressTable.lessonId, params.data.lessonId),
+    ))
+    .returning({ talkDiscussedAt: childProgressTable.talkDiscussedAt });
+  if (!record?.talkDiscussedAt) {
+    res.status(404).json({ error: "Completed lesson not found." });
+    return;
+  }
+  res.json({ talkDiscussedAt: record.talkDiscussedAt.toISOString() });
+});
 
 router.delete("/family/children/:childId", async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
@@ -340,7 +427,7 @@ router.post(
     }
 
     const [profile] = await db
-      .select({ id: childProfilesTable.id })
+      .select({ id: childProfilesTable.id, learningState: childProfilesTable.learningState })
       .from(childProfilesTable)
       .where(
         and(
@@ -351,6 +438,21 @@ router.post(
       .limit(1);
     if (!profile) {
       res.status(404).json({ error: "Learner profile not found." });
+      return;
+    }
+    const levelIndex = learningLevels.findIndex((item) =>
+      item.lessonIds.some((lessonId) => lessonId === body.data.lessonId),
+    );
+    const learningState = (profile.learningState ?? {}) as {
+      pledgeLevel?: number;
+      learnerAgreedLevel?: number;
+    };
+    if (
+      levelIndex < 0 ||
+      (learningState.pledgeLevel ?? 0) < levelIndex + 1 ||
+      (learningState.learnerAgreedLevel ?? 0) < levelIndex + 1
+    ) {
+      res.status(403).json({ error: "Both learner and guardian must agree to the level pledge first." });
       return;
     }
 
@@ -366,7 +468,6 @@ router.post(
       res.status(400).json({ error: "Choose a valid lesson." });
       return;
     }
-    const levelIndex = learningLevels.findIndex((item) => item.id === level.id);
     const levelLessonIds: string[] = [...level.lessonIds];
     const lessonIndex = levelLessonIds.indexOf(body.data.lessonId);
     if (levelIndex > 0) {
@@ -390,10 +491,21 @@ router.post(
 
     await db
       .insert(childProgressTable)
-      .values({ childId: profile.id, lessonId: body.data.lessonId })
+      .values({
+        childId: profile.id,
+        lessonId: body.data.lessonId,
+        reflection: body.data.reflection?.trim() || null,
+        durationSeconds: body.data.durationSeconds ?? 0,
+        quizScore: body.data.quizScore ?? null,
+      })
       .onConflictDoUpdate({
         target: [childProgressTable.childId, childProgressTable.lessonId],
-        set: { completedAt: new Date() },
+        set: {
+          completedAt: new Date(),
+          reflection: body.data.reflection?.trim() || null,
+          durationSeconds: body.data.durationSeconds ?? 0,
+          quizScore: body.data.quizScore ?? null,
+        },
       });
 
     const updatedProgress = await db

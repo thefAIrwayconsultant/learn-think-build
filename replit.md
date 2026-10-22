@@ -1,6 +1,6 @@
-# [Project name]
+# Learn Think Build
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Parent-guided AI literacy for learners ages 10+, with age-banded lessons, hands-on practice, mastery checks, and family accountability.
 
 ## Run & Operate
 
@@ -22,23 +22,42 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/ai-explorer/src/` — React/Vite app, learner experience, guardian dashboard, lesson content and styles.
+- `artifacts/api-server/src/routes/family.ts` — guardian-owned profiles, learner progress, and family API.
+- `lib/db/src/schema/families.ts` — PostgreSQL source of truth for guardians, child profiles, progress, and mastery.
+- `lib/api-spec/openapi.yaml` — API contract source of truth; regenerate clients and Zod validators with the codegen command above.
+- `artifacts/ai-explorer/src/Mascot.tsx` — Pip mascot.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Learner accounts remain guardian-owned; learner profiles store only display name and broad age band. Never add birth dates or learner email addresses.
+- Keep AI examples simulated in lessons; do not add an open-ended live learner chatbot.
+- Preserve old lesson completions by mapping legacy lesson IDs to their equivalent lessons in the revised curriculum. Do not delete or reset progress during curriculum changes.
+- The four mastery levels remain sequential: AI Foundations (Engaging with AI), Safe & Responsible Use (Managing AI), Prompt Craft (Creating with AI), and App Builder (Designing AI).
+- Enforce lesson completion requirements and guardian approval before unlocking the next level; do not rely on lesson-card navigation alone.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Parent-led, at-home AI education for learners 10+.
+- Three age paths: 10–12 Curious Starter, 13–15 Thoughtful Explorer, and 16+ Independent Builder. Teach the same core skills with age-adjusted language, examples, pacing, and depth.
+- Each lesson uses a consistent six-step loop: Warm-up, Hook, Watch & Listen, Try It, Think, and Check. Lessons combine narration with synchronized visuals, interaction, retrieval practice, reflection, and spaced review; never match learners to a single “learning style.”
+- Lesson completion requires the explainer/transcript, hands-on activity, a non-empty learner reflection, and an 80%+ mixed check. Each lesson ends with a family Talk it Over card.
+- Weekly goals are supportive, not streak-based. Guardians can review learner progress, reflections, project submissions, discussion cards, pledge status, and goal progress.
+- Real AI tools are not available to learners; future access must be adult-approved and supervised.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep learning intuitive while holding learners accountable.
+- Do not market the product for school sales; focus on parents introducing AI at home.
+- Publish only genuine family testimonials with permission. Do not invent reviews.
+- Keep the $9.99/month family price visible as “coming soon” until billing is enabled.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Production schema changes are applied through Replit Publish; use the Drizzle push command only for the development database.
+- Regenerate API hooks and Zod types after changing the OpenAPI contract.
+- Phase 2 is intentionally deferred until Phase 1 works end to end.
+- Mastery checks require 80% or higher. A failed retake must require review of missed lessons and draw a different question set.
 
 ## Pointers
 

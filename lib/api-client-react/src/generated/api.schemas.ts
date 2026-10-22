@@ -21,6 +21,45 @@ export const ChildProfileAgeBand = {
   '16-plus': '16-plus',
 } as const;
 
+export type LearningStateProjects = {[key: string]: {
+  /** @maxLength 4000 */
+  content?: string;
+  approved?: boolean;
+  /** @nullable */
+  reviewedAt?: string | null;
+}};
+
+export interface LearningState {
+  /**
+     * @minimum 1
+     * @maximum 7
+     */
+  weeklyGoal: number;
+  /**
+     * @minimum 0
+     * @maximum 4
+     */
+  pledgeLevel: number;
+  /**
+     * @minimum 0
+     * @maximum 4
+     */
+  learnerAgreedLevel: number;
+  projects: LearningStateProjects;
+}
+
+export interface LessonRecord {
+  lessonId: string;
+  /** @nullable */
+  reflection?: string | null;
+  durationSeconds: number;
+  /** @nullable */
+  quizScore?: number | null;
+  /** @nullable */
+  talkDiscussedAt?: string | null;
+  completedAt?: string;
+}
+
 export interface ChildProfile {
   id: string;
   displayName: string;
@@ -28,6 +67,8 @@ export interface ChildProfile {
   ageBand: ChildProfileAgeBand;
   completedLessonIds: string[];
   masteredLevelIds: string[];
+  learningState: LearningState;
+  lessonRecords: LessonRecord[];
   createdAt: string;
 }
 
@@ -79,6 +120,23 @@ export const LessonProgressInputLessonId = {
 
 export interface LessonProgressInput {
   lessonId: LessonProgressInputLessonId;
+  /**
+     * @minLength 30
+     * @maxLength 2000
+     */
+  reflection: string;
+  /**
+     * @minimum 1
+     * @maximum 7200
+     */
+  durationSeconds: number;
+  /**
+     * @minimum 80
+     * @maximum 100
+     */
+  quizScore: number;
+  activityCompleted: true;
+  watchCompleted: true;
 }
 
 export interface LessonProgress {
@@ -126,4 +184,8 @@ export interface LevelAssessmentResult {
   passed: boolean;
   masteredLevelIds: string[];
 }
+
+export type MarkLessonTalkDiscussed200 = {
+  talkDiscussedAt: string;
+};
 

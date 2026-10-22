@@ -22,7 +22,7 @@ export type LearningLevel = {
 export const learningLevels: LearningLevel[] = [
   {
     id: 'ai-foundations',
-    title: 'Level 1 · AI Foundations',
+    title: 'Level 1 · AI Foundations / Engaging with AI',
     shortTitle: 'AI Foundations',
     description: 'Understand how AI works, where it can be wrong, and how to protect personal information.',
     objective: 'Explain AI as a pattern-finding tool, verify claims, and name information that should stay private.',
@@ -37,8 +37,8 @@ export const learningLevels: LearningLevel[] = [
   },
   {
     id: 'responsible-use',
-    title: 'Level 2 · Responsible Use',
-    shortTitle: 'Responsible Use',
+    title: 'Level 2 · Safe & Responsible Use / Managing AI',
+    shortTitle: 'Safe & Responsible Use',
     description: 'Practice academic honesty, bias awareness, and when to stop and ask a trusted person.',
     objective: 'Follow class rules, keep your own work your own, and recognize questions that need human help.',
     lessonIds: ['school-integrity', 'responsible-use'],
@@ -52,7 +52,7 @@ export const learningLevels: LearningLevel[] = [
   },
   {
     id: 'prompt-craft',
-    title: 'Level 3 · Prompt Craft',
+    title: 'Level 3 · Prompt Craft / Creating with AI',
     shortTitle: 'Prompt Craft',
     description: 'Write useful prompts with a goal, safe context, format, and limits.',
     objective: 'Improve an AI request with specific instructions while protecting privacy and keeping your own judgment.',
@@ -67,7 +67,7 @@ export const learningLevels: LearningLevel[] = [
   },
   {
     id: 'app-builder',
-    title: 'Level 4 · App Builder',
+    title: 'Level 4 · App Builder / Designing AI',
     shortTitle: 'App Builder',
     description: 'Plan a small app, ask for focused changes, test edge cases, and explain what you made.',
     objective: 'Build toward a basic app that solves one small problem, protects users, and can be explained by its creator.',

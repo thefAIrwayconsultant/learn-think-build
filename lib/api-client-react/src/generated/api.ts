@@ -26,10 +26,12 @@ import type {
   ChildProfileInput,
   GuardianFamily,
   HealthStatus,
+  LearningState,
   LessonProgress,
   LessonProgressInput,
   LevelAssessmentInput,
-  LevelAssessmentResult
+  LevelAssessmentResult,
+  MarkLessonTalkDiscussed200
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -552,6 +554,171 @@ export const useCompleteChildLesson = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getCompleteChildLessonMutationOptions(options));
+    }
+
+export const getUpdateChildLearningStateUrl = (childId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/learning-state`
+}
+
+/**
+ * @summary Save guardian-owned learning goals, pledges, and project approvals
+ */
+export const updateChildLearningState = async (childId: string,
+    learningState: LearningState, options?: Parameters<typeof customFetch>[1]): Promise<LearningState> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<LearningState>(getUpdateChildLearningStateUrl(childId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(learningState)
+  }
+);}
+
+
+
+
+
+export const getUpdateChildLearningStateMutationKey = () => ['updateChildLearningState'] as const;
+
+export const getUpdateChildLearningStateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildLearningState>>, TError,UpdateChildLearningStateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateChildLearningState>>, TError,UpdateChildLearningStateMutationVariables, TContext> => {
+
+const mutationKey = getUpdateChildLearningStateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChildLearningState>>, UpdateChildLearningStateMutationVariables> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  updateChildLearningState(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateChildLearningStateMutationResult = NonNullable<Awaited<ReturnType<typeof updateChildLearningState>>>
+    export type UpdateChildLearningStateMutationBody = BodyType<LearningState>
+    export type UpdateChildLearningStateMutationError = ErrorType<void>
+    export type UpdateChildLearningStateMutationVariables = {childId: string;data: BodyType<LearningState>}
+
+    /**
+ * @summary Save guardian-owned learning goals, pledges, and project approvals
+ */
+export const useUpdateChildLearningState = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildLearningState>>, TError,UpdateChildLearningStateMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateChildLearningState>>,
+        TError,
+        UpdateChildLearningStateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateChildLearningStateMutationOptions(options));
+    }
+
+export const getMarkLessonTalkDiscussedUrl = (childId: string,
+    lessonId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/lessons/${lessonId}/talk`
+}
+
+/**
+ * @summary Mark a lesson's family conversation as discussed
+ */
+export const markLessonTalkDiscussed = async (childId: string,
+    lessonId: string, options?: Parameters<typeof customFetch>[1]): Promise<MarkLessonTalkDiscussed200> => {
+
+  return customFetch<MarkLessonTalkDiscussed200>(getMarkLessonTalkDiscussedUrl(childId,lessonId),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkLessonTalkDiscussedMutationKey = () => ['markLessonTalkDiscussed'] as const;
+
+export const getMarkLessonTalkDiscussedMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markLessonTalkDiscussed>>, TError,MarkLessonTalkDiscussedMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markLessonTalkDiscussed>>, TError,MarkLessonTalkDiscussedMutationVariables, TContext> => {
+
+const mutationKey = getMarkLessonTalkDiscussedMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markLessonTalkDiscussed>>, MarkLessonTalkDiscussedMutationVariables> = (props) => {
+          const {childId,lessonId} = props ?? {};
+
+          return  markLessonTalkDiscussed(childId,lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkLessonTalkDiscussedMutationResult = NonNullable<Awaited<ReturnType<typeof markLessonTalkDiscussed>>>
+
+    export type MarkLessonTalkDiscussedMutationError = ErrorType<void>
+    export type MarkLessonTalkDiscussedMutationVariables = {childId: string;lessonId: string}
+
+    /**
+ * @summary Mark a lesson's family conversation as discussed
+ */
+export const useMarkLessonTalkDiscussed = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markLessonTalkDiscussed>>, TError,MarkLessonTalkDiscussedMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markLessonTalkDiscussed>>,
+        TError,
+        MarkLessonTalkDiscussedMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkLessonTalkDiscussedMutationOptions(options));
     }
 
 export const getSubmitLevelAssessmentUrl = (childId: string,) => {

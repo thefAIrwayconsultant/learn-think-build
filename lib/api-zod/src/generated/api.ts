@@ -20,6 +20,18 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary Get the signed-in guardian's family
  */
+export const getFamilyResponseChildrenItemLearningStateWeeklyGoalMax = 7;
+
+export const getFamilyResponseChildrenItemLearningStatePledgeLevelMin = 0;
+export const getFamilyResponseChildrenItemLearningStatePledgeLevelMax = 4;
+
+export const getFamilyResponseChildrenItemLearningStateLearnerAgreedLevelMin = 0;
+export const getFamilyResponseChildrenItemLearningStateLearnerAgreedLevelMax = 4;
+
+export const getFamilyResponseChildrenItemLearningStateProjectsContentMax = 4000;
+
+
+
 export const GetFamilyResponse = zod.object({
   "children": zod.array(zod.object({
   "id": zod.string(),
@@ -27,6 +39,24 @@ export const GetFamilyResponse = zod.object({
   "ageBand": zod.union([zod.literal('10-12'),zod.literal('13-15'),zod.literal('16-plus'),zod.literal(null)]).nullable(),
   "completedLessonIds": zod.array(zod.string()),
   "masteredLevelIds": zod.array(zod.string()),
+  "learningState": zod.object({
+  "weeklyGoal": zod.number().int().min(1).max(getFamilyResponseChildrenItemLearningStateWeeklyGoalMax),
+  "pledgeLevel": zod.number().int().min(getFamilyResponseChildrenItemLearningStatePledgeLevelMin).max(getFamilyResponseChildrenItemLearningStatePledgeLevelMax),
+  "learnerAgreedLevel": zod.number().int().min(getFamilyResponseChildrenItemLearningStateLearnerAgreedLevelMin).max(getFamilyResponseChildrenItemLearningStateLearnerAgreedLevelMax),
+  "projects": zod.record(zod.string(), zod.object({
+  "content": zod.string().max(getFamilyResponseChildrenItemLearningStateProjectsContentMax).optional(),
+  "approved": zod.boolean().optional(),
+  "reviewedAt": zod.coerce.date().nullish()
+}))
+}),
+  "lessonRecords": zod.array(zod.object({
+  "lessonId": zod.string(),
+  "reflection": zod.string().nullish(),
+  "durationSeconds": zod.number().int(),
+  "quizScore": zod.number().int().nullish(),
+  "talkDiscussedAt": zod.coerce.date().nullish(),
+  "completedAt": zod.coerce.date().optional()
+})),
   "createdAt": zod.coerce.date()
 }))
 })
@@ -44,12 +74,42 @@ export const CreateChildProfileBody = zod.object({
   "ageBand": zod.enum(['10-12', '13-15', '16-plus'])
 })
 
+export const createChildProfileResponseLearningStateWeeklyGoalMax = 7;
+
+export const createChildProfileResponseLearningStatePledgeLevelMin = 0;
+export const createChildProfileResponseLearningStatePledgeLevelMax = 4;
+
+export const createChildProfileResponseLearningStateLearnerAgreedLevelMin = 0;
+export const createChildProfileResponseLearningStateLearnerAgreedLevelMax = 4;
+
+export const createChildProfileResponseLearningStateProjectsContentMax = 4000;
+
+
+
 export const CreateChildProfileResponse = zod.object({
   "id": zod.string(),
   "displayName": zod.string(),
   "ageBand": zod.union([zod.literal('10-12'),zod.literal('13-15'),zod.literal('16-plus'),zod.literal(null)]).nullable(),
   "completedLessonIds": zod.array(zod.string()),
   "masteredLevelIds": zod.array(zod.string()),
+  "learningState": zod.object({
+  "weeklyGoal": zod.number().int().min(1).max(createChildProfileResponseLearningStateWeeklyGoalMax),
+  "pledgeLevel": zod.number().int().min(createChildProfileResponseLearningStatePledgeLevelMin).max(createChildProfileResponseLearningStatePledgeLevelMax),
+  "learnerAgreedLevel": zod.number().int().min(createChildProfileResponseLearningStateLearnerAgreedLevelMin).max(createChildProfileResponseLearningStateLearnerAgreedLevelMax),
+  "projects": zod.record(zod.string(), zod.object({
+  "content": zod.string().max(createChildProfileResponseLearningStateProjectsContentMax).optional(),
+  "approved": zod.boolean().optional(),
+  "reviewedAt": zod.coerce.date().nullish()
+}))
+}),
+  "lessonRecords": zod.array(zod.object({
+  "lessonId": zod.string(),
+  "reflection": zod.string().nullish(),
+  "durationSeconds": zod.number().int(),
+  "quizScore": zod.number().int().nullish(),
+  "talkDiscussedAt": zod.coerce.date().nullish(),
+  "completedAt": zod.coerce.date().optional()
+})),
   "createdAt": zod.coerce.date()
 })
 
@@ -87,12 +147,94 @@ export const CompleteChildLessonParams = zod.object({
   "childId": zod.coerce.string()
 })
 
+export const completeChildLessonBodyReflectionMin = 30;
+export const completeChildLessonBodyReflectionMax = 2000;
+
+export const completeChildLessonBodyDurationSecondsMax = 7200;
+
+export const completeChildLessonBodyQuizScoreMin = 80;
+export const completeChildLessonBodyQuizScoreMax = 100;
+
+
+
 export const CompleteChildLessonBody = zod.object({
-  "lessonId": zod.enum(['what-is-ai', 'clear-instructions', 'check-the-answer', 'privacy-safe-use', 'school-integrity', 'responsible-use', 'prompt-design', 'plan-an-app', 'test-app', 'iterate-app'])
+  "lessonId": zod.enum(['what-is-ai', 'clear-instructions', 'check-the-answer', 'privacy-safe-use', 'school-integrity', 'responsible-use', 'prompt-design', 'plan-an-app', 'test-app', 'iterate-app']),
+  "reflection": zod.string().min(completeChildLessonBodyReflectionMin).max(completeChildLessonBodyReflectionMax),
+  "durationSeconds": zod.number().int().min(1).max(completeChildLessonBodyDurationSecondsMax),
+  "quizScore": zod.number().int().min(completeChildLessonBodyQuizScoreMin).max(completeChildLessonBodyQuizScoreMax),
+  "activityCompleted": zod.literal(true),
+  "watchCompleted": zod.literal(true)
 })
 
 export const CompleteChildLessonResponse = zod.object({
   "completedLessonIds": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Save guardian-owned learning goals, pledges, and project approvals
+ */
+export const UpdateChildLearningStateParams = zod.object({
+  "childId": zod.coerce.string()
+})
+
+export const updateChildLearningStateBodyWeeklyGoalMax = 7;
+
+export const updateChildLearningStateBodyPledgeLevelMin = 0;
+export const updateChildLearningStateBodyPledgeLevelMax = 4;
+
+export const updateChildLearningStateBodyLearnerAgreedLevelMin = 0;
+export const updateChildLearningStateBodyLearnerAgreedLevelMax = 4;
+
+export const updateChildLearningStateBodyProjectsContentMax = 4000;
+
+
+
+export const UpdateChildLearningStateBody = zod.object({
+  "weeklyGoal": zod.number().int().min(1).max(updateChildLearningStateBodyWeeklyGoalMax),
+  "pledgeLevel": zod.number().int().min(updateChildLearningStateBodyPledgeLevelMin).max(updateChildLearningStateBodyPledgeLevelMax),
+  "learnerAgreedLevel": zod.number().int().min(updateChildLearningStateBodyLearnerAgreedLevelMin).max(updateChildLearningStateBodyLearnerAgreedLevelMax),
+  "projects": zod.record(zod.string(), zod.object({
+  "content": zod.string().max(updateChildLearningStateBodyProjectsContentMax).optional(),
+  "approved": zod.boolean().optional(),
+  "reviewedAt": zod.coerce.date().nullish()
+}))
+})
+
+export const updateChildLearningStateResponseWeeklyGoalMax = 7;
+
+export const updateChildLearningStateResponsePledgeLevelMin = 0;
+export const updateChildLearningStateResponsePledgeLevelMax = 4;
+
+export const updateChildLearningStateResponseLearnerAgreedLevelMin = 0;
+export const updateChildLearningStateResponseLearnerAgreedLevelMax = 4;
+
+export const updateChildLearningStateResponseProjectsContentMax = 4000;
+
+
+
+export const UpdateChildLearningStateResponse = zod.object({
+  "weeklyGoal": zod.number().int().min(1).max(updateChildLearningStateResponseWeeklyGoalMax),
+  "pledgeLevel": zod.number().int().min(updateChildLearningStateResponsePledgeLevelMin).max(updateChildLearningStateResponsePledgeLevelMax),
+  "learnerAgreedLevel": zod.number().int().min(updateChildLearningStateResponseLearnerAgreedLevelMin).max(updateChildLearningStateResponseLearnerAgreedLevelMax),
+  "projects": zod.record(zod.string(), zod.object({
+  "content": zod.string().max(updateChildLearningStateResponseProjectsContentMax).optional(),
+  "approved": zod.boolean().optional(),
+  "reviewedAt": zod.coerce.date().nullish()
+}))
+})
+
+
+/**
+ * @summary Mark a lesson's family conversation as discussed
+ */
+export const MarkLessonTalkDiscussedParams = zod.object({
+  "childId": zod.coerce.string(),
+  "lessonId": zod.coerce.string()
+})
+
+export const MarkLessonTalkDiscussedResponse = zod.object({
+  "talkDiscussedAt": zod.coerce.date()
 })
 
 
