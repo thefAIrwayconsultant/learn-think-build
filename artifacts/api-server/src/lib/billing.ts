@@ -1,7 +1,7 @@
 import { stripeRequest } from "../stripeClient";
 
 const PRODUCT_NAME = "AI Explorer Family Plan";
-const PRICE_AMOUNT = 999;
+const PRICE_AMOUNT = 7999;
 const PRICE_CURRENCY = "usd";
 
 export type StripePrice = {
@@ -118,12 +118,12 @@ export async function getFamilyPrice(): Promise<StripePrice> {
     (item) =>
       item.unit_amount === PRICE_AMOUNT &&
       item.currency === PRICE_CURRENCY &&
-      item.recurring?.interval === "month",
+      item.recurring?.interval === "year",
   );
 
   if (!price) {
     throw new Error(
-      "The $9.99 USD monthly AI Explorer Family Plan price is not configured in Stripe.",
+      "The $79.99 USD annual AI Explorer Family Plan price is not configured in Stripe.",
     );
   }
 

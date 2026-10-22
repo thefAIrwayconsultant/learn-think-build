@@ -112,6 +112,35 @@ paths:
           description: Sign-in required
         "404":
           description: Learner profile not found
+  /family/children/{childId}/assessments:
+    post:
+      operationId: submitLevelAssessment
+      tags: [family]
+      summary: Submit a level assessment for server-side grading
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LevelAssessmentInput"
+      responses:
+        "200":
+          description: Assessment result and earned levels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LevelAssessmentResult"
+        "401":
+          description: Sign-in required
+        "403":
+          description: Finish the required lessons and prior level first
+        "404":
+          description: Learner profile not found
   /billing/checkout:
     post:
       operationId: createCheckoutSession
@@ -153,11 +182,14 @@ components:
         - status
     ChildProfile:
       type: object
-      required: [id, displayName, completedLessonIds, createdAt]
+      required: [id, displayName, completedLessonIds, masteredLevelIds, createdAt]
       properties:
         id: { type: string }
         displayName: { type: string }
         completedLessonIds:
+          type: array
+          items: { type: string }
+        masteredLevelIds:
           type: array
           items: { type: string }
         createdAt: { type: string, format: date-time }
@@ -184,12 +216,36 @@ components:
       properties:
         lessonId:
           type: string
-          enum: [what-is-ai, clear-instructions, check-the-answer, privacy-safe-use]
+          enum: [what-is-ai, clear-instructions, check-the-answer, privacy-safe-use, school-integrity, responsible-use, prompt-design, plan-an-app, test-app, iterate-app]
     LessonProgress:
       type: object
       required: [completedLessonIds]
       properties:
         completedLessonIds:
+          type: array
+          items: { type: string }
+    LevelAssessmentInput:
+      type: object
+      required: [levelId, answers]
+      properties:
+        levelId:
+          type: string
+          enum: [ai-foundations, responsible-use, prompt-craft, app-builder]
+        answers:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items: { type: integer, minimum: 0, maximum: 2 }
+    LevelAssessmentResult:
+      type: object
+      required: [levelId, score, passed, masteredLevelIds]
+      properties:
+        levelId:
+          type: string
+          enum: [ai-foundations, responsible-use, prompt-craft, app-builder]
+        score: { type: integer, minimum: 0, maximum: 100 }
+        passed: { type: boolean }
+        masteredLevelIds:
           type: array
           items: { type: string }
     CheckoutSession:

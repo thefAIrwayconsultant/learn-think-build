@@ -1,7 +1,7 @@
 import { ReplitConnectors } from "@replit/connectors-sdk";
 
 const PRODUCT_NAME = "AI Explorer Family Plan";
-const MONTHLY_AMOUNT = 999;
+const ANNUAL_AMOUNT = 7999;
 const CURRENCY = "usd";
 const connectors = new ReplitConnectors();
 
@@ -124,7 +124,7 @@ async function main(): Promise<void> {
       new URLSearchParams({
         name: PRODUCT_NAME,
         description:
-          "Monthly access for a family to AI Explorer's age-appropriate AI lessons and learner profiles.",
+          "Annual access for a family to AI Explorer's age-appropriate AI literacy and app-building curriculum.",
         "metadata[app]": "ai-explorer",
         "metadata[audience]": "parent-or-guardian",
       }),
@@ -142,14 +142,14 @@ async function main(): Promise<void> {
   );
   const price = prices.data.find(
     (item) =>
-      item.unit_amount === MONTHLY_AMOUNT &&
+      item.unit_amount === ANNUAL_AMOUNT &&
       item.currency === CURRENCY &&
-      item.recurring?.interval === "month",
+      item.recurring?.interval === "year",
   );
 
   if (price) {
     console.info(
-      `AI Explorer Family Plan already has the $9.99 USD monthly price (${price.id}).`,
+      "AI Explorer Family Plan already has the $79.99 USD annual price.",
     );
   } else {
     const createdPrice = await stripeRequest<StripePrice>(
@@ -157,16 +157,16 @@ async function main(): Promise<void> {
       "POST",
       new URLSearchParams({
         product: product.id,
-        unit_amount: String(MONTHLY_AMOUNT),
+        unit_amount: String(ANNUAL_AMOUNT),
         currency: CURRENCY,
-        "recurring[interval]": "month",
+        "recurring[interval]": "year",
         "metadata[app]": "ai-explorer",
       }),
-      "ai-explorer-family-plan-usd-999-monthly-v1",
+      "ai-explorer-family-plan-usd-7999-annual-v1",
     );
 
     console.info(
-      `Created the $9.99 USD monthly price for AI Explorer Family Plan (${createdPrice.id}).`,
+      "Created the $79.99 USD annual price for AI Explorer Family Plan.",
     );
   }
 

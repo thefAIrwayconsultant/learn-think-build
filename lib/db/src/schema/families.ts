@@ -1,6 +1,7 @@
 import { createInsertSchema } from "drizzle-zod";
 import {
   index,
+  integer,
   pgTable,
   primaryKey,
   text,
@@ -50,6 +51,24 @@ export const childProgressTable = pgTable(
   ],
 );
 
+export const childLevelMasteryTable = pgTable(
+  "child_level_mastery",
+  {
+    childId: uuid("child_id")
+      .notNull()
+      .references(() => childProfilesTable.id, { onDelete: "cascade" }),
+    levelId: varchar("level_id", { length: 40 }).notNull(),
+    score: integer("score").notNull(),
+    graduatedAt: timestamp("graduated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.childId, table.levelId] }),
+    index("child_level_mastery_child_id_idx").on(table.childId),
+  ],
+);
+
 export const insertChildProfileSchema = createInsertSchema(
   childProfilesTable,
 ).omit({ id: true, guardianId: true, createdAt: true });
@@ -57,3 +76,4 @@ export type InsertChildProfile = z.infer<typeof insertChildProfileSchema>;
 export type Guardian = typeof guardiansTable.$inferSelect;
 export type ChildProfile = typeof childProfilesTable.$inferSelect;
 export type ChildProgress = typeof childProgressTable.$inferSelect;
+export type ChildLevelMastery = typeof childLevelMasteryTable.$inferSelect;

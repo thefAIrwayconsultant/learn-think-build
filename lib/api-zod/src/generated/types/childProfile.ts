@@ -10,5 +10,6 @@ export interface ChildProfile {
   id: string;
   displayName: string;
   completedLessonIds: string[];
+  masteredLevelIds: string[];
   createdAt: Date;
 }

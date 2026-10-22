@@ -15,3 +15,7 @@ export * from './healthStatus';
 export * from './lessonProgress';
 export * from './lessonProgressInput';
 export * from './lessonProgressInputLessonId';
+export * from './levelAssessmentInput';
+export * from './levelAssessmentInputLevelId';
+export * from './levelAssessmentResult';
+export * from './levelAssessmentResultLevelId';

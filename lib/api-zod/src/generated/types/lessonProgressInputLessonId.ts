@@ -14,4 +14,10 @@ export const LessonProgressInputLessonId = {
   'clear-instructions': 'clear-instructions',
   'check-the-answer': 'check-the-answer',
   'privacy-safe-use': 'privacy-safe-use',
+  'school-integrity': 'school-integrity',
+  'responsible-use': 'responsible-use',
+  'prompt-design': 'prompt-design',
+  'plan-an-app': 'plan-an-app',
+  'test-app': 'test-app',
+  'iterate-app': 'iterate-app',
 } as const;

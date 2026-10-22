@@ -28,6 +28,7 @@ export const GetFamilyResponse = zod.object({
   "id": zod.string(),
   "displayName": zod.string(),
   "completedLessonIds": zod.array(zod.string()),
+  "masteredLevelIds": zod.array(zod.string()),
   "createdAt": zod.coerce.date()
 }))
 })
@@ -48,6 +49,7 @@ export const CreateChildProfileResponse = zod.object({
   "id": zod.string(),
   "displayName": zod.string(),
   "completedLessonIds": zod.array(zod.string()),
+  "masteredLevelIds": zod.array(zod.string()),
   "createdAt": zod.coerce.date()
 })
 
@@ -70,11 +72,44 @@ export const CompleteChildLessonParams = zod.object({
 })
 
 export const CompleteChildLessonBody = zod.object({
-  "lessonId": zod.enum(['what-is-ai', 'clear-instructions', 'check-the-answer', 'privacy-safe-use'])
+  "lessonId": zod.enum(['what-is-ai', 'clear-instructions', 'check-the-answer', 'privacy-safe-use', 'school-integrity', 'responsible-use', 'prompt-design', 'plan-an-app', 'test-app', 'iterate-app'])
 })
 
 export const CompleteChildLessonResponse = zod.object({
   "completedLessonIds": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Submit a level assessment for server-side grading
+ */
+export const SubmitLevelAssessmentParams = zod.object({
+  "childId": zod.coerce.string()
+})
+
+export const submitLevelAssessmentBodyAnswersItemMin = 0;
+export const submitLevelAssessmentBodyAnswersItemMax = 2;
+
+export const submitLevelAssessmentBodyAnswersMin = 5;
+export const submitLevelAssessmentBodyAnswersMax = 5;
+
+
+
+export const SubmitLevelAssessmentBody = zod.object({
+  "levelId": zod.enum(['ai-foundations', 'responsible-use', 'prompt-craft', 'app-builder']),
+  "answers": zod.array(zod.number().int().min(submitLevelAssessmentBodyAnswersItemMin).max(submitLevelAssessmentBodyAnswersItemMax)).min(submitLevelAssessmentBodyAnswersMin).max(submitLevelAssessmentBodyAnswersMax)
+})
+
+export const submitLevelAssessmentResponseScoreMin = 0;
+export const submitLevelAssessmentResponseScoreMax = 100;
+
+
+
+export const SubmitLevelAssessmentResponse = zod.object({
+  "levelId": zod.enum(['ai-foundations', 'responsible-use', 'prompt-craft', 'app-builder']),
+  "score": zod.number().int().min(submitLevelAssessmentResponseScoreMin).max(submitLevelAssessmentResponseScoreMax),
+  "passed": zod.boolean(),
+  "masteredLevelIds": zod.array(zod.string())
 })
 
 

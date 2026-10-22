@@ -13,6 +13,7 @@ export interface ChildProfile {
   id: string;
   displayName: string;
   completedLessonIds: string[];
+  masteredLevelIds: string[];
   createdAt: string;
 }
 
@@ -55,6 +56,12 @@ export const LessonProgressInputLessonId = {
   'clear-instructions': 'clear-instructions',
   'check-the-answer': 'check-the-answer',
   'privacy-safe-use': 'privacy-safe-use',
+  'school-integrity': 'school-integrity',
+  'responsible-use': 'responsible-use',
+  'prompt-design': 'prompt-design',
+  'plan-an-app': 'plan-an-app',
+  'test-app': 'test-app',
+  'iterate-app': 'iterate-app',
 } as const;
 
 export interface LessonProgressInput {
@@ -63,6 +70,48 @@ export interface LessonProgressInput {
 
 export interface LessonProgress {
   completedLessonIds: string[];
+}
+
+export type LevelAssessmentInputLevelId = typeof LevelAssessmentInputLevelId[keyof typeof LevelAssessmentInputLevelId];
+
+
+export const LevelAssessmentInputLevelId = {
+  'ai-foundations': 'ai-foundations',
+  'responsible-use': 'responsible-use',
+  'prompt-craft': 'prompt-craft',
+  'app-builder': 'app-builder',
+} as const;
+
+export interface LevelAssessmentInput {
+  levelId: LevelAssessmentInputLevelId;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     * @items.minimum 0
+     * @items.maximum 2
+     */
+  answers: number[];
+}
+
+export type LevelAssessmentResultLevelId = typeof LevelAssessmentResultLevelId[keyof typeof LevelAssessmentResultLevelId];
+
+
+export const LevelAssessmentResultLevelId = {
+  'ai-foundations': 'ai-foundations',
+  'responsible-use': 'responsible-use',
+  'prompt-craft': 'prompt-craft',
+  'app-builder': 'app-builder',
+} as const;
+
+export interface LevelAssessmentResult {
+  levelId: LevelAssessmentResultLevelId;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  score: number;
+  passed: boolean;
+  masteredLevelIds: string[];
 }
 
 export interface CheckoutSession {
