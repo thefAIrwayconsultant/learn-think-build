@@ -10,8 +10,5 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "tsx": "catalog:"
-  },
-  "dependencies": {
-    "@replit/connectors-sdk": "^0.4.3"
   }
 }

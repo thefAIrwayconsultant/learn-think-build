@@ -25,11 +25,6 @@ import {
   SubmitLevelAssessmentParams,
   SubmitLevelAssessmentResponse,
 } from "@workspace/api-zod";
-import {
-  getFamilySubscription,
-  hasLearningAccess,
-} from "../lib/billing";
-
 const router: IRouter = Router();
 const validLessonIds = new Set([
   "what-is-ai",
@@ -81,11 +76,6 @@ async function ensureGuardian(id: string) {
   return guardian;
 }
 
-async function loadSubscription(customerId: string | null) {
-  if (!customerId) return null;
-  return getFamilySubscription(customerId);
-}
-
 router.get("/family", async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
   if (!guardianId) {
@@ -99,14 +89,11 @@ router.get("/family", async (req, res): Promise<void> => {
     return;
   }
 
-  const [profiles, subscription] = await Promise.all([
-    db
-      .select()
-      .from(childProfilesTable)
-      .where(eq(childProfilesTable.guardianId, guardianId))
-      .orderBy(asc(childProfilesTable.createdAt)),
-    loadSubscription(guardian.stripeCustomerId),
-  ]);
+  const profiles = await db
+    .select()
+    .from(childProfilesTable)
+    .where(eq(childProfilesTable.guardianId, guardianId))
+    .orderBy(asc(childProfilesTable.createdAt));
   const progressRows =
     profiles.length > 0
       ? await db
@@ -140,9 +127,6 @@ router.get("/family", async (req, res): Promise<void> => {
   }
 
   const response = {
-    subscriptionStatus: subscription?.status ?? "none",
-    subscriptionPeriodEnd: subscription?.periodEnd ?? null,
-    subscriptionCancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
     children: profiles.map((profile) => ({
       id: profile.id,
       displayName: profile.displayName,
@@ -168,14 +152,7 @@ router.post("/family/children", async (req, res): Promise<void> => {
     return;
   }
 
-  const guardian = await ensureGuardian(guardianId);
-  const subscription = await loadSubscription(
-    guardian?.stripeCustomerId ?? null,
-  );
-  if (!hasLearningAccess(subscription)) {
-    res.status(402).json({ error: "An active family subscription is required." });
-    return;
-  }
+  await ensureGuardian(guardianId);
 
   const displayName = parsed.data.displayName.trim();
   if (!displayName) {
@@ -255,12 +232,6 @@ router.post(
       res.status(404).json({ error: "Learner profile not found." });
       return;
     }
-    const guardian = await ensureGuardian(guardianId);
-    const subscription = await loadSubscription(guardian?.stripeCustomerId ?? null);
-    if (!hasLearningAccess(subscription)) {
-      res.status(402).json({ error: "An active family subscription is required." });
-      return;
-    }
     const levelIndex = learningLevels.findIndex((level) => level.id === body.data.levelId);
     const level = learningLevels[levelIndex];
     const progress = await db
@@ -325,15 +296,6 @@ router.post(
     const body = CompleteChildLessonBody.safeParse(req.body);
     if (!body.success || !validLessonIds.has(body.data?.lessonId ?? "")) {
       res.status(400).json({ error: "Choose a valid lesson." });
-      return;
-    }
-
-    const guardian = await ensureGuardian(guardianId);
-    const subscription = await loadSubscription(
-      guardian?.stripeCustomerId ?? null,
-    );
-    if (!hasLearningAccess(subscription)) {
-      res.status(402).json({ error: "An active family subscription is required." });
       return;
     }
 

@@ -6,12 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ChildProfile } from './childProfile';
-import type { GuardianFamilySubscriptionStatus } from './guardianFamilySubscriptionStatus';
 
 export interface GuardianFamily {
-  subscriptionStatus: GuardianFamilySubscriptionStatus;
-  /** @nullable */
-  subscriptionPeriodEnd: Date | null;
-  subscriptionCancelAtPeriodEnd: boolean;
   children: ChildProfile[];
 }

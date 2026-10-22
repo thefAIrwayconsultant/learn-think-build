@@ -25,26 +25,7 @@ export interface ChildProfileInput {
   displayName: string;
 }
 
-export type GuardianFamilySubscriptionStatus = typeof GuardianFamilySubscriptionStatus[keyof typeof GuardianFamilySubscriptionStatus];
-
-
-export const GuardianFamilySubscriptionStatus = {
-  none: 'none',
-  active: 'active',
-  trialing: 'trialing',
-  past_due: 'past_due',
-  unpaid: 'unpaid',
-  canceled: 'canceled',
-  incomplete: 'incomplete',
-  incomplete_expired: 'incomplete_expired',
-  paused: 'paused',
-} as const;
-
 export interface GuardianFamily {
-  subscriptionStatus: GuardianFamilySubscriptionStatus;
-  /** @nullable */
-  subscriptionPeriodEnd: string | null;
-  subscriptionCancelAtPeriodEnd: boolean;
   children: ChildProfile[];
 }
 
@@ -112,9 +93,5 @@ export interface LevelAssessmentResult {
   score: number;
   passed: boolean;
   masteredLevelIds: string[];
-}
-
-export interface CheckoutSession {
-  url: string;
 }
 

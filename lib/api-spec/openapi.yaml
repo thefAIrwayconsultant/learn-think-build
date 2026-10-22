@@ -12,8 +12,6 @@ tags:
     description: Health operations
   - name: family
     description: Guardian family accounts, learner profiles, and progress
-  - name: billing
-    description: Subscription checkout and management
 paths:
   /healthz:
     get:
@@ -35,7 +33,7 @@ paths:
       summary: Get the signed-in guardian's family
       responses:
         "200":
-          description: Family profile and subscription status
+          description: Guardian family profiles and learner progress
           content:
             application/json:
               schema:
@@ -64,8 +62,6 @@ paths:
           description: Invalid profile name
         "401":
           description: Sign-in required
-        "402":
-          description: Active subscription required
   /family/children/{childId}:
     delete:
       operationId: deleteChildProfile
@@ -141,36 +137,6 @@ paths:
           description: Finish the required lessons and prior level first
         "404":
           description: Learner profile not found
-  /billing/checkout:
-    post:
-      operationId: createCheckoutSession
-      tags: [billing]
-      summary: Start the monthly family subscription checkout
-      responses:
-        "200":
-          description: Stripe Checkout URL
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CheckoutSession"
-        "401":
-          description: Sign-in required
-  /billing/portal:
-    post:
-      operationId: createBillingPortalSession
-      tags: [billing]
-      summary: Open subscription management
-      responses:
-        "200":
-          description: Stripe billing portal URL
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CheckoutSession"
-        "401":
-          description: Sign-in required
-        "404":
-          description: No Stripe customer exists for this guardian
 components:
   schemas:
     HealthStatus:
@@ -200,13 +166,8 @@ components:
         displayName: { type: string, minLength: 1, maxLength: 40 }
     GuardianFamily:
       type: object
-      required: [subscriptionStatus, subscriptionPeriodEnd, subscriptionCancelAtPeriodEnd, children]
+      required: [children]
       properties:
-        subscriptionStatus:
-          type: string
-          enum: [none, active, trialing, past_due, unpaid, canceled, incomplete, incomplete_expired, paused]
-        subscriptionPeriodEnd: { type: ["string", "null"], format: date-time }
-        subscriptionCancelAtPeriodEnd: { type: boolean }
         children:
           type: array
           items: { $ref: "#/components/schemas/ChildProfile" }
@@ -248,9 +209,4 @@ components:
         masteredLevelIds:
           type: array
           items: { type: string }
-    CheckoutSession:
-      type: object
-      required: [url]
-      properties:
-        url: { type: string, format: uri }
 

@@ -3,9 +3,9 @@ import { ClerkProvider, SignIn, SignUp, useClerk, useUser } from '@clerk/react';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, Clock3, Compass, CreditCard, Lightbulb, LockKeyhole, LogOut, RotateCcw, ShieldCheck, Sparkles, Trash2, UserRoundPlus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, Clock3, Compass, Lightbulb, LockKeyhole, LogOut, RotateCcw, ShieldCheck, Sparkles, Trash2, UserRoundPlus } from 'lucide-react';
 import { Link, Redirect, Route, Router as WouterRouter, Switch, useLocation, useRoute } from 'wouter';
-import { getGetFamilyQueryKey, useCompleteChildLesson, useCreateBillingPortalSession, useCreateCheckoutSession, useCreateChildProfile, useDeleteChildProfile, useGetFamily, useSubmitLevelAssessment } from '@workspace/api-client-react';
+import { getGetFamilyQueryKey, useCompleteChildLesson, useCreateChildProfile, useDeleteChildProfile, useGetFamily, useSubmitLevelAssessment } from '@workspace/api-client-react';
 import type { ChildProfile, GuardianFamily } from '@workspace/api-client-react';
 import type { LessonProgressInputLessonId } from '@workspace/api-client-react';
 import { lessons, type Lesson } from './lessons';
@@ -76,7 +76,6 @@ const clerkAppearance = {
   },
 };
 
-const activeStatuses = ['active', 'trialing'];
 const lessonApiIds: Record<string, LessonProgressInputLessonId> = {
   'ai-basics': 'what-is-ai',
   'clear-prompts': 'clear-instructions',
@@ -210,7 +209,7 @@ function LandingPage() {
           <div className="section-heading"><div><div className="eyebrow">One annual family plan</div><h2 id="price-heading">A full year of learning and making.</h2><p>One adult account manages billing and learner profiles.</p></div></div>
           <div className="price-panel">
             <div><div className="price-amount">$79.99 <small>USD / year · billed upfront</small></div><p>Full-year access to the guided curriculum and learner profiles. About $6.67 per month.</p></div>
-            <div className="price-action"><Link className="primary-button" href="/sign-up" data-testid="button-pricing-signup">Create a guardian account <ArrowRight size={16} /></Link><span>For parents and guardians · cancel renewal in billing settings</span></div>
+          <div className="price-action"><Link className="primary-button" href="/sign-up" data-testid="button-pricing-signup">Create a guardian account <ArrowRight size={16} /></Link><span>Family plan checkout is coming soon.</span></div>
           </div>
         </section>
         <p className="footnote"><ShieldCheck size={16} /> Parent-owned account and billing. Learner profiles ask for display name only.</p>
@@ -259,7 +258,7 @@ function FamilyPage() {
   const { user } = useUser();
   const { data: family, isLoading, isError, refetch } = useGetFamily();
   if (isLoading) return <FamilyLoading />;
-  if (isError || !family) return <main className="page-content family-page"><StatusMessage title="Your family page didn’t load." message="We couldn’t reach your account details just now. Your subscription and learner profiles are still safe." retry={() => void refetch()} /></main>;
+  if (isError || !family) return <main className="page-content family-page"><StatusMessage title="Your family page didn’t load." message="We couldn’t reach your family details just now. Your learner profiles and saved progress are still safe." retry={() => void refetch()} /></main>;
   return <FamilyDashboard family={family} parentName={user?.fullName || user?.primaryEmailAddress?.emailAddress || 'Parent or guardian'} />;
 }
 
@@ -269,21 +268,13 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
   const { signOut } = useClerk();
   const createProfile = useCreateChildProfile();
   const deleteProfile = useDeleteChildProfile();
-  const checkout = useCreateCheckoutSession();
-  const portal = useCreateBillingPortalSession();
   const [adding, setAdding] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [formError, setFormError] = useState('');
-  const subscribed = activeStatuses.includes(family.subscriptionStatus);
   const invalidateFamily = () => client.invalidateQueries({ queryKey: getGetFamilyQueryKey() });
-  const startCheckout = () => checkout.mutate(undefined, { onSuccess: (session) => { window.location.assign(session.url); } });
-  const openPortal = () => portal.mutate(undefined, { onSuccess: (session) => { window.location.assign(session.url); } });
-  const needsPaymentAttention = ['past_due', 'unpaid'].includes(family.subscriptionStatus);
-  const canManageBilling = subscribed || needsPaymentAttention;
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanName = displayName.trim();
-    if (!subscribed) { setFormError('Start or renew the family subscription before creating a learner profile.'); return; }
     if (!cleanName || cleanName.length > 40) { setFormError('Choose a display name between 1 and 40 characters.'); return; }
     setFormError('');
     createProfile.mutate({ data: { displayName: cleanName } }, {
@@ -298,45 +289,35 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
       onError: () => setFormError('We could not remove that profile. Please try again.'),
     });
   };
-  const statusText: Record<string, string> = {
-    active: 'Active', trialing: 'Trial active', past_due: 'Payment needs attention', unpaid: 'Payment overdue',
-    canceled: 'Canceled', paused: 'Paused', incomplete: 'Payment setup incomplete', incomplete_expired: 'Subscription expired', none: 'Not subscribed',
-  };
-  const displayStatus = statusText[family.subscriptionStatus] || 'Subscription status';
   return (
     <>
       <main className="page-content family-page">
         <div className="family-welcome">
-          <div><div className="eyebrow">The grown-up’s corner</div><h1>Your family workshop.</h1><p>Manage your plan and choose who’s ready to explore.</p></div>
+          <div><div className="eyebrow">The grown-up’s corner</div><h1>Your family workshop.</h1><p>Manage learner profiles and saved progress.</p></div>
           <div className="account-pill"><span className="initial-badge">{parentName.trim().charAt(0).toUpperCase()}</span><span>{parentName}</span><button className="signout-button" type="button" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={14} /> Sign out</button></div>
         </div>
         <div className="family-grid">
           <section className="family-panel subscription-panel" aria-labelledby="subscription-heading">
-            <div className="panel-head"><h2 id="subscription-heading">Family subscription</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />{displayStatus}</span></div>
+            <div className="panel-head"><h2 id="subscription-heading">Family plan</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />Coming soon</span></div>
             <div className="subscription-price">$79.99 <small>USD / year</small></div>
-            <p>{subscribed ? family.subscriptionCancelAtPeriodEnd ? `Your plan remains available through ${formatDate(family.subscriptionPeriodEnd)}.` : `Your family plan is ready${family.subscriptionPeriodEnd ? ` through ${formatDate(family.subscriptionPeriodEnd)}` : ''}.` : 'One upfront annual payment unlocks learner profiles, all interactive lessons, and saved progress.'}</p>
-            <p className="plan-terms-note">The $79.99 annual price applies to new subscriptions. Existing subscribers keep their current billing terms.</p>
-            <div className="subscription-actions">
-              {canManageBilling
-                ? <button type="button" className="secondary-button" onClick={openPortal} disabled={portal.isPending} data-testid="button-manage-subscription"><CreditCard size={15} />{portal.isPending ? 'Opening…' : needsPaymentAttention ? 'Update payment details' : 'Manage subscription'}</button>
-                : <button type="button" className="primary-button" onClick={startCheckout} disabled={checkout.isPending} data-testid="button-subscribe"><CreditCard size={15} />{checkout.isPending ? 'Preparing checkout…' : family.subscriptionStatus === 'none' ? 'Start for $79.99/year' : 'Resume family plan'}</button>}
-            </div>
-            {(checkout.isError || portal.isError) && <p role="alert">We couldn’t open billing just now. Please try again.</p>}
-            <div className="family-note"><ShieldCheck size={18} /><span>You own the account, subscription, and family controls. Learners use a display name only.</span></div>
+            <p>Family plan checkout and billing management are paused while launch details are finalized.</p>
+            <p className="plan-terms-note">Learner profiles, interactive lessons, and saved progress are available while checkout is coming soon.</p>
+            <div className="subscription-actions"><button type="button" className="primary-button" disabled aria-disabled="true" data-testid="button-subscribe">Coming soon</button></div>
+            <div className="family-note"><ShieldCheck size={18} /><span>An adult owns the account and family controls. Learners use a display name only.</span></div>
           </section>
           <section className="family-panel" aria-labelledby="learners-heading">
-            <div className="panel-head"><div><h2 id="learners-heading">Learner profiles</h2><p style={{ margin: '5px 0 0', color: 'hsl(var(--muted-foreground))', fontSize: 12 }}>Just a display name—no personal details.</p></div>{subscribed && <button type="button" className="secondary-button" onClick={() => { setAdding((value) => !value); setFormError(''); }} data-testid="button-add-profile"><UserRoundPlus size={15} /> Add learner</button>}</div>
+            <div className="panel-head"><div><h2 id="learners-heading">Learner profiles</h2><p style={{ margin: '5px 0 0', color: 'hsl(var(--muted-foreground))', fontSize: 12 }}>Just a display name—no personal details.</p></div><button type="button" className="secondary-button" onClick={() => { setAdding((value) => !value); setFormError(''); }} data-testid="button-add-profile"><UserRoundPlus size={15} /> Add learner</button></div>
             {family.children.length ? <div className="child-list">{family.children.map((child, index) => (
               <div className="child-row" key={child.id} data-testid={`row-learner-${child.id}`}>
                 <span className="child-avatar">{child.displayName.trim().charAt(0).toUpperCase()}</span>
                 <div className="child-info"><strong>{child.displayName}</strong><span>{child.completedLessonIds.length} lessons · {child.masteredLevelIds.length} of {learningLevels.length} levels graduated</span></div>
                 <div className="child-actions">
-                  {subscribed && <Link className="secondary-button" href={`/learn/${child.id}`} data-testid={`link-learner-${child.id}`}>Open workshop <ArrowRight size={14} /></Link>}
+                  <Link className="secondary-button" href={`/learn/${child.id}`} data-testid={`link-learner-${child.id}`}>Open workshop <ArrowRight size={14} /></Link>
                   <button type="button" className="icon-button" aria-label={`Remove ${child.displayName}`} title="Remove learner profile" onClick={() => removeProfile(child)} disabled={deleteProfile.isPending} data-testid={`button-remove-${child.id}`}><Trash2 size={16} /></button>
                 </div>
               </div>
-            ))}</div> : <div className="empty-card"><UserRoundPlus size={25} /><h2>Your first explorer starts here.</h2><p>{subscribed ? 'Add a display name to open a learner workshop.' : 'Subscribe to your family plan to create learner profiles.'}</p></div>}
-            {adding && subscribed && <form className="add-child-form" onSubmit={submitProfile} noValidate>
+            ))}</div> : <div className="empty-card"><UserRoundPlus size={25} /><h2>Your first explorer starts here.</h2><p>Add a display name to open a learner workshop.</p></div>}
+            {adding && <form className="add-child-form" onSubmit={submitProfile} noValidate>
               <label htmlFor="learner-name">Learner display name</label>
               <input id="learner-name" name="displayName" autoComplete="off" maxLength={40} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="What should we call this explorer?" data-testid="input-learner-name" />
               <div className="form-actions"><span className="form-hint">No email or other personal information.</span><button className="primary-button" type="submit" disabled={createProfile.isPending} data-testid="button-save-profile">{createProfile.isPending ? 'Saving…' : 'Create profile'} <ArrowRight size={15} /></button></div>
@@ -350,16 +331,10 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
   );
 }
 
-function formatDate(date: string | null) {
-  if (!date) return 'the end of the billing period';
-  return new Intl.DateTimeFormat(undefined, { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(date));
-}
-
 function FamilyDataGate({ childId, children }: { childId?: string; children: (family: GuardianFamily, child?: ChildProfile) => ReactNode }) {
   const { data: family, isLoading, isError, refetch } = useGetFamily();
   if (isLoading) return <main className="page-content"><div className="skeleton" style={{ height: 160 }} /><div className="skeleton large" style={{ marginTop: 20 }} /></main>;
   if (isError || !family) return <main className="page-content"><StatusMessage title="The workshop is taking a breather." message="We couldn’t load your family details. Your saved progress is safe." retry={() => void refetch()} /></main>;
-  if (!activeStatuses.includes(family.subscriptionStatus)) return <main className="page-content not-found"><div className="eyebrow" style={{ justifyContent: 'center' }}>Family plan required</div><h1>Ask your grown-up to open the workshop.</h1><p>Learner trails and profiles are available with an active family subscription.</p><Link href="/family" className="primary-button" data-testid="link-family-subscribe">Go to family account <ArrowRight size={16} /></Link></main>;
   const child = childId ? family.children.find((item) => item.id === childId) : undefined;
   if (childId && !child) return <NotFound />;
   return <>{children(family, child)}</>;

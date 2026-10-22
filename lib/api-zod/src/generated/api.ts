@@ -21,9 +21,6 @@ export const HealthCheckResponse = zod.object({
  * @summary Get the signed-in guardian's family
  */
 export const GetFamilyResponse = zod.object({
-  "subscriptionStatus": zod.enum(['none', 'active', 'trialing', 'past_due', 'unpaid', 'canceled', 'incomplete', 'incomplete_expired', 'paused']),
-  "subscriptionPeriodEnd": zod.coerce.date().nullable(),
-  "subscriptionCancelAtPeriodEnd": zod.boolean(),
   "children": zod.array(zod.object({
   "id": zod.string(),
   "displayName": zod.string(),
@@ -110,22 +107,6 @@ export const SubmitLevelAssessmentResponse = zod.object({
   "score": zod.number().int().min(submitLevelAssessmentResponseScoreMin).max(submitLevelAssessmentResponseScoreMax),
   "passed": zod.boolean(),
   "masteredLevelIds": zod.array(zod.string())
-})
-
-
-/**
- * @summary Start the monthly family subscription checkout
- */
-export const CreateCheckoutSessionResponse = zod.object({
-  "url": zod.string().url()
-})
-
-
-/**
- * @summary Open subscription management
- */
-export const CreateBillingPortalSessionResponse = zod.object({
-  "url": zod.string().url()
 })
 
 
