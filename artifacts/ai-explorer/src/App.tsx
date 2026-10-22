@@ -10,6 +10,7 @@ import type { ChildProfile, GuardianFamily } from '@workspace/api-client-react';
 import type { LessonProgressInputLessonId } from '@workspace/api-client-react';
 import { lessons, type Lesson } from './lessons';
 import { learningLevels, passingScore, type LearningLevelId } from './levels';
+import { Mascot } from './Mascot';
 import './index.css';
 
 const clerkPubKey = publishableKeyFromHost(
@@ -95,9 +96,9 @@ function BrandHeader() {
   const { isSignedIn } = useUser();
   return (
     <header className="site-header">
-      <Link href="/" className="brand" aria-label="AI Explorer home" data-testid="link-home">
+      <Link href="/" className="brand" aria-label="Learn Think Build home" data-testid="link-home">
         <span className="brand-mark"><Compass size={21} strokeWidth={2.2} /></span>
-        <span className="brand-name">AI Explorer</span>
+        <span className="brand-name">Learn Think Build</span>
       </Link>
       <span className="header-note">AI literacy · safe building · ages 10+</span>
       <nav className="header-actions" aria-label="Account navigation">
@@ -111,7 +112,7 @@ function BrandHeader() {
 }
 
 function Footer() {
-  return <footer className="site-footer"><span><strong>AI Explorer</strong> · Learn thoughtfully. Build responsibly.</span><span>For learners 10+ · An adult owns the account.</span></footer>;
+  return <footer className="site-footer"><span><strong>Learn Think Build</strong> · Learn thoughtfully. Build responsibly.</span><span>For learners 10+ · An adult owns the account.</span></footer>;
 }
 
 function SampleFeedbackPage() {
@@ -134,11 +135,11 @@ function SampleFeedbackPage() {
   ];
   return <>
     <main className="page-content feedback-page">
-      <Link href="/" className="back-link"><ArrowLeft size={15} /> Back to AI Explorer</Link>
+      <Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link>
       <header className="feedback-hero">
         <div className="eyebrow">Illustrative examples</div>
         <h1>What learners could say.</h1>
-        <p>These sample quotes are fictional examples written to show the kinds of outcomes AI Explorer aims to support.</p>
+        <p>These sample quotes are fictional examples written to show the kinds of outcomes Learn Think Build aims to support.</p>
       </header>
       <aside className="feedback-disclosure" role="note"><ShieldCheck size={20} /><span><strong>Not actual reviews.</strong> These examples are fictional and are not endorsements from real customers, families, educators, or learners.</span></aside>
       <section className="feedback-grid" aria-label="Fictional sample feedback">
@@ -149,7 +150,7 @@ function SampleFeedbackPage() {
           <p className="feedback-caption">Illustrative sample · not a real testimonial</p>
         </article>)}
       </section>
-      <div className="feedback-cta"><div><h2>See the learning path for yourself.</h2><p>Explore the curriculum, safety approach, and annual family plan.</p></div><Link href="/" className="primary-button">Explore AI Explorer <ArrowRight size={16} /></Link></div>
+      <div className="feedback-cta"><div><h2>See the learning path for yourself.</h2><p>Explore the curriculum, safety approach, and annual family plan.</p></div><Link href="/" className="primary-button">Explore Learn Think Build <ArrowRight size={16} /></Link></div>
     </main>
     <Footer />
   </>;
@@ -172,8 +173,9 @@ function LandingPage() {
             </div>
             <div className="landing-trust"><ShieldCheck size={17} /><span>Adults own the account. Learners use a display name—no child email required.</span></div>
           </div>
-          <div className="landing-art" aria-label="Illustrated AI Explorer field notebook">
+          <div className="landing-art" aria-label="Illustrated Learn Think Build field notebook">
             <div className="art-paper" />
+            <div className="landing-mascot"><Mascot mood="curious" size={158} /></div>
             <div className="art-board">
               <div className="art-board-top"><span>Year-one project / 01</span><Compass size={18} /></div>
               <h3>From first prompt<br /><span>to first app.</span></h3>
@@ -219,11 +221,11 @@ function LandingPage() {
 }
 
 function SignInPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">Welcome back</div><h1>Your next idea is waiting.</h1><p>Sign in as the parent or guardian who owns this AI Explorer account. Learners enter through their profile in the family account.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to AI Explorer</Link></section><div className="auth-card-wrap"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">Welcome back</div><h1>Your next idea is waiting.</h1><p>Sign in as the parent or guardian who owns this Learn Think Build account. Learners enter through their profile in the family account.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div></main>;
 }
 
 function SignUpPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Make room for a year of learning.</h1><p>Create the adult-owned account first. You’ll manage the $79.99 annual plan and learner profiles here, with no child email addresses or personal details needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to AI Explorer</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Make room for a year of learning.</h1><p>Create the adult-owned account first. You’ll manage the $79.99 annual plan and learner profiles here, with no child email addresses or personal details needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
 }
 
 function ClerkCacheInvalidator() {
@@ -377,7 +379,8 @@ function LearnerHub({ child }: { child: ChildProfile }) {
       <main className="page-content">
         <Link href="/family" className="back-link"><ArrowLeft size={15} /> Family account</Link>
         <section className="learn-header"><div className="learn-greeting"><span className="child-avatar">{child.displayName.trim().charAt(0).toUpperCase()}</span><div><div className="eyebrow">Your field guide</div><h1>Welcome, {child.displayName}.</h1><p>Pick a trail. There’s no rush to get anywhere.</p></div></div><Link href="/family" className="secondary-button">Family controls</Link></section>
-        <div className="learn-progress" data-testid="progress-summary"><strong>Level {graduatedCount} / {learningLevels.length}</strong><span>{graduatedCount === learningLevels.length ? 'AI Explorer graduate' : 'mastery levels earned'}</span><div className="progress-track" role="progressbar" aria-valuenow={graduatedCount} aria-valuemin={0} aria-valuemax={learningLevels.length} aria-label="Mastery levels graduated"><div className="progress-fill" style={{ width: `${(graduatedCount / learningLevels.length) * 100}%` }} /></div><span>{child.completedLessonIds.length} of {lessons.length} lessons complete</span></div>
+        <aside className="pip-nudge"><Mascot mood="bright" size={94} /><div><span className="eyebrow">Pip’s field note</span><strong>Stay curious. Check the answer.</strong><p>AI can sound sure and still be wrong. Your judgment is part of every trail.</p></div></aside>
+        <div className="learn-progress" data-testid="progress-summary"><strong>Level {graduatedCount} / {learningLevels.length}</strong><span>{graduatedCount === learningLevels.length ? 'Learn Think Build graduate' : 'mastery levels earned'}</span><div className="progress-track" role="progressbar" aria-valuenow={graduatedCount} aria-valuemin={0} aria-valuemax={learningLevels.length} aria-label="Mastery levels graduated"><div className="progress-fill" style={{ width: `${(graduatedCount / learningLevels.length) * 100}%` }} /></div><span>{child.completedLessonIds.length} of {lessons.length} lessons complete</span></div>
         <section className="levels-list" aria-labelledby="trails-heading"><div className="section-heading"><div><h2 id="trails-heading">Your learning path</h2><p>Learn it, show what you know, then unlock the next level.</p></div></div>{learningLevels.map((level, levelIndex) => {
           const unlocked = levelIndex === 0 || mastered.has(learningLevels[levelIndex - 1].id);
           const levelLessons = level.lessonIds.map((id) => lessons.find((lesson) => lesson.id === id)).filter((lesson): lesson is Lesson => Boolean(lesson));
@@ -429,6 +432,7 @@ function LevelAssessmentPage({ child, levelId }: { child: ChildProfile; levelId:
     <main className="page-content assessment-page">
       <Link href={`/learn/${child.id}`} className="back-link"><ArrowLeft size={15} /> Your learning path</Link>
       <header className="lesson-top"><div className="lesson-kicker">Show what you know · 5 questions</div><h1>{level.title}</h1><p>{level.objective}</p></header>
+      <aside className="pip-nudge pip-assessment"><Mascot mood="thinking" size={82} /><div><span className="eyebrow">Pip’s reminder</span><strong>Take your time and trust your thinking.</strong><p>You can review the lessons and try again if you need another pass.</p></div></aside>
       {!result ? <section className="assessment-card">
         <p className="assessment-rule">Answer all five questions. Score {passingScore}% or higher to graduate and unlock the next level. If you don’t pass yet, review the lessons and try again.</p>
         {level.assessment.map((item, questionIndex) => <fieldset className="assessment-question" key={item.question}><legend>{questionIndex + 1}. {item.question}</legend><div className="answer-list">{item.options.map((option, optionIndex) => <button type="button" key={option} className={`answer-option${answers[questionIndex] === optionIndex ? ' is-correct' : ''}`} aria-pressed={answers[questionIndex] === optionIndex} onClick={() => chooseAnswer(questionIndex, optionIndex)}><span className="answer-letter">{String.fromCharCode(65 + optionIndex)}</span>{option}</button>)}</div></fieldset>)}
@@ -509,6 +513,7 @@ function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string
               return <button key={option} type="button" className={`answer-option${correctChoice ? ' is-correct' : ''}${selectedWrong ? ' is-wrong' : ''}`} onClick={() => { if (!isCorrect) setSelectedIndex(index); }} disabled={isCorrect} aria-pressed={selectedIndex === index} data-testid={`answer-option-${stepIndex + 1}-${index + 1}`}><span className="answer-letter">{String.fromCharCode(65 + index)}</span>{option}</button>;
             })}</div>
             {selectedIndex !== null && <div className={`feedback ${isCorrect ? 'correct' : 'try-again'}`} role="status" aria-live="polite" data-testid="quiz-feedback">{isCorrect ? <CheckCircle2 size={20} /> : <Lightbulb size={20} />}<span><strong>{isCorrect ? 'Good thinking.' : 'Not quite. Have another go.'}</strong>{isCorrect ? step.feedback : 'Look back at the field note, then try a different answer.'}</span></div>}</div>
+            {selectedIndex !== null && <div className="pip-feedback"><Mascot mood={isCorrect ? 'bright' : 'thinking'} size={66} /><span>{isCorrect ? 'That’s the kind of careful thinking that makes a strong builder.' : 'A good scout checks the clues and gives it another try.'}</span></div>}
             {saveError && <p role="alert" style={{ color: 'hsl(var(--destructive))' }} data-testid="status-save-error">{saveError}</p>}
             <div className="lesson-actions"><button className="primary-button" type="button" onClick={continueLesson} disabled={!isCorrect || complete.isPending} data-testid="button-continue">{complete.isPending ? 'Saving your trail…' : stepIndex === lesson.steps.length - 1 ? 'Finish this trail' : 'Next field note'} <ArrowRight size={17} /></button></div>
           </section>

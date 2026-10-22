@@ -1,2 +1,2 @@
 - [Stripe connector access](stripe-connector-access.md) — Use the connected proxy API; the integration may withhold raw keys from app code.
-- [AI Explorer learning and sales scope](ai-explorer-learning-and-sales.md) — Keep real AI use supervised and school sales positioned as annual per-student licensing.
+- [Learn Think Build learning and sales scope](ai-explorer-learning-and-sales.md) — Keep real AI use supervised and school sales positioned as annual per-student licensing.
