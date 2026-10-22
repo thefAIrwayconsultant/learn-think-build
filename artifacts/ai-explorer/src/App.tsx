@@ -102,9 +102,13 @@ function BrandHeader() {
         <span className="brand-mark"><Compass size={21} strokeWidth={2.2} /></span>
         <span className="brand-name">Learn Think Build</span>
       </Link>
-      <span className="header-note">AI literacy · safe building · ages 10+</span>
+      <nav className="primary-nav" aria-label="Main navigation">
+        <a className="nav-tab" href={`${basePath}/#how-heading`}>How it works</a>
+        <a className="nav-tab" href={`${basePath}/#curriculum`}>Learning path</a>
+        <Link className="nav-tab" href="/testimonials">Testimonials</Link>
+        <a className="nav-tab" href={`${basePath}/#price-heading`}>Pricing</a>
+      </nav>
       <nav className="header-actions" aria-label="Account navigation">
-        <Link href="/sample-feedback" className="header-cta" data-testid="link-sample-feedback">Sample feedback</Link>
         {isSignedIn
           ? <><Link href="/" className="header-cta" data-testid="link-home-signed-in">Home</Link><Link href="/family" className="header-cta solid" data-testid="link-family">Family account</Link></>
           : <><Link href="/sign-in" className="header-cta" data-testid="link-sign-in">Sign in</Link><Link href="/sign-up" className="header-cta solid" data-testid="link-sign-up">Get started</Link></>}
@@ -117,42 +121,25 @@ function Footer() {
   return <footer className="site-footer"><span><strong>Learn Think Build</strong> · Learn thoughtfully. Build responsibly.</span><span>For learners 10+ · An adult owns the account.</span></footer>;
 }
 
-function SampleFeedbackPage() {
-  const examples = [
-    {
-      role: 'Fictional parent persona',
-      title: 'A starting point for better conversations',
-      quote: 'I like that it asks kids to check AI answers and talk about when a tool should not be used—not just how to get a quick answer.',
-    },
-    {
-      role: 'Fictional guardian persona',
-      title: 'A thoughtful place to explore at home',
-      quote: 'The lessons give us a calm way to talk about what AI can do, where it can be wrong, and how to make something of our own.',
-    },
-    {
-      role: 'Fictional learner persona',
-      title: 'Small steps toward making',
-      quote: 'I can start with an idea, plan a simple app, and learn how to test it before I share it.',
-    },
-  ];
+function TestimonialsPage() {
   return <>
-    <main className="page-content feedback-page">
+    <main className="page-content feedback-page testimonials-page">
       <Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link>
       <header className="feedback-hero">
-        <div className="eyebrow">Illustrative examples</div>
-        <h1>What learners could say.</h1>
-        <p>These sample quotes are fictional examples written to show the kinds of outcomes Learn Think Build aims to support.</p>
+        <div className="eyebrow">Family stories</div>
+        <h1>Testimonials</h1>
+        <p>We’ll share real experiences from families when they choose to provide a testimonial and give us permission to publish it.</p>
       </header>
-      <aside className="feedback-disclosure" role="note"><ShieldCheck size={20} /><span><strong>Not actual reviews.</strong> These examples are fictional and are not endorsements from real customers, families, or learners.</span></aside>
-      <section className="feedback-grid" aria-label="Fictional sample feedback">
-        {examples.map((example) => <article className="feedback-card" key={example.title}>
-          <div className="feedback-card-top"><span className="feedback-icon"><CheckCircle2 size={19} /></span><span className="feedback-role">{example.role}</span></div>
-          <h2>{example.title}</h2>
-          <blockquote>“{example.quote}”</blockquote>
-          <p className="feedback-caption">Illustrative sample · not a real testimonial</p>
-        </article>)}
+      <section className="testimonial-empty" aria-label="Testimonials">
+        <span className="testimonial-empty-icon"><ShieldCheck size={24} /></span>
+        <div className="eyebrow">Real voices only</div>
+        <h2>Parent testimonials are coming soon.</h2>
+        <p>We don’t publish invented or placeholder reviews. Until families share their own stories, you can explore the learning path and how the at-home program works.</p>
+        <div className="testimonial-actions">
+          <a className="primary-button" href={`${basePath || ''}/#curriculum`}>Explore the learning path <ArrowRight size={16} /></a>
+          <a className="secondary-button" href={`${basePath || ''}/#how-heading`}>How it works</a>
+        </div>
       </section>
-      <div className="feedback-cta"><div><h2>See the learning path for yourself.</h2><p>Explore the curriculum, safety approach, and monthly family plan.</p></div><Link href="/" className="primary-button">Explore Learn Think Build <ArrowRight size={16} /></Link></div>
     </main>
     <Footer />
   </>;
@@ -549,7 +536,8 @@ function NotFound() {
 function RouterContent() {
   return <><ClerkCacheInvalidator /><BrandHeader /><Switch>
     <Route path="/" component={LandingPage} />
-    <Route path="/sample-feedback" component={SampleFeedbackPage} />
+    <Route path="/testimonials" component={TestimonialsPage} />
+    <Route path="/sample-feedback" component={() => <Redirect to="/testimonials" />} />
     <Route path="/sign-in/*?" component={SignInPage} />
     <Route path="/sign-up/*?" component={SignUpPage} />
     <Route path="/family" component={() => <GuardianGate><FamilyPage /></GuardianGate>} />
