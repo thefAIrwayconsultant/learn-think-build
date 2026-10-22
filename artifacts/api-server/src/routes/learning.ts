@@ -24,7 +24,7 @@ async function context(req: Request, res: Response) {
   const [dailyRecord] = await db.select().from(childDailyLearningTable)
     .where(eq(childDailyLearningTable.childId, profile.id)).limit(1);
   return { profile, completed: new Set(canonicalIds(progress.map(row => row.lessonId))),
-    mastered: new Set(mastery.map(row => row.levelId)), state: normalizeState(profile.learningState),
+    mastered: new Set(mastery.map(row => row.levelId).filter(id => levels.some(level => level.id === id))), state: normalizeState(profile.learningState),
     dailyUsage: summarizeDailyLearning(dailyRecord),
     ageBand: (profile.ageBand ?? "10-12") as AgeBand };
 }

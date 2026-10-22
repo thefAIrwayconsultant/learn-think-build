@@ -17,8 +17,8 @@ import {
   guardiansTable,
   quizAttemptsTable,
 } from "@workspace/db";
-import { levels, normalizeLessonId } from "@workspace/curriculum";
-import { advanceDailyLearning, canonicalIds, normalizeState, levelReady, mergeProgressRecords, summarizeDailyLearning, weakTopicCounts } from "../lib/learning-rules";
+import { isLegacyChapterId, levels, normalizeLessonId } from "@workspace/curriculum";
+import { advanceDailyLearning, calculateLearningScore, canonicalIds, normalizeState, levelReady, mergeProgressRecords, summarizeDailyLearning, weakTopicCounts } from "../lib/learning-rules";
 import learningRouter from "./learning";
 import {
   CompleteChildLessonBody,
@@ -65,7 +65,7 @@ router.get("/family/children/:childId/daily-usage", async (req, res): Promise<vo
 router.post("/family/children/:childId/daily-usage", async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
   if (!guardianId) { res.status(401).json({ error: "Sign in with a parent or guardian account." }); return; }
-  const body = z.object({ active: z.boolean() }).safeParse(req.body);
+  const body = z.object({ active: z.boolean(), sessionId: z.uuid() }).safeParse(req.body);
   if (!body.success) { res.status(400).json({ error: "Choose whether the learner is actively learning." }); return; }
   const summary = await db.transaction(async (tx) => {
     const [profile] = await tx.select({ id: childProfilesTable.id }).from(childProfilesTable)
@@ -75,7 +75,7 @@ router.post("/family/children/:childId/daily-usage", async (req, res): Promise<v
     const [record] = await tx.select().from(childDailyLearningTable)
       .where(eq(childDailyLearningTable.childId, profile.id)).limit(1).for("update");
     const now = new Date();
-    const next = advanceDailyLearning(record, body.data.active, now);
+    const next = advanceDailyLearning(record, body.data.active, body.data.sessionId, now);
     if (record) {
       await tx.update(childDailyLearningTable).set(next).where(eq(childDailyLearningTable.childId, profile.id));
     } else {
@@ -152,19 +152,13 @@ router.get("/family", async (req, res): Promise<void> => {
   }
 
   const response = {
-    children: profiles.map((profile) => ({
-      id: profile.id,
-      displayName: profile.displayName,
-      ageBand: profile.ageBand,
-      completedLessonIds: canonicalIds(completedByChild.get(profile.id) ?? []),
-      masteredLevelIds: masteredByChild.get(profile.id) ?? [],
-      learningState: normalizeState(profile.learningState),
-      reviewCount: reviews.filter(row => row.childId === profile.id && row.kind === "review" && row.finishedAt).length,
-      bestReviewScore: Math.max(0, ...reviews.filter(row => row.childId === profile.id && row.kind === "review").map(row => row.score ?? 0)),
-      levelScores: Object.fromEntries(masteryRows.filter(row => row.childId === profile.id).map(row => [row.levelId, row.score])),
-      weakTopics: weakTopicCounts(reviews.filter(row => row.childId === profile.id && row.finishedAt)
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 20).map(row => row.missedLessonIds as string[])),
-      lessonRecords: mergeProgressRecords(progressRows
+    children: profiles.map((profile) => {
+      const completedLessonIds = canonicalIds(completedByChild.get(profile.id) ?? []);
+      const masteredLevelIds = (masteredByChild.get(profile.id) ?? []).filter((id) => levels.some((level) => level.id === id));
+      const childReviews = reviews.filter(row => row.childId === profile.id);
+      const reviewCount = childReviews.filter(row => row.kind === "review" && row.finishedAt).length;
+      const bestReviewScore = Math.max(0, ...childReviews.filter(row => row.kind === "review").map(row => row.score ?? 0));
+      const lessonRecords = mergeProgressRecords(progressRows
         .filter((row) => row.childId === profile.id)
         .map((row) => ({
           lessonId: row.lessonId,
@@ -173,9 +167,31 @@ router.get("/family", async (req, res): Promise<void> => {
           quizScore: row.quizScore,
           talkDiscussedAt: row.talkDiscussedAt?.toISOString() ?? null,
           completedAt: row.completedAt.toISOString(),
-        }))),
-      createdAt: profile.createdAt.toISOString(),
-    })),
+        })));
+      const { learningScore, scoreBreakdown } = calculateLearningScore({
+        completedLessonIds,
+        lessonRecords,
+        masteredChapterIds: masteredLevelIds,
+        bestReviewScore,
+      });
+      return {
+        id: profile.id,
+        displayName: profile.displayName,
+        ageBand: profile.ageBand,
+        completedLessonIds,
+        masteredLevelIds,
+        learningState: normalizeState(profile.learningState),
+        reviewCount,
+        bestReviewScore,
+        levelScores: Object.fromEntries(masteryRows.filter(row => row.childId === profile.id).map(row => [row.levelId, row.score])),
+        weakTopics: weakTopicCounts(childReviews.filter(row => row.finishedAt)
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 20).map(row => row.missedLessonIds as string[])),
+        lessonRecords,
+        learningScore,
+        scoreBreakdown,
+        createdAt: profile.createdAt.toISOString(),
+      };
+    }),
   };
 
   res.json(GetFamilyResponse.parse(response));
@@ -218,6 +234,8 @@ router.post("/family/children", async (req, res): Promise<void> => {
         reviewCount: 0,
         bestReviewScore: 0,
         levelScores: {},
+        learningScore: 0,
+        scoreBreakdown: { missionPoints: 0, quizPoints: 0, chapterPoints: 0, reviewPoints: 0 },
         createdAt: profile.createdAt.toISOString(),
       }),
     );
@@ -294,7 +312,11 @@ router.patch("/family/children/:childId/learning-state", async (req, res): Promi
   const mastered = new Set(mastery.map(row => row.levelId));
   for (const [id, project] of Object.entries(next.projects)) {
     const level = levels.find(item => item.id === id);
-    if (!level) { res.status(400).json({ error: "Choose a valid level project." }); return; }
+    if (!level) {
+      // Keep projects from the previous curriculum intact without letting them satisfy new chapter gates.
+      if (isLegacyChapterId(id)) continue;
+      res.status(400).json({ error: "Choose a valid chapter project." }); return;
+    }
     const old = state.projects[id];
     if (old?.content !== project.content) {
       // Editing a reviewed submission always requires a fresh guardian review.
@@ -311,8 +333,8 @@ router.patch("/family/children/:childId/learning-state", async (req, res): Promi
     } else project.reviewedAt = null;
   }
   if ((next.pledgeLevel > state.pledgeLevel && !levelReady(next.pledgeLevel - 1, completed, mastered, state))
-    || (next.learnerAgreedLevel > state.learnerAgreedLevel && !levelReady(next.learnerAgreedLevel - 1, completed, mastered, state))) {
-    res.status(403).json({ error: "Finish the previous level's lessons, mastery check, and approved project before the next pledge." }); return;
+     || (next.learnerAgreedLevel > state.learnerAgreedLevel && !levelReady(next.learnerAgreedLevel - 1, completed, mastered, state))) {
+    res.status(403).json({ error: "Finish the previous chapter's lessons, mastery check, and approved project before the next pledge." }); return;
   }
   next.revision = state.revision + 1;
   const [updated] = await db

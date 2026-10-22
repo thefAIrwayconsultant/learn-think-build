@@ -91,6 +91,7 @@ export const childDailyLearningTable = pgTable(
     secondsUsed: integer("seconds_used").notNull().default(0),
     lastHeartbeatAt: timestamp("last_heartbeat_at", { withTimezone: true }).notNull(),
     active: boolean("active").notNull().default(false),
+    activeSessions: jsonb("active_sessions").$type<Record<string, string>>().notNull().default({}),
   },
 );
 

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { levels, getLessonsForAgeBand } from "@workspace/curriculum";
-import { advanceDailyLearning, DAILY_LEARNING_LIMIT_SECONDS, summarizeDailyLearning } from "./learning-rules";
+import { advanceDailyLearning, calculateLearningScore, DAILY_LEARNING_LIMIT_SECONDS, summarizeDailyLearning } from "./learning-rules";
 import { canonicalIds, gradeQuestions, lessonReady, levelReady, normalizeState, pickQuestions, validReflection, mergeProgressRecords, weakTopicCounts } from "./learning-rules";
 
 test("legacy aliases are deduplicated without granting unknown credit", () => {
@@ -11,19 +11,42 @@ test("legacy aliases are deduplicated without granting unknown credit", () => {
 });
 test("the daily time limit counts visible intervals, pauses, and unlocks after 24 hours", () => {
   const startedAt = new Date("2026-10-22T10:00:00.000Z");
-  const first = advanceDailyLearning(undefined, true, startedAt);
+  const first = advanceDailyLearning(undefined, true, "00000000-0000-4000-8000-000000000001", startedAt);
   assert.equal(first.secondsUsed, 0);
   assert.equal(summarizeDailyLearning(first, new Date("2026-10-22T10:00:05.000Z")).usedSeconds, 5);
-  const paused = advanceDailyLearning(first, false, new Date("2026-10-22T10:00:05.000Z"));
+  const paused = advanceDailyLearning(first, false, "00000000-0000-4000-8000-000000000001", new Date("2026-10-22T10:00:05.000Z"));
   assert.equal(paused.secondsUsed, 5);
   assert.equal(summarizeDailyLearning(paused, new Date("2026-10-22T10:50:00.000Z")).usedSeconds, 5);
+  const secondDevice = advanceDailyLearning(first, true, "00000000-0000-4000-8000-000000000002", new Date("2026-10-22T10:00:04.000Z"));
+  const oneDevicePaused = advanceDailyLearning(secondDevice, false, "00000000-0000-4000-8000-000000000001", new Date("2026-10-22T10:00:05.000Z"));
+  assert.equal(oneDevicePaused.active, true, "one tab pausing must not stop another active tab");
 
   const nearlyDone = { ...paused, active: true, secondsUsed: DAILY_LEARNING_LIMIT_SECONDS - 5,
     lastHeartbeatAt: new Date("2026-10-22T10:00:05.000Z") };
-  const exhausted = advanceDailyLearning(nearlyDone, true, new Date("2026-10-22T10:00:10.000Z"));
+  const exhausted = advanceDailyLearning(nearlyDone, true, "00000000-0000-4000-8000-000000000001", new Date("2026-10-22T10:00:10.000Z"));
   assert.equal(summarizeDailyLearning(exhausted, new Date("2026-10-22T10:00:10.000Z")).remainingSeconds, 0);
   assert.equal(summarizeDailyLearning(exhausted, new Date("2026-10-23T10:00:10.000Z")).remainingSeconds, 600);
-  assert.equal(advanceDailyLearning(exhausted, false, new Date("2026-10-22T10:10:05.000Z")).secondsUsed, 600);
+  assert.equal(advanceDailyLearning(exhausted, false, "00000000-0000-4000-8000-000000000001", new Date("2026-10-22T10:10:05.000Z")).secondsUsed, 600);
+});
+
+test("learning points use unique lesson credits, best quiz scores and current chapter mastery", () => {
+  const score = calculateLearningScore({
+    completedLessonIds: ["what-is-ai", "ai-basics", "clear-prompts", "clear-instructions"],
+    lessonRecords: [
+      { lessonId: "what-is-ai", quizScore: 80 },
+      { lessonId: "ai-basics", quizScore: 100 },
+      { lessonId: "clear-instructions", quizScore: 99 },
+    ],
+    masteredChapterIds: [levels[0].id, levels[1].id, "ai-foundations"],
+    bestReviewScore: 89,
+  });
+  assert.deepEqual(score, {
+    learningScore: 137,
+    scoreBreakdown: { missionPoints: 20, quizPoints: 9, chapterPoints: 100, reviewPoints: 8 },
+  });
+  assert.equal(calculateLearningScore({
+    completedLessonIds: [], lessonRecords: [], masteredChapterIds: [], bestReviewScore: 0,
+  }).learningScore, 0);
 });
 
 test("the whole 80-session path enforces pledges, sequence, mastery AND project", () => {

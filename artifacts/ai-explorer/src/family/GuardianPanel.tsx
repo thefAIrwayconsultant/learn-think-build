@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Check } from 'lucide-react';
 import { getGetFamilyQueryKey, useMarkLessonTalkDiscussed, useUpdateChildLearningState } from '@workspace/api-client-react';
 import type { ChildProfile, LearningState } from '@workspace/api-client-react';
-import { getLessonsForAgeBand, levels, normalizeLessonId } from '@workspace/curriculum';
+import { getLessonsForAgeBand, isLegacyChapterId, legacyLevelNames, levels, normalizeLessonId } from '@workspace/curriculum';
 import { Insights } from '../learn/Insights';
 import { PASS, completedSet, levelLessonsDone, lessonSequence, lessonsThisWeek, nextPledgeLevel } from '../learn/access';
 import { apiErrorBody } from '../learn/shared';
@@ -19,12 +19,12 @@ function ProjectReview({ child, levelId, save }: { child: ChildProfile; levelId:
   const ready = mastered && lessonsOk && project.content.length >= 60 && rubric.every(Boolean);
   const approve = () => save({ ...child.learningState, projects: { ...child.learningState.projects, [levelId]: { content: project.content, approved: true, reviewedAt: project.reviewedAt ?? null, rubric: [true, true, true] } } });
   return <div className="guardian-project" data-testid={`review-project-${levelId}`}>
-    <div><strong>{level.title} project</strong><p className="project-text">{project.content}</p>
+    <div><strong>{level.title} chapter project</strong><p className="project-text">{project.content}</p>
       {project.approved ? <span className="ok-text"><Check size={13} /> Approved{project.reviewedAt ? ` on ${new Date(project.reviewedAt).toLocaleDateString()}` : ''}</span> : <>
         <fieldset className="rubric-check"><legend>Check each criterion you have seen</legend>
           {level.project.rubric.map((r, i) => <label key={r}><input type="checkbox" checked={rubric[i]} onChange={(e) => setRubric((v) => v.map((x, k) => k === i ? e.target.checked : x))} /> {r}</label>)}</fieldset>
-        {!mastered && <p className="activity-note">Waiting for the learner to pass the level mastery check ({PASS}%).</p>}
-        {!lessonsOk && <p className="activity-note">Every lesson in this level must be completed first.</p>}
+        {!mastered && <p className="activity-note">Waiting for the learner to pass the chapter mastery check ({PASS}%).</p>}
+        {!lessonsOk && <p className="activity-note">Every mission in this chapter must be completed first.</p>}
         <button className="primary-button" type="button" disabled={!ready} onClick={approve} data-testid={`button-approve-${levelId}`}>Approve project</button></>}
     </div></div>;
 }
@@ -51,10 +51,11 @@ export function GuardianPanel({ child }: { child: ChildProfile }) {
   const talks = records.filter((r) => !r.talkDiscussedAt);
   const target = nextPledgeLevel(child);
   const done = completedSet(child);
-  const summary = `${child.displayName}: ${done.size} of ${total} lessons complete, ${minutes} minutes of learning, ${week} of ${s.weeklyGoal} lessons this week. Levels mastered: ${child.masteredLevelIds.length} of ${levels.length}. Best weekly review: ${child.reviewCount ? `${child.bestReviewScore ?? 0}%` : 'not taken yet'}.`;
+  const priorProjects = Object.entries(s.projects ?? {}).filter(([id, project]) => isLegacyChapterId(id) && project.content);
+  const summary = `${child.displayName}: ${done.size} of ${total} daily missions complete, ${minutes} minutes of learning, ${week} of ${s.weeklyGoal} missions this week. Chapters mastered: ${child.masteredLevelIds.length} of ${levels.length}. Best weekly review: ${child.reviewCount ? `${child.bestReviewScore ?? 0}%` : 'not taken yet'}.`;
   return <section className="family-learning-summary" aria-label={`${child.displayName} learning summary`}>
     <div className="summary-metrics">
-      <span><strong>{done.size}/{total}</strong> lessons</span><span><strong>{minutes}</strong> minutes</span>
+      <span><strong>{done.size}/{total}</strong> missions</span><span><strong>{minutes}</strong> minutes</span>
       <span><strong>{avg === null ? 'none' : `${avg}%`}</strong> avg check</span><span><strong>{week}/{s.weeklyGoal}</strong> this week</span>
       <span><strong>{child.reviewCount ?? 0}</strong> reviews</span>
     </div>
@@ -66,10 +67,14 @@ export function GuardianPanel({ child }: { child: ChildProfile }) {
       <div><strong>Talk it Over cards</strong>{records.length ? <ul>{records.map((r) => { const l = lessons.find((x) => x.id === normalizeLessonId(r.lessonId)); return <li key={r.lessonId}><em>{title(r.lessonId)}</em>: {l?.familyPrompt ?? 'Ask what they learned.'} {r.talkDiscussedAt ? <span className="ok-text"><Check size={12} /> Discussed</span> : <button className="text-action" type="button" onClick={() => markTalk.mutate({ childId: child.id, lessonId: normalizeLessonId(r.lessonId) }, { onSuccess: refresh })} disabled={markTalk.isPending}>Mark discussed</button>}</li>; })}</ul> : <p>Cards appear after each lesson.</p>}{talks.length > 0 && <p className="activity-note">{talks.length} waiting.</p>}</div>
     </div>
     <div className="guardian-pledge">
-      <div><strong>Family pledge · Level {target}</strong><span>Learner agreed through Level {s.learnerAgreedLevel}; guardian agreed through Level {s.pledgeLevel}.</span></div>
+      <div><strong>Family pledge · Chapter {target}</strong><span>Learner agreed through Chapter {s.learnerAgreedLevel}; guardian agreed through Chapter {s.pledgeLevel}.</span></div>
       {s.pledgeLevel < target && <button className="secondary-button" type="button" onClick={() => save({ ...s, pledgeLevel: target })} disabled={saveState.isPending} data-testid={`button-guardian-pledge-${child.id}`}>Agree as guardian</button>}
     </div>
     {levels.map((l) => <ProjectReview key={`${l.id}-${child.learningState.projects?.[l.id]?.content ?? ''}`} child={child} levelId={l.id} save={save} />)}
+    {priorProjects.length > 0 && <details className="weekly-summary prior-projects">
+      <summary>Earlier curriculum projects · preserved history</summary>
+      {priorProjects.map(([id, project]) => <div key={id}><strong>{legacyLevelNames[id] ?? id} project</strong><p className="project-text">{project.content}</p><span className="activity-note">{project.approved ? 'Previously approved' : 'Saved; pending review under the previous curriculum'}. This history does not unlock a new chapter.</span></div>)}
+    </details>}
     <Insights child={child} />
     <details className="weekly-summary"><summary>Optional weekly summary</summary><p>{summary}</p>
       <button className="text-action" type="button" onClick={() => { void navigator.clipboard?.writeText(summary).then(() => setCopied(true)); }}>{copied ? 'Copied' : 'Copy summary'}</button></details>

@@ -9,13 +9,16 @@ import { getGetFamilyQueryKey, useCreateChildProfile, useDeleteChildProfile, use
 import type { ChildProfile, GuardianFamily } from '@workspace/api-client-react';
 import { getLessonsForAgeBand, levels, normalizeLessonId, type Lesson } from '@workspace/curriculum';
 import { LessonFlow } from './learn/LessonFlow';
+import { DailyLearningGate } from './learn/DailyLearningGate';
 import { MasteryFlow } from './learn/MasteryFlow';
 import { LearnerHub } from './learn/Hub';
 import { ReviewFlow } from './learn/ReviewFlow';
 import { GuardianPanel } from './family/GuardianPanel';
+import { FamilyLeaderboard } from './family/FamilyLeaderboard';
 import { Mascot } from './Mascot';
 import { AgeBandPicker } from './AgeBandPicker';
 import { getAgeBand, type AgeBand } from './audience';
+import { FAMILY_MONTHLY_PRICE } from './pricing';
 import './index.css';
 
 const clerkPubKey = publishableKeyFromHost(
@@ -24,7 +27,6 @@ const clerkPubKey = publishableKeyFromHost(
 );
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-const FAMILY_MONTHLY_PRICE = '$9.99';
 const queryClient = new QueryClient();
 
 function stripBase(path: string) {
@@ -126,32 +128,18 @@ function TestimonialsPage() {
       <Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link>
       <header className="feedback-hero">
         <div className="eyebrow">Testimonials</div>
-        <h1>Useful lessons. Confident families.</h1>
-        <p>A parent’s perspective on making AI learning helpful, approachable, and fun.</p>
+        <h1>What families think about Learn Think Build.</h1>
+        <p>We only publish real family feedback, with permission.</p>
       </header>
-      <aside className="feedback-disclosure">
-        <ShieldCheck size={22} />
-        <div><strong>Illustrative quotes—not real customer reviews</strong>These fictional examples describe the experience we aim to provide. Real family testimonials will only be published with permission.</div>
-      </aside>
-      <section className="feedback-grid" aria-label="Illustrative parent quotes">
+      <section className="feedback-grid" aria-label="Parent testimonials">
         <article className="feedback-card">
-          <span className="feedback-role">Illustrative parent quote</span>
-          <h2>A helpful place to start</h2>
-          <blockquote>“I wanted to introduce my child to AI but didn’t know where to start. The short lessons made the basics clear, and the privacy activities gave us useful things to practice together.”</blockquote>
-        </article>
-        <article className="feedback-card">
-          <span className="feedback-role">Illustrative parent quote</span>
-          <h2>Learning they want to come back to</h2>
-          <blockquote>“The challenges made the lessons feel like something to explore, not another assignment. I loved seeing my child explain why an AI answer might be wrong instead of just accepting it.”</blockquote>
-        </article>
-        <article className="feedback-card">
-          <span className="feedback-role">Illustrative parent quote</span>
-          <h2>Easy to know what comes next</h2>
-          <blockquote>“The step-by-step path made a big subject feel manageable. I could see what my child understood, talk through the tricky parts, and celebrate each new skill together.”</blockquote>
+          <span className="feedback-role">Honest feedback only</span>
+          <h2>We are listening to families.</h2>
+          <p>There are no parent reviews to share yet. When families choose to provide feedback, we will publish their real words only with their permission.</p>
         </article>
       </section>
       <section className="feedback-cta" aria-label="Explore Learn Think Build">
-        <div><h2>See what your family could build.</h2><p>Explore four levels of safe, hands-on AI learning.</p></div>
+        <div><h2>See what your family could build.</h2><p>Explore four chapters of safe, hands-on AI learning.</p></div>
         <a className="primary-button" href={`${basePath || ''}/#curriculum`}>Explore the learning path <ArrowRight size={16} /></a>
       </section>
     </main>
@@ -165,12 +153,12 @@ function LandingPage() {
       <main className="page-content">
         <section className="landing-hero">
           <div className="landing-copy">
-            <div className="eyebrow">A safe AI jumpstart for kids 10+</div>
-            <h1>Learn AI safely.<br />Build real skills.<br /><em>Get a jumpstart.</em></h1>
-            <p>AI skills are becoming table stakes in today’s business world. Learn Think Build gives curious kids 10+ a safe, playful introduction—then builds their prompting, critical thinking, problem-solving, and creating skills step by step. It’s a jumpstart they can grow with, from their first AI lesson toward further study and future work. AI examples are simulated; real AI tools stay adult-supervised.</p>
+          <div className="eyebrow">A safe AI adventure for curious kids 10+</div>
+          <h1>How does AI work?<br />Let’s find out.<br /><em>Then make something.</em></h1>
+          <p>Explore the surprising ways AI spots patterns, creates pictures, predicts words, and helps build ideas. Short, hands-on missions turn curiosity into real skills, one small step at a time. A parent or guardian guides the journey; every AI demonstration is simulated, so learners can experiment safely without a live chatbot.</p>
             <div className="landing-ctas">
-              <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Start a learner path <ArrowRight size={17} /></Link>
-              <a href="#curriculum" className="secondary-button">See the challenge path</a>
+              <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Start exploring <ArrowRight size={17} /></Link>
+              <a href="#curriculum" className="secondary-button">Explore the AI chapters</a>
             </div>
             <div className="landing-trust"><ShieldCheck size={17} /><span>Adults own the account. Learners use a display name and broad age range—no birth date or child email required.</span></div>
           </div>
@@ -178,34 +166,34 @@ function LandingPage() {
             <div className="art-paper" />
             <div className="landing-mascot"><Mascot mood="curious" size={158} /></div>
             <div className="art-board">
-              <div className="art-board-top"><span>Challenge 01 · Start here</span><Compass size={18} /></div>
-              <h3>From first question<br /><span>to first build.</span></h3>
+              <div className="art-board-top"><span>Mission 01 · Start here</span><Compass size={18} /></div>
+              <h3>Ask a big question.<br /><span>Try a tiny experiment.</span></h3>
               <div className="art-sketch"><Sparkles size={22} /><span>Learn · Try · Improve · Build</span><Lightbulb size={22} /></div>
             </div>
             <div className="art-chip one">One skill at a time</div>
-            <div className="art-chip two">Build more than you scroll</div>
+            <div className="art-chip two">10 minutes · one cool idea</div>
           </div>
         </section>
-        <div className="landing-band"><strong>AI literacy is becoming a basic workplace skill.</strong><span>Give children time to learn, experiment, and build confidence long before their first job.</span></div>
+        <div className="landing-band"><strong>Big curiosity. Small daily missions.</strong><span>Explore what AI can do, where it gets things wrong, and what you can create with a little imagination.</span></div>
         <section className="landing-section" aria-labelledby="how-heading">
-          <div className="section-heading"><div><div className="eyebrow">Beginner-friendly · Built for steady progress</div><h2 id="how-heading">Start with curiosity. Grow real-world skills.</h2><p>No AI experience needed. Kids start with the basics, then build practical skills through age-appropriate challenges, personal bests, and earned mastery—not a rush to grow up.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">One 10-minute mission a day · No streak pressure</div><h2 id="how-heading">A little exploring adds up.</h2><p>Each day brings one short, age-adjusted adventure. A 10-minute daily learning limit helps keep screen time intentional; progress waits safely until the next day.</p></div></div>
           <div className="feature-grid">
             <article className="feature-note"><div className="feature-number">THE SIX-STEP LESSON</div><h3>Warm-up, Hook, Watch, Try, Think, Check.</h3><p>Every lesson follows the same six steps. A warm-up recalls earlier lessons, a hook asks for a prediction, narrated scenes with captions teach one skill, a hands-on activity lets learners try it, a written reflection puts it in their own words, and a five-question check needs 80% to save. Missed questions come with an explanation and a retry on fresh questions.</p></article>
-            <article className="feature-note"><div className="feature-number">EARNED, NOT RUSHED</div><h3>Mastery plus a guardian sign-off.</h3><p>Lessons open in order. Finishing a level takes an 80% mastery check and a short project that a parent or guardian reviews against three criteria. Each new level starts with a pledge from both learner and guardian. A weekly goal and a mixed review keep learning steady without streak pressure.</p></article>
+            <article className="feature-note"><div className="feature-number">EARNED, NOT RUSHED</div><h3>Explore 20 daily missions in each chapter.</h3><p>Each chapter takes about a month at 10 minutes a day. Complete the missions, earn 80% on a fresh-question mastery check, and make a small project that a parent or guardian reviews. Weekly mixed review, personal bests, and badges celebrate learning without streak pressure.</p></article>
           </div>
         </section>
         <section className="landing-section curriculum-section" id="curriculum" aria-labelledby="curriculum-heading">
-          <div className="section-heading"><div><div className="eyebrow">Four levels · beginner to builder</div><h2 id="curriculum-heading">Build real-world AI confidence, one level at a time.</h2><p>Choose a learner path—Curious Starter (10–12), Thoughtful Explorer (13–15), or Independent Builder (16+). Lessons become more detailed and independent as learners grow, while the same core skills remain.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">Four chapters · 20 daily missions each</div><h2 id="curriculum-heading">Meet the magic. Learn what is really happening.</h2><p>Choose an age path—Curious Starter (10–12), Thoughtful Explorer (13–15), or Independent Builder (16+). Every learner explores the same core ideas through examples and explanations shaped for their age.</p></div></div>
           <div className="curriculum-grid">
-            <article className="curriculum-card"><span>LEVEL 01 · ENGAGING WITH AI</span><h3>AI Foundations</h3><p>How AI finds patterns, how a chatbot predicts the next word, confident mistakes and checking, deepfakes and voice clones, and keeping private information private.</p></article>
-            <article className="curriculum-card"><span>LEVEL 02 · MANAGING AI</span><h3>Safe & Responsible Use</h3><p>AI is not a friend, bias, honest schoolwork, when not to use AI, and spotting scams and pressure.</p></article>
-            <article className="curriculum-card"><span>LEVEL 03 · CREATING WITH AI</span><h3>Prompt Craft</h3><p>Goal, context, format, and limits; follow-up prompts, using AI as a tutor rather than an answer machine, sources, and creative credit.</p></article>
-            <article className="curriculum-card"><span>LEVEL 04 · DESIGNING AI</span><h3>App Builder</h3><p>How training data shapes a model, planning an app, building in small steps, testing and privacy, and presenting what you made.</p></article>
+            <article className="curriculum-card"><span>CHAPTER 01 · ABOUT A MONTH</span><h3>Meet the AIs</h3><p>Explore chatbots, picture makers, recommendations, voice and vision tools, game AI, and robots. Follow the data and patterns behind each kind.</p></article>
+            <article className="curriculum-card"><span>CHAPTER 02 · ABOUT A MONTH</span><h3>Prompting Power</h3><p>Turn fuzzy ideas into clearer prompts with goals, context, formats, limits, examples, role prompts, and follow-up experiments.</p></article>
+            <article className="curriculum-card"><span>CHAPTER 03 · ABOUT A MONTH</span><h3>When to Use AI (and When Not To)</h3><p>Explore playful low-risk uses while protecting privacy, school learning, original thinking, real relationships, and big decisions.</p></article>
+            <article className="curriculum-card"><span>CHAPTER 04 · ABOUT A MONTH</span><h3>When to Trust AI (and When Not To)</h3><p>Become a claim-checking detective: investigate mistakes, sources, bias, fake media, scams, pressure, and when to ask a trusted adult.</p></article>
           </div>
-          <p className="curriculum-note"><ShieldCheck size={17} /> AI examples are simulated; there is no live child chatbot. Every lesson has narrated scenes with captions and read-aloud, a hands-on activity, a written reflection, a server-graded check with retry, and a family conversation prompt. Lesson length and examples adapt to age. If something feels wrong, stop and talk to a trusted adult.</p>
+          <p className="curriculum-note"><ShieldCheck size={17} /> Every 10-minute lesson has a warm-up, prediction, narrated and captioned scenes, an interactive demonstration, a reflection, and a server-graded check. Learners finish a chapter project and mastery check; guardians review projects. All AI examples are simulated. If something feels wrong, stop and talk to a trusted adult.</p>
         </section>
         <section className="landing-section home-family-section" aria-labelledby="family-learning-heading">
-          <div className="home-family-panel"><div><div className="eyebrow">For parents & guardians</div><h2 id="family-learning-heading">Turn curiosity into making.</h2><p>Give kids a creative alternative to passive screen time: learn how AI works, practice making good choices, and work toward building useful things safely.</p><ul><li>Age-based paths for learners 10+</li><li>Short lessons with clear goals and level progress</li><li>Parent-owned profiles with no child email or birth date</li></ul></div><div className="home-family-callout"><strong>Progress earned through learning</strong><span>One adult manages the account and learner profiles. Kids advance by practicing, reflecting, and showing what they understand. Real AI tools stay under adult supervision.</span></div></div>
+          <div className="home-family-panel"><div><div className="eyebrow">For parents & guardians</div><h2 id="family-learning-heading">A safe place for big questions.</h2><p>Give kids a fun, hands-on way to explore AI beyond school. They practice making things, asking better questions, and knowing when a person should lead.</p><ul><li>Age-based adventures for learners 10+</li><li>One 10-minute learning window per day, with no streak pressure</li><li>Parent-owned profiles with no child email or birth date</li></ul></div><div className="home-family-callout"><strong>Parent-guided from the start</strong><span>One adult manages the family account and reviews progress. Kids explore a simulated AI world—not a live chatbot—and build confidence one careful step at a time.</span></div></div>
         </section>
         <section className="landing-section" aria-labelledby="price-heading">
           <div className="section-heading"><div><div className="eyebrow">One monthly family plan</div><h2 id="price-heading">An AI jumpstart for {FAMILY_MONTHLY_PRICE} a month.</h2><p>Age-appropriate learning today. Practical foundations for tomorrow. One parent or guardian owns the family account.</p></div></div>
@@ -226,7 +214,7 @@ function SignInPage() {
 }
 
 function SignUpPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Give your child an AI jumpstart.</h1><p>Start with a safe introduction and build practical AI skills over time. Create the adult-owned account first. The family plan is {FAMILY_MONTHLY_PRICE} per month, with checkout coming soon. Learners use a display name and broad age range; no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Start a safe AI adventure.</h1><p>Create the adult-owned account first. Your family plan is {FAMILY_MONTHLY_PRICE} per month, with checkout coming soon. Learners explore four chapters of short, hands-on missions using a display name and broad age range—no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
 }
 
 function ClerkCacheInvalidator() {
@@ -299,6 +287,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
           <div><div className="eyebrow">The grown-up’s corner</div><h1>Your family workshop.</h1><p>Manage learner profiles and saved progress.</p></div>
           <div className="account-pill"><span className="initial-badge">{parentName.trim().charAt(0).toUpperCase()}</span><span>{parentName}</span><button className="signout-button" type="button" onClick={() => signOut({ redirectUrl: basePath || '/' })} data-testid="button-sign-out"><LogOut size={14} /> Sign out</button></div>
         </div>
+        {family.children.length > 0 && <FamilyLeaderboard learners={family.children} />}
         <div className="family-grid">
           <section className="family-panel subscription-panel" aria-labelledby="subscription-heading">
             <div className="panel-head"><h2 id="subscription-heading">Family plan</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />Coming soon</span></div>
@@ -314,7 +303,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
               <div className="child-list-item" key={child.id}>
               <div className="child-row" data-testid={`row-learner-${child.id}`}>
                 <span className="child-avatar">{child.displayName.trim().charAt(0).toUpperCase()}</span>
-                <div className="child-info"><strong>{child.displayName}</strong><span>{getAgeBand(child.ageBand)?.label ?? 'Learning path not selected'} · {child.completedLessonIds.length} lessons · {child.masteredLevelIds.length} of {learningLevels.length} levels graduated</span></div>
+                <div className="child-info"><strong>{child.displayName}</strong><span>{getAgeBand(child.ageBand)?.label ?? 'Learning path not selected'} · {child.completedLessonIds.length} missions · {child.masteredLevelIds.length} of {learningLevels.length} chapters mastered</span></div>
                 <div className="child-actions">
                   <Link className="secondary-button" href={`/learn/${child.id}`} data-testid={`link-learner-${child.id}`}>{child.ageBand ? 'Open workshop' : 'Choose path'} <ArrowRight size={14} /></Link>
                   <button type="button" className="icon-button" aria-label={`Remove ${child.displayName}`} title="Remove learner profile" onClick={() => removeProfile(child)} disabled={deleteProfile.isPending} data-testid={`button-remove-${child.id}`}><Trash2 size={16} /></button>
@@ -377,22 +366,22 @@ function AgeBandSetup({ child }: { child: ChildProfile }) {
 
 function LearnerRoute() {
   const [, params] = useRoute('/learn/:childId');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <LearnerHub child={child} /> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(family, child) => child ? <DailyLearningGate childId={child.id}><LearnerHub child={child} familyLearners={family.children} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function ReviewRoute() {
   const [, params] = useRoute('/learn/:childId/review');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <ReviewFlow key={`${child.id}-${child.ageBand}`} child={child} /> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <DailyLearningGate childId={child.id}><ReviewFlow key={`${child.id}-${child.ageBand}`} child={child} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function LevelAssessmentRoute() {
   const [, params] = useRoute('/learn/:childId/level/:levelId/test');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <MasteryFlow key={`${child.id}-${child.ageBand}-${params?.levelId}`} child={child} levelId={params?.levelId || ''} /> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <DailyLearningGate childId={child.id}><MasteryFlow key={`${child.id}-${child.ageBand}-${params?.levelId}`} child={child} levelId={params?.levelId || ''} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function LessonRoute() {
   const [, params] = useRoute('/learn/:childId/lesson/:id');
-  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <LessonFlow child={child} lessonId={params?.id || ''} /> : <NotFound />}</FamilyDataGate></GuardianGate>;
+  return <GuardianGate><FamilyDataGate childId={params?.childId}>{(_, child) => child ? <DailyLearningGate childId={child.id}><LessonFlow child={child} lessonId={params?.id || ''} /></DailyLearningGate> : <NotFound />}</FamilyDataGate></GuardianGate>;
 }
 
 function NotFound() {

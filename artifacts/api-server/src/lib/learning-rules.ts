@@ -10,6 +10,7 @@ export type DailyLearningRecord = {
   secondsUsed: number;
   lastHeartbeatAt: Date;
   active: boolean;
+  activeSessions?: Record<string, string>;
 };
 
 export type DailyLearningSummary = {
@@ -34,15 +35,23 @@ export function summarizeDailyLearning(record: DailyLearningRecord | undefined, 
 export function advanceDailyLearning(
   record: DailyLearningRecord | undefined,
   active: boolean,
+  sessionId: string,
   now = new Date(),
 ): DailyLearningRecord {
   const previous = summarizeDailyLearning(record, now);
   const expired = !record || now.getTime() - record.windowStartedAt.getTime() >= LEARNING_WINDOW_MILLISECONDS;
+  const activeSessions = expired ? {} : { ...(record.activeSessions ?? {}) };
+  for (const [id, lastSeen] of Object.entries(activeSessions)) {
+    if (now.getTime() - new Date(lastSeen).getTime() > 15_000) delete activeSessions[id];
+  }
+  if (active && previous.remainingSeconds > 0) activeSessions[sessionId] = now.toISOString();
+  else delete activeSessions[sessionId];
   return {
     windowStartedAt: expired ? now : record.windowStartedAt,
     secondsUsed: previous.usedSeconds,
     lastHeartbeatAt: now,
-    active: active && previous.remainingSeconds > 0,
+    active: Object.keys(activeSessions).length > 0,
+    activeSessions,
   };
 }
 
@@ -94,6 +103,32 @@ export function mergeProgressRecords(records: ProgressRecord[]): ProgressRecord[
       talkDiscussedAt: dates.at(-1) ?? null });
   }
   return [...byId.values()];
+}
+
+export function calculateLearningScore(input: {
+  completedLessonIds: string[];
+  lessonRecords: Array<{ lessonId: string; quizScore: number | null }>;
+  masteredChapterIds: string[];
+  bestReviewScore: number;
+}) {
+  const completed = new Set(canonicalIds(input.completedLessonIds));
+  const bestQuizByLesson = new Map<string, number>();
+  for (const record of input.lessonRecords) {
+    const id = normalizeLessonId(record.lessonId);
+    if (!completed.has(id) || typeof record.quizScore !== "number") continue;
+    bestQuizByLesson.set(id, Math.max(bestQuizByLesson.get(id) ?? 0, Math.min(100, Math.max(0, record.quizScore))));
+  }
+  const currentChapterIds = new Set(input.masteredChapterIds.filter(id => levels.some(level => level.id === id)));
+  const scoreBreakdown = {
+    missionPoints: completed.size * 10,
+    quizPoints: [...bestQuizByLesson.values()].reduce((sum, score) => sum + Math.floor(score / 20), 0),
+    chapterPoints: currentChapterIds.size * 50,
+    reviewPoints: Math.floor(Math.min(100, Math.max(0, input.bestReviewScore)) / 10),
+  };
+  return {
+    learningScore: Object.values(scoreBreakdown).reduce((sum, points) => sum + points, 0),
+    scoreBreakdown,
+  };
 }
 
 export function lessonReady(id: string, completed: Set<string>, mastered: Set<string>, state: LearningState): boolean {

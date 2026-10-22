@@ -24,6 +24,8 @@ import type {
   AgeBandResponse,
   ChildProfile,
   ChildProfileInput,
+  DailyUsage,
+  DailyUsageHeartbeat,
   GuardianFamily,
   HealthStatus,
   LearningState,
@@ -469,6 +471,172 @@ export const useUpdateChildAgeBand = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateChildAgeBandMutationOptions(options));
+    }
+
+export const getGetChildDailyUsageUrl = (childId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/daily-usage`
+}
+
+/**
+ * @summary Get active learning time remaining in the learner's 24-hour window
+ */
+export const getChildDailyUsage = async (childId: string, options?: Parameters<typeof customFetch>[1]): Promise<DailyUsage> => {
+
+  return customFetch<DailyUsage>(getGetChildDailyUsageUrl(childId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetChildDailyUsageQueryKey = (childId: string,) => {
+    return [
+    `/api/family/children/${childId}/daily-usage`
+    ] as const;
+    }
+
+
+export const getGetChildDailyUsageQueryOptions = <TData = Awaited<ReturnType<typeof getChildDailyUsage>>, TError = ErrorType<void>>(childId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChildDailyUsage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetChildDailyUsageQueryKey(childId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getChildDailyUsage>>> = ({ signal }) => getChildDailyUsage(childId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: childId !== null && childId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getChildDailyUsage>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetChildDailyUsageQueryResult = NonNullable<Awaited<ReturnType<typeof getChildDailyUsage>>>
+export type GetChildDailyUsageQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get active learning time remaining in the learner's 24-hour window
+ */
+
+export function useGetChildDailyUsage<TData = Awaited<ReturnType<typeof getChildDailyUsage>>, TError = ErrorType<void>>(
+ childId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getChildDailyUsage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetChildDailyUsageQueryOptions(childId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRecordChildDailyUsageUrl = (childId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/daily-usage`
+}
+
+/**
+ * @summary Start, pause, or record active learning time
+ */
+export const recordChildDailyUsage = async (childId: string,
+    dailyUsageHeartbeat: DailyUsageHeartbeat, options?: Parameters<typeof customFetch>[1]): Promise<DailyUsage> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<DailyUsage>(getRecordChildDailyUsageUrl(childId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(dailyUsageHeartbeat)
+  }
+);}
+
+
+
+
+
+export const getRecordChildDailyUsageMutationKey = () => ['recordChildDailyUsage'] as const;
+
+export const getRecordChildDailyUsageMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordChildDailyUsage>>, TError,RecordChildDailyUsageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordChildDailyUsage>>, TError,RecordChildDailyUsageMutationVariables, TContext> => {
+
+const mutationKey = getRecordChildDailyUsageMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordChildDailyUsage>>, RecordChildDailyUsageMutationVariables> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  recordChildDailyUsage(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordChildDailyUsageMutationResult = NonNullable<Awaited<ReturnType<typeof recordChildDailyUsage>>>
+    export type RecordChildDailyUsageMutationBody = BodyType<DailyUsageHeartbeat>
+    export type RecordChildDailyUsageMutationError = ErrorType<void>
+    export type RecordChildDailyUsageMutationVariables = {childId: string;data: BodyType<DailyUsageHeartbeat>}
+
+    /**
+ * @summary Start, pause, or record active learning time
+ */
+export const useRecordChildDailyUsage = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordChildDailyUsage>>, TError,RecordChildDailyUsageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordChildDailyUsage>>,
+        TError,
+        RecordChildDailyUsageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordChildDailyUsageMutationOptions(options));
     }
 
 export const getStartLearningQuizUrl = (childId: string,) => {

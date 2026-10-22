@@ -4,15 +4,16 @@ import { getLessonsForAgeBand, levels, normalizeLessonId, type AgeBand } from ".
 
 const bands: AgeBand[] = ["10-12", "13-15", "16-plus"];
 const ids = levels.flatMap(level => level.lessonIds);
-test("four complete levels and all legacy credits survive", () => {
+test("four complete chapters contain 20 sessions each and preserve every legacy lesson ID", () => {
   assert.equal(levels.length, 4);
-  assert.equal(ids.length, 21);
+  assert.equal(ids.length, 80);
   assert.equal(new Set(ids).size, ids.length);
   for (const id of ["what-is-ai", "clear-instructions", "check-the-answer", "privacy-safe-use",
     "school-integrity", "responsible-use", "prompt-design", "plan-an-app", "test-app", "iterate-app"]) assert.ok(ids.includes(id));
   assert.equal(normalizeLessonId("ai-basics"), "what-is-ai");
   assert.equal(normalizeLessonId("clear-prompts"), "clear-instructions");
   assert.equal(normalizeLessonId("check-answers"), "check-the-answer");
+  assert.deepEqual(levels.map((level) => level.lessonIds.length), [20, 20, 20, 20]);
   for (const level of levels) {
     assert.ok(level.project.prompt.length >= 60);
     assert.equal(level.project.rubric.length, 3);
@@ -30,8 +31,9 @@ for (const band of bands) {
       assert.ok(lesson.hook.scenario.length > 25);
       assert.ok(lesson.familyPrompt.length > 25);
       assert.ok(lesson.reflectionPrompt.length > 25);
-      assert.ok(lesson.durationMinutes >= ({ "10-12": 10, "13-15": 12, "16-plus": 15 })[band]);
-      assert.ok(lesson.durationMinutes <= ({ "10-12": 12, "13-15": 15, "16-plus": 20 })[band]);
+       assert.equal(lesson.durationMinutes, 10);
+       assert.ok(lesson.sessionNumber >= 1 && lesson.sessionNumber <= 20);
+       assert.equal(lesson.chapterSessionCount, 20);
       assert.ok(lesson.questionBank.length >= 8);
       assert.equal(new Set(lesson.questionBank.map(q => q.id)).size, lesson.questionBank.length);
       for (const question of lesson.questionBank) {

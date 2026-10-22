@@ -333,17 +333,17 @@ export const chapterFourDays: DailyLessonSeed[] = [
     ["Pip leaves a pretend chat that asks for a secret and tells a trusted grown-up.", "A learner asks for adult help when a generated health answer feels worrying.", "Escalate when stakes exceed a learner's ability to independently verify or safely reverse an action."], "branching"),
 ];
 
-function makeChoices(seed: DailyLessonSeed, ageIndex: number) {
+function makeChoices(seed: DailyLessonSeed) {
   return [
     { text: seed.experiment, correct: true, feedback: seed.principle },
     { text: "Trust the most confident answer without checking.", correct: false, feedback: seed.caution },
     { text: "Use private details to make the tool understand everything.", correct: false, feedback: "Only share information that the task truly needs, and keep personal information out." },
-  ].map((choice, index) => ({ ...choice, text: ageIndex === 0 && index === 0 ? `${choice.text}` : choice.text }));
+  ];
 }
 
 function makeDailyActivity(seed: DailyLessonSeed, ageIndex: number): Lesson["activity"] {
   const example = seed.examples[ageIndex];
-  const choices = makeChoices(seed, ageIndex);
+  const choices = makeChoices(seed);
   const classifyItems = [
     [example, 0, seed.signal],
     [seed.caution, 1, seed.caution],
@@ -415,16 +415,24 @@ function makeChecks(seed: DailyLessonSeed): [string, string, string, string, str
 
 function makeDailyScripts(seed: DailyLessonSeed, ageIndex: number): [string, string, string] {
   const example = seed.examples[ageIndex];
-  const wordByAge = [
-    { opener: "Hi, I'm Pip! Let's explore together.", analogy: "Think of it like a set of clue cards.", action: "Try one clue and see what changes." },
-    { opener: "Pip's lab is open. Let's test the idea.", analogy: "Treat the example like a small experiment.", action: "Change one part and compare what happens." },
-    { opener: "Builder lab: inspect the system before trusting it.", analogy: "Treat the output as an estimate with limits.", action: "Test an edge case and explain your evidence." },
-  ][ageIndex];
-  return [
-    `${wordByAge.opener} ${seed.principle} ${wordByAge.analogy} ${seed.signal}`,
-    `${example} ${wordByAge.action} The input, the examples, and the system's goal help explain why the result can change. ${seed.caution}`,
-    `${seed.experiment} Then say what the model did, what it missed, and one safe next step. AI is a tool for exploring ideas; people stay in charge of decisions and real-world care.`,
+  const scenarios = [
+    [
+      `Hi, I'm Pip! ${seed.principle} We can explore this with clues, pictures, and pretend examples. You do not need to know big words to spot what the tool is doing. ${seed.signal}`,
+      `${example} Let's pause and notice what went into the tool and what came out. Try one small change and look at the new result. That helps us learn why an answer might change. ${seed.caution}`,
+      `${seed.experiment} Tell a trusted grown-up what you noticed. A computer can help us explore, but a real person checks important choices. If anything feels wrong, stop and ask for help. You can come back tomorrow for another experiment.`,
+    ],
+    [
+      `Pip's lab is open. ${seed.principle} Treat this example like a small experiment: notice the input, compare the result, and ask what could explain the difference. ${seed.signal}`,
+      `${example} Change one part while keeping the rest steady. Compare both results and name the clue that changed. This is more useful than guessing from a confident tone. ${seed.caution}`,
+      `${seed.experiment} Explain which part you would check with a reliable source or trusted adult. A helpful tool can still miss context. If something feels wrong or high-stakes, stop and get human help. Take a break and return tomorrow.`,
+    ],
+    [
+      `Builder lab: inspect the system before trusting it. ${seed.principle} Separate the input, the model's objective, the output, and the evidence needed to evaluate that output. ${seed.signal}`,
+      `${example} Hold the objective constant and vary one input. Compare the outputs, then identify an edge case the examples may not cover. A fluent result is not the same as a validated result. ${seed.caution}`,
+      `${seed.experiment} State the limitation and one safe next step in your own words. People remain accountable for consequential decisions. Stop and consult a trusted adult if the context is sensitive or uncertain. A short break helps; continue whenever you are ready.`,
+    ],
   ];
+  return scenarios.map((scenes) => scenes.map((scene) => scene.trim()).join("~")) as [string, string, string];
 }
 
 export function dailySeedAsLessonSeed(seed: DailyLessonSeed, chapterId: Lesson["levelId"], ageIndex: number) {

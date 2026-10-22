@@ -28,6 +28,17 @@ export type ChildProfileWeakTopicsItem = {
 
 export type ChildProfileLevelScores = {[key: string]: number};
 
+export type ChildProfileScoreBreakdown = {
+  /** @minimum 0 */
+  missionPoints: number;
+  /** @minimum 0 */
+  quizPoints: number;
+  /** @minimum 0 */
+  chapterPoints: number;
+  /** @minimum 0 */
+  reviewPoints: number;
+};
+
 export type LearningStateProjects = {[key: string]: {
   /** @maxLength 4000 */
   content?: string;
@@ -83,6 +94,9 @@ export interface ChildProfile {
   bestReviewScore?: number;
   weakTopics?: ChildProfileWeakTopicsItem[];
   levelScores?: ChildProfileLevelScores;
+  /** @minimum 0 */
+  learningScore: number;
+  scoreBreakdown: ChildProfileScoreBreakdown;
   createdAt: string;
 }
 
@@ -243,6 +257,25 @@ export interface QuizGrade {
   passed: boolean;
   missedLessonIds: string[];
   feedback: string[];
+}
+
+export interface DailyUsageHeartbeat {
+  active: boolean;
+  sessionId: string;
+}
+
+export interface DailyUsage {
+  /**
+     * @minimum 0
+     * @maximum 600
+     */
+  usedSeconds: number;
+  /**
+     * @minimum 0
+     * @maximum 600
+     */
+  remainingSeconds: number;
+  resetAt: string;
 }
 
 export type MarkLessonTalkDiscussed200 = {

@@ -1,5 +1,5 @@
 import type { ChildProfile } from '@workspace/api-client-react';
-import { levels } from '@workspace/curriculum';
+import { legacyLevelNames, levels } from '@workspace/curriculum';
 import { badges, highScores, skillMap } from './access';
 
 export function Insights({ child }: { child: ChildProfile }) {
@@ -12,12 +12,13 @@ export function Insights({ child }: { child: ChildProfile }) {
       {map.length ? <ul className="skill-list">{map.map(({ lesson, state }) => <li key={lesson.id} className={`skill-${state}`}><span>{lesson.title}</span><b>{state}</b></li>)}</ul> : <p className="activity-note">Finish a lesson to start your skill map.</p>}
     </div>
     <div className="insight-block"><h4>Badges</h4>
-      {b.length ? <div className="badge-row">{b.map((x) => <span key={x.key} className={`badge badge-${x.kind}`}>{x.label}</span>)}</div> : <p className="activity-note">Badges appear as lessons, levels and reviews are completed.</p>}
+      {b.length ? <div className="badge-row">{b.map((x) => <span key={x.key} className={`badge badge-${x.kind}`}>{x.label}</span>)}</div> : <p className="activity-note">Badges appear as missions, chapters and reviews are completed.</p>}
     </div>
     <div className="insight-block"><h4>Personal bests</h4>
       <ul className="skill-list">
         <li><span>Best lesson check</span><b>{best === null ? 'none yet' : `${best}%`}</b></li>
         {levels.map((l) => { const v = hs.levelScores[l.id]; return typeof v === 'number' ? <li key={l.id}><span>{l.title} mastery</span><b>{v}%</b></li> : null; })}
+        {Object.entries(hs.levelScores).filter(([id, value]) => typeof value === 'number' && legacyLevelNames[id]).map(([id, value]) => <li key={`prior-${id}`}><span>Previous curriculum · {legacyLevelNames[id]}</span><b>{value}%</b></li>)}
         <li><span>Best weekly review ({hs.reviews} taken)</span><b>{hs.review === null || hs.reviews === 0 ? 'none yet' : `${hs.review}%`}</b></li>
       </ul>
     </div>

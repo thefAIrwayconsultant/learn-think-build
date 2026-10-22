@@ -23,10 +23,10 @@ export function MasteryFlow({ child, levelId }: { child: ChildProfile; levelId: 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useSpeechSafety(child.id, levelId, quiz?.attemptId);
-  if (!level) return <main className="page-content not-found"><h1>That level isn’t here.</h1><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
+  if (!level) return <main className="page-content not-found"><h1>That chapter isn’t here.</h1><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
   const lessons = getLessonsForAgeBand(child.ageBand ?? '10-12');
   const canTake = masteryUnlocked(child, level.id);
-  if (!canTake) return <main className="page-content not-found"><h1>Keep learning first.</h1><p>Finish every lesson in this level (and the previous level) before the mastery check.</p><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
+  if (!canTake) return <main className="page-content not-found"><h1>Keep exploring first.</h1><p>Finish every mission in this chapter (and the previous chapter) before the mastery check.</p><Link className="primary-button" href={`/learn/${child.id}`}>Back to learning path</Link></main>;
 
   const begin = async () => {
     setBusy(true); setError(''); setResult(null);
@@ -60,7 +60,7 @@ export function MasteryFlow({ child, levelId }: { child: ChildProfile; levelId: 
   const reviewing = reviewIds.length > 0 && !reviewIds.every((id) => reviewed.includes(id));
   return <main className="page-content assessment-page lesson-page">
     <Link href={`/learn/${child.id}`} className="back-link"><ArrowLeft size={15} /> Learning path</Link>
-    <header className="lesson-top"><div className="lesson-kicker">Mastery check · {level.domain}</div><h1>{level.title}</h1><p>Score 80% or higher. Questions come from every lesson in this level.</p></header>
+    <header className="lesson-top"><div className="lesson-kicker">Chapter mastery check · {level.domain}</div><h1>{level.title}</h1><p>Score 80% or higher. Questions come from every daily mission in this chapter.</p></header>
     <section className="lesson-card-panel">
       {reviewing && <div>
         <h2>Review before you try again</h2><p className="step-explanation">Go through each missed lesson’s scenes, then mark it reviewed. Your next check uses different questions.</p>
@@ -72,7 +72,7 @@ export function MasteryFlow({ child, levelId }: { child: ChildProfile; levelId: 
       {result && <div data-testid="assessment-result" className={`assessment-result ${result.passed ? 'passed' : 'retry'}`}>
         {result.passed ? <CheckCircle2 size={34} /> : null}
         <h2>{result.passed ? `Mastered at ${result.score}%` : `${result.score}% so far`}</h2>
-        <p>{result.passed ? 'Your score is saved. The next level opens once your guardian approves the level project.' : 'You need 80%. Review the lessons below, then try with different questions.'}</p>
+         <p>{result.passed ? 'Your score is saved. The next chapter opens once your guardian approves the chapter project.' : 'You need 80%. Review the missions below, then try with different questions.'}</p>
         {result.feedback.length > 0 && <ul>{result.feedback.map((f, i) => <li key={i}>{f}</li>)}</ul>}
         {!result.passed && result.missed.length > 0 && <p>Review: {result.missed.map((id) => lessons.find((l) => l.id === id)?.title ?? id).join(', ')}</p>}
         {result.passed ? <Link href={`/learn/${child.id}`} className="primary-button">Continue <ArrowRight size={16} /></Link> : <button type="button" className="primary-button" onClick={begin}>Review and retry</button>}

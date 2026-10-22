@@ -312,7 +312,7 @@ components:
         - status
     ChildProfile:
       type: object
-      required: [id, displayName, ageBand, completedLessonIds, masteredLevelIds, learningState, lessonRecords, createdAt]
+      required: [id, displayName, ageBand, completedLessonIds, masteredLevelIds, learningState, lessonRecords, learningScore, scoreBreakdown, createdAt]
       properties:
         id: { type: string }
         displayName: { type: string }
@@ -344,6 +344,15 @@ components:
         levelScores:
           type: object
           additionalProperties: { type: integer }
+        learningScore: { type: integer, minimum: 0 }
+        scoreBreakdown:
+          type: object
+          required: [missionPoints, quizPoints, chapterPoints, reviewPoints]
+          properties:
+            missionPoints: { type: integer, minimum: 0 }
+            quizPoints: { type: integer, minimum: 0 }
+            chapterPoints: { type: integer, minimum: 0 }
+            reviewPoints: { type: integer, minimum: 0 }
         createdAt: { type: string, format: date-time }
     ChildProfileInput:
       type: object
@@ -495,9 +504,10 @@ components:
         feedback: { type: array, items: { type: string } }
     DailyUsageHeartbeat:
       type: object
-      required: [active]
+      required: [active, sessionId]
       properties:
         active: { type: boolean }
+        sessionId: { type: string, format: uuid }
     DailyUsage:
       type: object
       required: [usedSeconds, remainingSeconds, resetAt]

@@ -32,6 +32,16 @@ export const getFamilyResponseChildrenItemLearningStateLearnerAgreedLevelMax = 4
 
 export const getFamilyResponseChildrenItemLearningStateProjectsContentMax = 4000;
 
+export const getFamilyResponseChildrenItemLearningScoreMin = 0;
+
+export const getFamilyResponseChildrenItemScoreBreakdownMissionPointsMin = 0;
+
+export const getFamilyResponseChildrenItemScoreBreakdownQuizPointsMin = 0;
+
+export const getFamilyResponseChildrenItemScoreBreakdownChapterPointsMin = 0;
+
+export const getFamilyResponseChildrenItemScoreBreakdownReviewPointsMin = 0;
+
 
 
 export const GetFamilyResponse = zod.object({
@@ -68,6 +78,13 @@ export const GetFamilyResponse = zod.object({
   "misses": zod.number().int()
 })).optional(),
   "levelScores": zod.record(zod.string(), zod.number().int()).optional(),
+  "learningScore": zod.number().int().min(getFamilyResponseChildrenItemLearningScoreMin),
+  "scoreBreakdown": zod.object({
+  "missionPoints": zod.number().int().min(getFamilyResponseChildrenItemScoreBreakdownMissionPointsMin),
+  "quizPoints": zod.number().int().min(getFamilyResponseChildrenItemScoreBreakdownQuizPointsMin),
+  "chapterPoints": zod.number().int().min(getFamilyResponseChildrenItemScoreBreakdownChapterPointsMin),
+  "reviewPoints": zod.number().int().min(getFamilyResponseChildrenItemScoreBreakdownReviewPointsMin)
+}),
   "createdAt": zod.coerce.date()
 }))
 })
@@ -96,6 +113,16 @@ export const createChildProfileResponseLearningStateLearnerAgreedLevelMin = 0;
 export const createChildProfileResponseLearningStateLearnerAgreedLevelMax = 4;
 
 export const createChildProfileResponseLearningStateProjectsContentMax = 4000;
+
+export const createChildProfileResponseLearningScoreMin = 0;
+
+export const createChildProfileResponseScoreBreakdownMissionPointsMin = 0;
+
+export const createChildProfileResponseScoreBreakdownQuizPointsMin = 0;
+
+export const createChildProfileResponseScoreBreakdownChapterPointsMin = 0;
+
+export const createChildProfileResponseScoreBreakdownReviewPointsMin = 0;
 
 
 
@@ -132,6 +159,13 @@ export const CreateChildProfileResponse = zod.object({
   "misses": zod.number().int()
 })).optional(),
   "levelScores": zod.record(zod.string(), zod.number().int()).optional(),
+  "learningScore": zod.number().int().min(createChildProfileResponseLearningScoreMin),
+  "scoreBreakdown": zod.object({
+  "missionPoints": zod.number().int().min(createChildProfileResponseScoreBreakdownMissionPointsMin),
+  "quizPoints": zod.number().int().min(createChildProfileResponseScoreBreakdownQuizPointsMin),
+  "chapterPoints": zod.number().int().min(createChildProfileResponseScoreBreakdownChapterPointsMin),
+  "reviewPoints": zod.number().int().min(createChildProfileResponseScoreBreakdownReviewPointsMin)
+}),
   "createdAt": zod.coerce.date()
 })
 
@@ -159,6 +193,55 @@ export const UpdateChildAgeBandBody = zod.object({
 
 export const UpdateChildAgeBandResponse = zod.object({
   "ageBand": zod.enum(['10-12', '13-15', '16-plus'])
+})
+
+
+/**
+ * @summary Get active learning time remaining in the learner's 24-hour window
+ */
+export const GetChildDailyUsageParams = zod.object({
+  "childId": zod.coerce.string()
+})
+
+export const getChildDailyUsageResponseUsedSecondsMin = 0;
+export const getChildDailyUsageResponseUsedSecondsMax = 600;
+
+export const getChildDailyUsageResponseRemainingSecondsMin = 0;
+export const getChildDailyUsageResponseRemainingSecondsMax = 600;
+
+
+
+export const GetChildDailyUsageResponse = zod.object({
+  "usedSeconds": zod.number().int().min(getChildDailyUsageResponseUsedSecondsMin).max(getChildDailyUsageResponseUsedSecondsMax),
+  "remainingSeconds": zod.number().int().min(getChildDailyUsageResponseRemainingSecondsMin).max(getChildDailyUsageResponseRemainingSecondsMax),
+  "resetAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Start, pause, or record active learning time
+ */
+export const RecordChildDailyUsageParams = zod.object({
+  "childId": zod.coerce.string()
+})
+
+export const RecordChildDailyUsageBody = zod.object({
+  "active": zod.boolean(),
+  "sessionId": zod.string().uuid()
+})
+
+export const recordChildDailyUsageResponseUsedSecondsMin = 0;
+export const recordChildDailyUsageResponseUsedSecondsMax = 600;
+
+export const recordChildDailyUsageResponseRemainingSecondsMin = 0;
+export const recordChildDailyUsageResponseRemainingSecondsMax = 600;
+
+
+
+export const RecordChildDailyUsageResponse = zod.object({
+  "usedSeconds": zod.number().int().min(recordChildDailyUsageResponseUsedSecondsMin).max(recordChildDailyUsageResponseUsedSecondsMax),
+  "remainingSeconds": zod.number().int().min(recordChildDailyUsageResponseRemainingSecondsMin).max(recordChildDailyUsageResponseRemainingSecondsMax),
+  "resetAt": zod.coerce.date()
 })
 
 

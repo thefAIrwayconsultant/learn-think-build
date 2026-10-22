@@ -7,6 +7,7 @@
  */
 import type { ChildProfileAgeBand } from './childProfileAgeBand';
 import type { ChildProfileLevelScores } from './childProfileLevelScores';
+import type { ChildProfileScoreBreakdown } from './childProfileScoreBreakdown';
 import type { ChildProfileWeakTopicsItem } from './childProfileWeakTopicsItem';
 import type { LearningState } from './learningState';
 import type { LessonRecord } from './lessonRecord';
@@ -24,5 +25,8 @@ export interface ChildProfile {
   bestReviewScore?: number;
   weakTopics?: ChildProfileWeakTopicsItem[];
   levelScores?: ChildProfileLevelScores;
+  /** @minimum 0 */
+  learningScore: number;
+  scoreBreakdown: ChildProfileScoreBreakdown;
   createdAt: Date;
 }

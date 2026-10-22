@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Coffee, MessageCircle, RotateCcw, ShieldCheck } from 'lucide-react';
 import { completeChildLesson, getGetFamilyQueryKey, startLearningQuiz } from '@workspace/api-client-react';
 import type { ChildProfile, QuizAttempt } from '@workspace/api-client-react';
-import { getLessonsForAgeBand, normalizeLessonId, type Lesson, type Question } from '@workspace/curriculum';
+import { getLessonsForAgeBand, levels, normalizeLessonId, type Lesson, type Question } from '@workspace/curriculum';
 import { lessonUnlocked } from './access';
 import { LessonActivity } from './activities';
 import { WatchStep } from './WatchStep';
@@ -122,7 +122,7 @@ function FlowInner({ child, lesson, all }: { child: ChildProfile; lesson: Lesson
   const nextLesson = all[index + 1];
   return <main className="page-content lesson-page">
     <Link href={`/learn/${child.id}`} className="back-link"><ArrowLeft size={15} /> Learning path</Link>
-    <header className="lesson-top"><div className="lesson-kicker">{lesson.topic} · about {lesson.durationMinutes} min</div><h1>{lesson.title}</h1><p>{lesson.summary}</p><ReadButton id="lesson-intro" text={`${lesson.title}. ${lesson.summary}. About ${lesson.durationMinutes} minutes. If anything feels wrong, stop and talk to a trusted adult.`} /></header>
+    <header className="lesson-top"><div className="lesson-kicker">Chapter {levels.findIndex((chapter) => chapter.id === lesson.levelId) + 1} · Day {lesson.sessionNumber} of {lesson.chapterSessionCount} · about {lesson.durationMinutes} min · {lesson.topic}</div><h1>{lesson.title}</h1><p>{lesson.summary}</p><ReadButton id="lesson-intro" text={`${lesson.title}. ${lesson.summary}. About ${lesson.durationMinutes} minutes. If anything feels wrong, stop and talk to a trusted adult.`} /></header>
     {!done && <>
       <nav className="lesson-stepper" aria-label="Lesson steps"><ol>{steps.map((s, i) => <li key={s} className={i === step ? 'is-current' : i < step ? 'is-done' : ''} aria-current={i === step ? 'step' : undefined}><span>{i < step ? <Check size={12} /> : i + 1}</span><em>{s}</em></li>)}</ol></nav>
       <p className="step-count" data-testid="text-step-count">Step {step + 1} of {steps.length}: {name}</p>
@@ -201,9 +201,9 @@ function FinishCard({ lesson, child, nextLesson, missedQuestions, onRevisit }: {
       <p role="status" data-testid="passed-review-status">{ready ? 'All correct. Ready to continue.' : 'Try the missed answer again. Your explanation is above.'}</p>
     </section>}
     <div className="family-card"><MessageCircle size={18} /><div><strong>Talk it over with your family</strong><p>{lesson.familyPrompt}</p><ReadButton id="family" text={lesson.familyPrompt} /></div></div>
-    <div className="family-card break"><Coffee size={18} /><div><strong>Take a break</strong><p>Stretch, get water, look out a window. Come back when you feel like it.</p></div></div>
+    <div className="family-card break"><Coffee size={18} /><div><strong>{lesson.sessionNumber === lesson.chapterSessionCount ? 'Take a break · chapter milestone' : 'Take a break · good place to pause'}</strong><p>{lesson.sessionNumber === lesson.chapterSessionCount ? 'You reached the end of this chapter’s missions. Stretch, get water, and celebrate your progress. Come back tomorrow—or whenever you are ready. There is no streak.' : 'Stretch, get water, or look out a window. This is a natural stopping point. Come back tomorrow—or whenever you feel ready. There is no streak to keep.'}</p></div></div>
     <div className="complete-actions">
-      {ready && nextLesson && lessonUnlocked(child, nextLesson.id) && <Link href={`/learn/${child.id}/lesson/${nextLesson.id}`} className="primary-button" data-testid="link-next-lesson">Next lesson <ArrowRight size={16} /></Link>}
+      {ready && nextLesson && lessonUnlocked(child, nextLesson.id) && <Link href={`/learn/${child.id}/lesson/${nextLesson.id}`} className="primary-button" data-testid="link-next-lesson">Next mission · {nextLesson.durationMinutes} min <ArrowRight size={16} /></Link>}
       {ready && <Link href={`/learn/${child.id}`} className="secondary-button" data-testid="link-finish-home">Learning path</Link>}
       <button type="button" className="secondary-button" onClick={onRevisit}><RotateCcw size={15} /> Revisit</button>
     </div>
