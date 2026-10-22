@@ -125,29 +125,29 @@ function TestimonialsPage() {
     <main className="page-content feedback-page testimonials-page">
       <Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link>
       <header className="feedback-hero">
-        <div className="eyebrow">Testimonials &amp; illustrative quotes</div>
-        <h1>Helpful. Fun. Easy to follow.</h1>
-        <p>Short lessons, playful challenges, and clear next steps—built to help families explore AI with confidence.</p>
+        <div className="eyebrow">Testimonials</div>
+        <h1>Useful lessons. Confident families.</h1>
+        <p>A parent’s perspective on making AI learning helpful, approachable, and fun.</p>
       </header>
       <aside className="feedback-disclosure">
         <ShieldCheck size={22} />
         <div><strong>Illustrative quotes—not real customer reviews</strong>These fictional examples describe the experience we aim to provide. Real family testimonials will only be published with permission.</div>
       </aside>
-      <section className="feedback-grid" aria-label="Illustrative parent and learner quotes">
+      <section className="feedback-grid" aria-label="Illustrative parent quotes">
         <article className="feedback-card">
           <span className="feedback-role">Illustrative parent quote</span>
           <h2>A helpful place to start</h2>
-          <blockquote>“AI felt like a huge topic to introduce. Having short, clear lessons gives us a safe starting point—and something useful to talk about together.”</blockquote>
+          <blockquote>“I wanted to introduce my child to AI but didn’t know where to start. The short lessons made the basics clear, and the privacy activities gave us useful things to practice together.”</blockquote>
         </article>
         <article className="feedback-card">
-          <span className="feedback-role">Illustrative learner quote</span>
-          <h2>More fun than just watching</h2>
-          <blockquote>“The challenges make me want to try one more idea. I get to figure things out, improve my score, and plan something I actually want to build.”</blockquote>
+          <span className="feedback-role">Illustrative parent quote</span>
+          <h2>Learning they want to come back to</h2>
+          <blockquote>“The challenges made the lessons feel like something to explore, not another assignment. I loved seeing my child explain why an AI answer might be wrong instead of just accepting it.”</blockquote>
         </article>
         <article className="feedback-card">
           <span className="feedback-role">Illustrative parent quote</span>
           <h2>Easy to know what comes next</h2>
-          <blockquote>“The learning path is so easy to follow. I can see what my child is learning, celebrate their progress, and know where a little encouragement would help.”</blockquote>
+          <blockquote>“The step-by-step path made a big subject feel manageable. I could see what my child understood, talk through the tricky parts, and celebrate each new skill together.”</blockquote>
         </article>
       </section>
       <section className="feedback-cta" aria-label="Explore Learn Think Build">

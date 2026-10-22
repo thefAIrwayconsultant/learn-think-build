@@ -7,7 +7,7 @@ Learn Think Build is a parent-focused, at-home introduction to AI for learners s
 
 **Why:** The user wants Learn Think Build marketed to parents for at-home AI introduction, with gradual practical skills, age-appropriate detail, and a playful shift from passive screen time toward safe creation.
 
-**Illustrative quote exception:** The user requested made-up quotes about how helpful, fun, and intuitive the app is, rather than an empty testimonials page. These are illustrative marketing examples, not genuine testimonials.
+**Illustrative quote exception:** The user requested made-up quotes about how helpful, fun, and intuitive the app is, rather than an empty testimonials page, and clarified that the quotes should be from parents describing useful lessons. These are illustrative marketing examples, not genuine testimonials.
 
 **Why:** Preserve the requested positive copy without misrepresenting fictional statements as real customer endorsements.
 
