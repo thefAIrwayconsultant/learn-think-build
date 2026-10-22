@@ -24,6 +24,7 @@ const clerkPubKey = publishableKeyFromHost(
 );
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const FAMILY_MONTHLY_PRICE = '$9.99';
 const queryClient = new QueryClient();
 
 function stripBase(path: string) {
@@ -164,9 +165,9 @@ function LandingPage() {
       <main className="page-content">
         <section className="landing-hero">
           <div className="landing-copy">
-            <div className="eyebrow">Future-ready AI skills, built step by step</div>
-            <h1>Learn AI safely.<br />Build your skills.<br /><em>Make something real.</em></h1>
-            <p>AI skills are becoming part of everyday life. Learn Think Build helps kids 10+ grow them gradually through age-fit lessons and playful challenges—learning to question AI, create with it, and use it safely instead of only watching what it makes. No live child chatbot; real AI tools stay adult-supervised.</p>
+            <div className="eyebrow">A safe AI jumpstart for kids 10+</div>
+            <h1>Learn AI safely.<br />Build real skills.<br /><em>Get a jumpstart.</em></h1>
+            <p>AI skills are becoming table stakes in today’s business world. Learn Think Build gives curious kids 10+ a safe, playful introduction—then builds their prompting, critical thinking, problem-solving, and creating skills step by step. It’s a jumpstart they can grow with, from their first AI lesson toward further study and future work. AI examples are simulated; real AI tools stay adult-supervised.</p>
             <div className="landing-ctas">
               <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Start a learner path <ArrowRight size={17} /></Link>
               <a href="#curriculum" className="secondary-button">See the challenge path</a>
@@ -185,9 +186,9 @@ function LandingPage() {
             <div className="art-chip two">Build more than you scroll</div>
           </div>
         </section>
-        <div className="landing-band"><strong>AI fluency is a real-world skill.</strong><span>Build it gradually—with safe practice, clear goals, and your own judgment in the lead.</span></div>
+        <div className="landing-band"><strong>AI literacy is becoming a basic workplace skill.</strong><span>Give children time to learn, experiment, and build confidence long before their first job.</span></div>
         <section className="landing-section" aria-labelledby="how-heading">
-          <div className="section-heading"><div><div className="eyebrow">Practice that feels like progress</div><h2 id="how-heading">Small challenges. Skills for the real world.</h2><p>Kids move from curious beginner to confident builder through age-fit practice, visible goals, and earned mastery.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">Beginner-friendly · Built for steady progress</div><h2 id="how-heading">Start with curiosity. Grow real-world skills.</h2><p>No AI experience needed. Kids start with the basics, then build practical skills through age-appropriate challenges, personal bests, and earned mastery—not a rush to grow up.</p></div></div>
           <div className="feature-grid">
             <article className="feature-note"><div className="feature-number">THE SIX-STEP LESSON</div><h3>Warm-up, Hook, Watch, Try, Think, Check.</h3><p>Every lesson follows the same six steps. A warm-up recalls earlier lessons, a hook asks for a prediction, narrated scenes with captions teach one skill, a hands-on activity lets learners try it, a written reflection puts it in their own words, and a five-question check needs 80% to save. Missed questions come with an explanation and a retry on fresh questions.</p></article>
             <article className="feature-note"><div className="feature-number">EARNED, NOT RUSHED</div><h3>Mastery plus a guardian sign-off.</h3><p>Lessons open in order. Finishing a level takes an 80% mastery check and a short project that a parent or guardian reviews against three criteria. Each new level starts with a pledge from both learner and guardian. A weekly goal and a mixed review keep learning steady without streak pressure.</p></article>
@@ -207,9 +208,9 @@ function LandingPage() {
           <div className="home-family-panel"><div><div className="eyebrow">For parents & guardians</div><h2 id="family-learning-heading">Turn curiosity into making.</h2><p>Give kids a creative alternative to passive screen time: learn how AI works, practice making good choices, and work toward building useful things safely.</p><ul><li>Age-based paths for learners 10+</li><li>Short lessons with clear goals and level progress</li><li>Parent-owned profiles with no child email or birth date</li></ul></div><div className="home-family-callout"><strong>Progress earned through learning</strong><span>One adult manages the account and learner profiles. Kids advance by practicing, reflecting, and showing what they understand. Real AI tools stay under adult supervision.</span></div></div>
         </section>
         <section className="landing-section" aria-labelledby="price-heading">
-          <div className="section-heading"><div><div className="eyebrow">One monthly family plan</div><h2 id="price-heading">A full year of learning and making.</h2><p>One adult account manages billing and learner profiles.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">One monthly family plan</div><h2 id="price-heading">An AI jumpstart for {FAMILY_MONTHLY_PRICE} a month.</h2><p>Age-appropriate learning today. Practical foundations for tomorrow. One parent or guardian owns the family account.</p></div></div>
           <div className="price-panel">
-            <div><div className="price-amount">$9.99 <small>USD / month</small></div><p>Planned monthly pricing for the guided curriculum and learner profiles. Family plan checkout is coming soon.</p></div>
+            <div><div className="price-amount">{FAMILY_MONTHLY_PRICE} <small>USD / month</small></div><p>The monthly family plan includes the guided curriculum and learner profiles. Checkout is coming soon; creating an account does not start a paid subscription.</p></div>
           <div className="price-action"><Link className="primary-button" href="/sign-up" data-testid="button-pricing-signup">Create a guardian account <ArrowRight size={16} /></Link><span>Family plan checkout is coming soon.</span></div>
           </div>
         </section>
@@ -225,7 +226,7 @@ function SignInPage() {
 }
 
 function SignUpPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Make room for a year of learning.</h1><p>Create the adult-owned account first. The family plan is $9.99 per month, with checkout coming soon. Learners use a display name and broad age range; no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Give your child an AI jumpstart.</h1><p>Start with a safe introduction and build practical AI skills over time. Create the adult-owned account first. The family plan is {FAMILY_MONTHLY_PRICE} per month, with checkout coming soon. Learners use a display name and broad age range; no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
 }
 
 function ClerkCacheInvalidator() {
@@ -301,7 +302,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
         <div className="family-grid">
           <section className="family-panel subscription-panel" aria-labelledby="subscription-heading">
             <div className="panel-head"><h2 id="subscription-heading">Family plan</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />Coming soon</span></div>
-            <div className="subscription-price">$9.99 <small>USD / month</small></div>
+            <div className="subscription-price">{FAMILY_MONTHLY_PRICE} <small>USD / month</small></div>
             <p>Family plan checkout and billing management are paused while launch details are finalized.</p>
             <p className="plan-terms-note">Learner profiles, interactive lessons, and saved progress are available while checkout is coming soon.</p>
             <div className="subscription-actions"><button type="button" className="primary-button" disabled aria-disabled="true" data-testid="button-subscribe">Coming soon</button></div>

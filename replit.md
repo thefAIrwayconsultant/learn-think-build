@@ -57,6 +57,7 @@ Parent-guided AI literacy for learners ages 10+, with age-banded lessons, hands-
 
 - Keep learning intuitive while holding learners accountable.
 - Do not market the product for school sales; focus on parents introducing AI at home.
+- Position the app as a safe AI jumpstart for curious children: introduce the basics now and gradually build practical skills for future study and work. AI literacy is becoming table stakes in today's business world; do not promise employment or replace age-appropriate learning with job-training pressure.
 - Publish only genuine family testimonials with permission. Do not invent reviews.
 - Keep the $9.99/month family price visible as “coming soon” until billing is enabled.
 - Keep the phone/iOS-width navigation labels and order consistent with desktop. This is one responsive website, not a separate native iOS application.
