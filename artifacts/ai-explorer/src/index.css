@@ -140,6 +140,7 @@
 .site-header, .page-content { position: relative; z-index: 1; }
 .site-header { height: 78px; display:flex; align-items:center; justify-content:space-between; max-width:1160px; margin:0 auto; padding:0 34px; }
 .brand { display:flex; gap:11px; align-items:center; color:inherit; text-decoration:none; }
+.auth-site-header { justify-content:space-between; }
 .brand-mark { width:36px; height:36px; border-radius:12px 12px 12px 4px; display:grid; place-items:center; background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); transform:rotate(-4deg); }
 .brand-name { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; letter-spacing:-.7px; }
 .header-note { font:11px var(--app-font-mono); text-transform:uppercase; letter-spacing:.12em; color:hsl(var(--muted-foreground)); }
@@ -404,10 +405,12 @@
 .empty-card h2 { font:700 23px 'Space Grotesk',sans-serif; margin:0; }
 .signout-button { border:0; background:transparent; color:hsl(var(--muted-foreground)); font:800 12px var(--app-font-sans); cursor:pointer; }
 .auth-layout { min-height:calc(100dvh - 82px); display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:42px; max-width:1080px; margin:auto; padding:32px 28px 70px; }
+.auth-layout > * { min-width:0; }
 .auth-message { padding:20px; }
 .auth-message h1 { font:700 clamp(40px,6vw,66px)/.98 'Space Grotesk',sans-serif; letter-spacing:-.07em; margin:18px 0; }
 .auth-message p { color:hsl(var(--muted-foreground)); line-height:1.75; max-width:420px; }
 .auth-card-wrap { padding:20px; border-radius:28px; background:hsl(var(--secondary) / .28); }
+.auth-card-wrap > * { width:100%; min-width:0; }
 .auth-loading { text-align:center; padding:70px 20px; color:hsl(var(--muted-foreground)); }
 .not-found { padding-top:80px; }
 .not-found .primary-button { margin-top:10px; }
@@ -447,6 +450,37 @@
   .pip-nudge { gap:10px; padding:11px 13px; margin:0 0 22px; }
   .pip-nudge > .pip-mascot { width:62px; }
   .pip-nudge strong { font-size:15px; }
+}
+
+@media (max-width:600px) {
+  .auth-layout {
+    width:100%;
+    min-width:0;
+    min-height:0;
+    max-width:520px;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+    box-sizing:border-box;
+    padding:18px 16px 32px;
+  }
+  .auth-message { min-width:0; padding:0 2px; }
+  .auth-message h1 {
+    max-width:100%;
+    margin:10px 0 8px;
+    font-size:clamp(30px,8.6vw,36px);
+    line-height:1.04;
+    letter-spacing:-.045em;
+    overflow-wrap:anywhere;
+  }
+  .auth-message p { max-width:100%; margin:0 0 9px; font-size:14px; line-height:1.55; }
+  .auth-card-wrap { width:100%; min-width:0; box-sizing:border-box; }
+}
+
+@media (max-width:380px) {
+  .auth-layout { padding-right:12px; padding-left:12px; }
+  .auth-card-wrap { padding:8px; }
 }
 
 /* Professional sky-blue, navy, and white learning system. */
@@ -620,4 +654,21 @@
   .lesson-step-actions { flex-direction:column-reverse; }
   .lesson-step-actions button { width:100%; }
   .speech-controls label { margin-left:0; }
+}
+
+@media (max-width:600px) {
+  .auth-card-wrap {
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+  }
+  .ltb-auth-card {
+    background:transparent !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    overflow:visible;
+  }
 }

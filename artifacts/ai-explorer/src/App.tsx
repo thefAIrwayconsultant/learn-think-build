@@ -52,7 +52,7 @@ const clerkAppearance = {
   },
   elements: {
     rootBox: 'w-full flex justify-center',
-    cardBox: 'bg-[#fffdf6] rounded-2xl w-[440px] max-w-full overflow-hidden shadow-xl',
+    cardBox: 'ltb-auth-card bg-[#fffdf6] rounded-2xl w-full max-w-[440px] overflow-hidden shadow-xl',
     card: '!shadow-none !border-0 !bg-transparent !rounded-none',
     footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
     headerTitle: 'text-[#243d39] font-bold',
@@ -96,22 +96,29 @@ const cardColors = ['hsl(201 89% 92%)', 'hsl(211 67% 94%)', 'hsl(198 85% 92%)', 
 
 function BrandHeader() {
   const { isSignedIn } = useUser();
+  const [location] = useLocation();
+  const isAuthRoute = location.startsWith('/sign-in') || location.startsWith('/sign-up');
+  const isSignInRoute = location.startsWith('/sign-in');
   return (
-    <header className="site-header">
+    <header className={`site-header${isAuthRoute ? ' auth-site-header' : ''}`}>
       <Link href="/" className="brand" aria-label="Learn Think Build home" data-testid="link-home">
         <span className="brand-mark"><Compass size={21} strokeWidth={2.2} /></span>
         <span className="brand-name">Learn Think Build</span>
       </Link>
-      <nav className="primary-nav" aria-label="Main navigation">
+      {!isAuthRoute && <nav className="primary-nav" aria-label="Main navigation">
         <a className="nav-tab" href={`${basePath}/#how-heading`}>How it works</a>
         <a className="nav-tab" href={`${basePath}/#curriculum`}>Learning path</a>
         <Link className="nav-tab" href="/testimonials">Testimonials</Link>
         <a className="nav-tab" href={`${basePath}/#price-heading`}>Pricing</a>
-      </nav>
+      </nav>}
       <nav className="header-actions" aria-label="Account navigation">
         {isSignedIn
           ? <><Link href="/" className="header-cta" data-testid="link-home-signed-in">Home</Link><Link href="/family" className="header-cta solid" data-testid="link-family">Family account</Link></>
-          : <><Link href="/sign-in" className="header-cta" data-testid="link-sign-in">Sign in</Link><Link href="/sign-up" className="header-cta solid" data-testid="link-sign-up">Get started</Link></>}
+          : isAuthRoute
+            ? isSignInRoute
+              ? <Link href="/sign-up" className="header-cta solid" data-testid="link-sign-up">Create account</Link>
+              : <Link href="/sign-in" className="header-cta" data-testid="link-sign-in">Sign in</Link>
+            : <><Link href="/sign-in" className="header-cta" data-testid="link-sign-in">Sign in</Link><Link href="/sign-up" className="header-cta solid" data-testid="link-sign-up">Get started</Link></>}
       </nav>
     </header>
   );
@@ -151,12 +158,12 @@ function LandingPage() {
       <main className="page-content">
         <section className="landing-hero">
           <div className="landing-copy">
-            <div className="eyebrow">A year of skills, not shortcuts</div>
-            <h1>Learn AI.<br />Think clearly.<br /><em>Build something real.</em></h1>
-            <p>A parent-guided AI learning path for ages 10+, designed for learning together at home. Start with the basics, learn when AI is—and isn’t—appropriate, then practice prompting, planning, and building toward a basic app by the end of year one.</p>
+            <div className="eyebrow">Future-ready AI skills, built step by step</div>
+            <h1>Learn AI safely.<br />Build your skills.<br /><em>Make something real.</em></h1>
+            <p>AI skills are becoming part of everyday life. Learn Think Build helps kids 10+ grow them gradually through age-fit lessons and playful challenges—learning to question AI, create with it, and use it safely instead of only watching what it makes. No live child chatbot; real AI tools stay adult-supervised.</p>
             <div className="landing-ctas">
-              <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Explore the family program <ArrowRight size={17} /></Link>
-              <a href="#curriculum" className="secondary-button">See the year-one path</a>
+              <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Start a learner path <ArrowRight size={17} /></Link>
+              <a href="#curriculum" className="secondary-button">See the challenge path</a>
             </div>
             <div className="landing-trust"><ShieldCheck size={17} /><span>Adults own the account. Learners use a display name and broad age range—no birth date or child email required.</span></div>
           </div>
@@ -164,24 +171,24 @@ function LandingPage() {
             <div className="art-paper" />
             <div className="landing-mascot"><Mascot mood="curious" size={158} /></div>
             <div className="art-board">
-              <div className="art-board-top"><span>Year-one project / 01</span><Compass size={18} /></div>
-              <h3>From first prompt<br /><span>to first app.</span></h3>
-              <div className="art-sketch"><Sparkles size={22} /><span>Learn · Plan · Build · Check</span><Lightbulb size={22} /></div>
+              <div className="art-board-top"><span>Challenge 01 · Start here</span><Compass size={18} /></div>
+              <h3>From first question<br /><span>to first build.</span></h3>
+              <div className="art-sketch"><Sparkles size={22} /><span>Learn · Try · Improve · Build</span><Lightbulb size={22} /></div>
             </div>
-            <div className="art-chip one">A year of guided practice</div>
-            <div className="art-chip two">Safe, adult-led tool use</div>
+            <div className="art-chip one">One skill at a time</div>
+            <div className="art-chip two">Build more than you scroll</div>
           </div>
         </section>
-        <div className="landing-band"><strong>AI is a tool. Your judgment leads.</strong><span>Learn what it can do, where it falls short, and when not to use it.</span></div>
+        <div className="landing-band"><strong>AI fluency is a real-world skill.</strong><span>Build it gradually—with safe practice, clear goals, and your own judgment in the lead.</span></div>
         <section className="landing-section" aria-labelledby="how-heading">
-          <div className="section-heading"><div><div className="eyebrow">A practical curriculum</div><h2 id="how-heading">Skills before tools. Safety throughout.</h2><p>Interactive lessons teach judgment, prompt writing, and responsible project habits.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">Practice that feels like progress</div><h2 id="how-heading">Small challenges. Skills for the real world.</h2><p>Kids move from curious beginner to confident builder through age-fit practice, visible goals, and earned mastery.</p></div></div>
           <div className="feature-grid">
-            <article className="feature-note"><div className="feature-number">THE SIX-STEP LESSON LOOP</div><h3>Warm up. Watch. Try. Think. Check.</h3><p>Each lesson moves through Warm-up, Hook, Watch & Listen, Try It, Think, and Check. Browser read-aloud includes pause, replay, speed, and a visible transcript. Hands-on practice and typed reflections lead into a three-question check with feedback and retry; 80% is the pass mark.</p></article>
-            <article className="feature-note"><div className="feature-number">ACCOUNTABILITY WITHOUT PRESSURE</div><h3>Practice, review, and talk together.</h3><p>Lesson time and examples match the learner’s age band. Every lesson includes a safety note and a Talk it Over prompt for home. Guardians can review server-saved reflections and progress; activity drafts are not saved.</p></article>
+            <article className="feature-note"><div className="feature-number">THE SIX-STEP CHALLENGE</div><h3>Warm up. Explore. Try. Think. Check.</h3><p>Each short lesson follows Warm-up, Hook, Watch & Listen, Try It, Think, and Check. Kids practice one skill, reflect in their own words, and earn progress by reaching an 80% check—not by rushing or spending more time online.</p></article>
+            <article className="feature-note"><div className="feature-number">GROW AT THE RIGHT PACE</div><h3>More depth as they grow.</h3><p>Every age path teaches the same core ideas with different language, examples, lesson lengths, and challenge depth. Level milestones, a gentle weekly goal, and family conversations support steady learning without pressure streaks.</p></article>
           </div>
         </section>
         <section className="landing-section curriculum-section" id="curriculum" aria-labelledby="curriculum-heading">
-          <div className="section-heading"><div><div className="eyebrow">Year one · beginner to builder</div><h2 id="curriculum-heading">A clear path to a basic app.</h2><p>Choose a learner path—Curious Starter (10–12), Thoughtful Explorer (13–15), or Independent Builder (16+). Core skills stay consistent while examples and depth change with age.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">Four levels · beginner to builder</div><h2 id="curriculum-heading">Build real-world AI confidence, one level at a time.</h2><p>Choose a learner path—Curious Starter (10–12), Thoughtful Explorer (13–15), or Independent Builder (16+). Lessons become more detailed and independent as learners grow, while the same core skills remain.</p></div></div>
           <div className="curriculum-grid">
             <article className="curriculum-card"><span>LEVEL 01 · ENGAGING WITH AI</span><h3>AI Foundations</h3><p>Patterns and predictions, how AI answers, made-up details, checking evidence, and keeping private information private.</p></article>
             <article className="curriculum-card"><span>LEVEL 02 · MANAGING AI</span><h3>Safe & Responsible Use</h3><p>Classroom honesty, bias, high-stakes questions, and when to pause and ask a trusted person.</p></article>
@@ -191,7 +198,7 @@ function LandingPage() {
           <p className="curriculum-note"><ShieldCheck size={17} /> AI examples are simulated; there is no live child chatbot. Every lesson has browser speech with captions, a hands-on activity, a typed reflection, a mixed quiz with retry, and a family conversation prompt. Lesson time and examples adapt to age. If something feels wrong, stop and talk to a trusted adult.</p>
         </section>
         <section className="landing-section home-family-section" aria-labelledby="family-learning-heading">
-          <div className="home-family-panel"><div><div className="eyebrow">For parents & guardians</div><h2 id="family-learning-heading">A thoughtful first step into AI, at home.</h2><p>Explore AI together outside the classroom with guided lessons that build curiosity, sound judgment, and creative skills at a family-friendly pace.</p><ul><li>Age-based paths for learners 10+</li><li>Interactive demos for learning by trying</li><li>Parent-owned profiles with no child email or birth date</li></ul></div><div className="home-family-callout"><strong>Made for family learning</strong><span>One adult manages the account and learner profiles. Choose a path together, work through the lessons at your own pace, and keep real AI tools under adult supervision.</span></div></div>
+          <div className="home-family-panel"><div><div className="eyebrow">For parents & guardians</div><h2 id="family-learning-heading">Turn curiosity into making.</h2><p>Give kids a creative alternative to passive screen time: learn how AI works, practice making good choices, and work toward building useful things safely.</p><ul><li>Age-based paths for learners 10+</li><li>Short lessons with clear goals and level progress</li><li>Parent-owned profiles with no child email or birth date</li></ul></div><div className="home-family-callout"><strong>Progress earned through learning</strong><span>One adult manages the account and learner profiles. Kids advance by practicing, reflecting, and showing what they understand. Real AI tools stay under adult supervision.</span></div></div>
         </section>
         <section className="landing-section" aria-labelledby="price-heading">
           <div className="section-heading"><div><div className="eyebrow">One monthly family plan</div><h2 id="price-heading">A full year of learning and making.</h2><p>One adult account manages billing and learner profiles.</p></div></div>
@@ -567,6 +574,7 @@ function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string
   const scorePercent = Math.round((score / lesson.steps.length) * 100);
   const speechText = `${lesson.introduction} ${lesson.steps.map((item) => `${item.heading}. ${item.explanation}. ${item.question}. ${item.options.join('. ')}. ${item.feedback}`).join(' ')} ${lesson.reflectionPrompt} ${lesson.activity.instruction} ${lesson.familyPrompt}`;
   const quizSpeechText = lesson.steps.map((item, index) => `Question ${index + 1}. ${item.question}. Choices: ${item.options.join('. ')}. ${item.feedback}`).join(' ');
+  const reflectionReady = reflection.trim().length >= 30;
   const startSpeech = (text = speechText) => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -589,7 +597,7 @@ function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string
     }
   };
   const completeLesson = () => {
-    if (scorePercent < passingScore || !activityText.trim() || !reflection.trim() || !watchCompleted) return;
+    if (scorePercent < passingScore || !activityText.trim() || !reflectionReady || !watchCompleted) return;
     setSaveError('');
     complete.mutate({ childId: child.id, data: {
       lessonId: lessonApiIds[lesson.id],
@@ -632,7 +640,7 @@ function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string
                <details className="lesson-transcript" open><summary><Volume2 size={15} /> Captions & transcript</summary><p>{renderSpeechText(speechText, speechCharIndex)}</p></details><button type="button" className="secondary-button" onClick={() => setWatchCompleted(true)}>{watchCompleted ? 'Transcript completed' : 'I finished reading the transcript'} <Check size={15} /></button>
             </>}
             {stage === 3 && <><h2 id="step-heading">{lesson.activity.title}</h2><p className="step-explanation">{lesson.activity.instruction}</p><label className="lesson-field-label" htmlFor="activity-draft">Your activity notes</label><textarea id="activity-draft" rows={4} maxLength={400} value={activityText} onChange={(event) => setActivityText(event.target.value)} placeholder={lesson.activity.placeholder} /><p className="not-saved-note">This activity draft stays in this browser session. Only activity completion is recorded with the lesson.</p></>}
-            {stage === 4 && <><h2 id="step-heading">Think it through</h2><p className="step-explanation">{lesson.reflectionPrompt}</p>{lesson.sentenceStarters && <div className="sentence-starters" aria-label="Sentence starters">{lesson.sentenceStarters.map((starter) => <button type="button" key={starter} className="secondary-button" onClick={() => setReflection((current) => `${current}${current ? ' ' : ''}${starter}`)}>{starter}</button>)}</div>}<label className="lesson-field-label" htmlFor="lesson-reflection">Your reflection <span>{reflection.length}/280</span></label><textarea id="lesson-reflection" rows={3} maxLength={280} value={reflection} onChange={(event) => setReflection(event.target.value)} placeholder={ageBand === '10-12' ? 'A few words is enough…' : 'Write a short reflection…'} /><p className="not-saved-note">Your reflection is saved to the family account when you complete this lesson.</p></>}
+            {stage === 4 && <><h2 id="step-heading">Think it through</h2><p className="step-explanation">{lesson.reflectionPrompt}</p>{lesson.sentenceStarters && <div className="sentence-starters" aria-label="Sentence starters">{lesson.sentenceStarters.map((starter) => <button type="button" key={starter} className="secondary-button" onClick={() => setReflection((current) => `${current}${current ? ' ' : ''}${starter}`)}>{starter}</button>)}</div>}<label className="lesson-field-label" htmlFor="lesson-reflection">Your reflection <span>{reflection.length}/280</span></label><textarea id="lesson-reflection" rows={3} maxLength={280} value={reflection} onChange={(event) => setReflection(event.target.value)} placeholder={ageBand === '10-12' ? 'Write one or two sentences…' : 'Write a short reflection…'} /><p className="not-saved-note">{reflectionReady ? 'Your reflection is saved to the family account when you complete this lesson.' : 'Write at least 30 characters in your own words to continue.'}</p></>}
             {stage === 5 && <><h2 id="step-heading">Check what stuck</h2><p className="step-explanation">Three questions. Choose an answer for each, get feedback, and retry if you need another go. You need {passingScore}% to pass.</p><button type="button" className="secondary-button" onClick={() => startSpeech(quizSpeechText)} disabled={!('speechSynthesis' in window)}><Volume2 size={15} /> Read questions and choices to me</button><div className="lesson-quiz">{lesson.steps.map((question, questionIndex) => {
               const answer = quizAnswers[questionIndex];
               const correct = answer === question.correctIndex;
@@ -640,8 +648,8 @@ function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string
             })}</div>{!quizSubmitted ? <button type="button" className="secondary-button" onClick={() => setQuizSubmitted(true)} disabled={quizAnswers.length < lesson.steps.length || quizAnswers.some((answer) => answer === null)}>Check answers</button> : <div className={`quiz-result ${scorePercent >= passingScore ? 'passed' : 'retry'}`} role="status"><strong>{scorePercent}% · {scorePercent >= passingScore ? 'Pass mark reached' : 'Not there yet'}</strong><span>{scorePercent >= passingScore ? 'You can complete the lesson.' : `You need ${passingScore}%. Review the feedback, then retry.`}</span>{scorePercent < passingScore && <button type="button" className="secondary-button" onClick={() => { setQuizAnswers([]); setQuizSubmitted(false); }}>Retry quiz</button>}</div>}
               {saveError && <p role="alert" className="save-error" data-testid="status-save-error">{saveError}</p>}<div className="lesson-family-prompt"><div className="eyebrow">Talk it Over</div><p>{lesson.familyPrompt}</p><span>Take this question to a trusted adult or family member. This conversation is not recorded.</span></div>
             </>}
-            {stage < 5 && <div className="lesson-step-actions">{stage > 0 && <button className="secondary-button" type="button" onClick={() => setStage((current) => Math.max(0, current - 1))}>Back</button>}<button className="primary-button" type="button" onClick={() => setStage((current) => Math.min(5, current + 1))} disabled={(stage === 0 && warmUpQuestions.some((_, index) => warmUpAnswers[index] === null)) || (stage === 2 && !watchCompleted) || (stage === 3 && !activityText.trim()) || (stage === 4 && !reflection.trim())}>{stage === 0 && warmUpQuestions.some((_, index) => warmUpAnswers[index] === null) ? 'Answer the quick review first' : stage === 2 && !watchCompleted ? 'Listen or read the transcript first' : stage === 3 && !activityText.trim() ? 'Add activity notes to continue' : stage === 4 && !reflection.trim() ? 'Write a short reflection to continue' : 'Continue'} <ArrowRight size={17} /></button></div>}
-            {stage === 5 && quizSubmitted && scorePercent >= passingScore && <div className="lesson-actions"><button className="primary-button" type="button" onClick={completeLesson} disabled={complete.isPending || !activityText.trim() || !reflection.trim() || !watchCompleted}>{complete.isPending ? 'Saving your lesson…' : 'Save completed lesson'} <ArrowRight size={17} /></button></div>}
+            {stage < 5 && <div className="lesson-step-actions">{stage > 0 && <button className="secondary-button" type="button" onClick={() => setStage((current) => Math.max(0, current - 1))}>Back</button>}<button className="primary-button" type="button" onClick={() => setStage((current) => Math.min(5, current + 1))} disabled={(stage === 0 && warmUpQuestions.some((_, index) => warmUpAnswers[index] === null)) || (stage === 2 && !watchCompleted) || (stage === 3 && !activityText.trim()) || (stage === 4 && !reflectionReady)}>{stage === 0 && warmUpQuestions.some((_, index) => warmUpAnswers[index] === null) ? 'Answer the quick review first' : stage === 2 && !watchCompleted ? 'Listen or read the transcript first' : stage === 3 && !activityText.trim() ? 'Complete the hands-on activity to continue' : stage === 4 && !reflectionReady ? 'Write at least 30 characters to continue' : 'Continue'} <ArrowRight size={17} /></button></div>}
+            {stage === 5 && quizSubmitted && scorePercent >= passingScore && <div className="lesson-actions"><button className="primary-button" type="button" onClick={completeLesson} disabled={complete.isPending || !activityText.trim() || !reflectionReady || !watchCompleted}>{complete.isPending ? 'Saving your lesson…' : 'Save completed lesson'} <ArrowRight size={17} /></button></div>}
           </section><aside className="safety-note"><ShieldCheck size={19} /><span><strong>A note for every lesson</strong>{lesson.safetyNote}</span></aside>
         </> : <section className="complete-panel" data-testid="lesson-completion"><div className="complete-seal"><CheckCircle2 size={39} /></div><div className="step-label">{alreadyCompleted ? 'Trail revisited' : 'Trail complete'}</div><h2>{alreadyCompleted ? 'Good to see you again.' : 'A new idea, in your kit.'}</h2><p>{alreadyCompleted ? 'You explored this lesson again. Keep the questions handy as you explore.' : `This trail is now saved to ${child.displayName}’s progress. Keep checking, keep asking, and remember: AI is a tool—not a substitute for your thinking.`}</p><div className="complete-actions"><button type="button" className="secondary-button" onClick={restartLesson} data-testid="button-revisit-lesson"><RotateCcw size={15} /> Revisit this trail</button><Link href={`/learn/${child.id}`} className="primary-button" data-testid="link-finish-home">Back to all trails <ArrowRight size={16} /></Link><Link href="/family" className="secondary-button" data-testid="link-finish-family">Family account</Link></div></section>}
       </main>

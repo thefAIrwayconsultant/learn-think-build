@@ -39,6 +39,8 @@ Parent-guided AI literacy for learners ages 10+, with age-banded lessons, hands-
 ## Product
 
 - Parent-led, at-home AI education for learners 10+.
+- The goal is to help children safely teach themselves AI skills they will need in the real world, building ability gradually through age-appropriate lessons and playful progress. Position it as a creative alternative to passive screen time: help children want to make and build with AI safely, not only consume content.
+- Make lessons increasingly detailed by age and prior mastery. Use game-inspired challenges, visible progress, mastery scores, personal bests, and badges to reward understanding and creation—not speed, pressure streaks, or time spent online. Do not advertise high scores, badges, or other game features as available until they are implemented.
 - Three age paths: 10–12 Curious Starter, 13–15 Thoughtful Explorer, and 16+ Independent Builder. Teach the same core skills with age-adjusted language, examples, pacing, and depth.
 - Each lesson uses a consistent six-step loop: Warm-up, Hook, Watch & Listen, Try It, Think, and Check. Lessons combine narration with synchronized visuals, interaction, retrieval practice, reflection, and spaced review; never match learners to a single “learning style.”
 - Lesson completion requires the explainer/transcript, hands-on activity, a non-empty learner reflection, and an 80%+ mixed check. Each lesson ends with a family Talk it Over card.
