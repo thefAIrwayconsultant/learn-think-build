@@ -71,7 +71,7 @@ export function LearnerHub({ child, familyLearners }: { child: ChildProfile; fam
       <p>I will protect private information, check important answers, follow the rules, and stop to ask a trusted adult if anything feels wrong.</p>
       <p className="pledge-status"><span className={s.learnerAgreedLevel >= target ? 'ok' : ''}>{s.learnerAgreedLevel >= target ? 'You agreed' : 'You have not agreed yet'}</span> · <span className={s.pledgeLevel >= target ? 'ok' : ''}>{s.pledgeLevel >= target ? 'Guardian agreed' : 'Guardian has not agreed yet'}</span></p>
       {agreeable && <button className="primary-button" type="button" onClick={learnerPledge} disabled={save.isPending} data-testid="button-learner-pledge">{save.isPending ? 'Saving…' : 'I agree'} <Check size={16} /></button>}
-      {s.learnerAgreedLevel >= target && s.pledgeLevel < target && <p className="level-hint">Ask your guardian to agree to the pledge from the Family account page.</p>}
+      {s.learnerAgreedLevel >= target && s.pledgeLevel < target && <p className="level-hint">Lessons unlock after your guardian agrees. <Link href="/family" className="text-action" data-testid="link-guardian-pledge">Open Family account for guardian approval</Link>.</p>}
       {pledgeError && <p className="activity-feedback bad" role="alert">{pledgeError}</p>}
     </section>}
     <section className="levels-list" aria-labelledby="trails-heading"><div className="section-heading"><div><h2 id="trails-heading">Your learning path</h2><p>Explore one short mission each day. Finish the chapter, pass its mastery check, and make a project for your guardian to review before the next chapter opens.</p></div></div>
