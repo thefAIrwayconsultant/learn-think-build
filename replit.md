@@ -156,6 +156,7 @@ All 21 historical lesson IDs stay in their corresponding new chapter, and aliase
 - API `/api/healthz` returned 200. The daily-usage route requires a real guardian-owned learner; a request for a nonexistent learner was rejected, not used as authenticated timer evidence.
 - A repository-wide search found no prior family price amounts; the app’s single price constant is `$4.99`. Billing remains “coming soon.”
 - The new development daily-time table has not been applied to production. Publish is required before the production app can enforce the 10-minute cap.
+- For the reported Google sign-in followed by blocked lesson access, recent production logs show successful OAuth/session requests and no learner lesson-route errors, but cannot identify the reporting user or their family setup. Preview sign-in now falls back to the family dashboard; when the guardian pledge is pending, the learner page provides a direct link to family approval. This fix has not yet been published or verified with the owner’s production account.
 
 ### Browser coverage and limitations
 
@@ -187,7 +188,7 @@ The remaining detailed browser records below are from the prior curriculum, befo
 
 The current published domain was confirmed through deployment metadata as `https://learnthinkbuild.com`. Live requests returned 200 for `/`, `/sign-in`, `/api/healthz` and `/api/__clerk/v1/environment`; `/api/family` correctly returned 401 without a session. These checks establish routing, health, the Clerk proxy and the signed-out API boundary—not successful authenticated production use.
 
-The published site continues to serve its previous build until the owner clicks Publish. Managed Clerk production users are separate from development test users. Never claim that a programmatic preview test proves a real production sign-in, and never enable testing claim overrides on the live site. The pre-publish schema diff reports a new quiz-attempt table/index/foreign key and missing additive columns for age bands, learning state, reflections, duration, scores and discussion status; it reports no structural data loss or backwards-compatibility warning. Apply these changes through Publish before serving the new experience.
+The owner published the curriculum rebuild after the previous preview-only checks; the later sign-in fallback and guardian-approval link are still preview-only and require another owner-initiated Publish. Managed Clerk production users are separate from development test users. Never claim that a programmatic preview test proves a real production sign-in, and never enable testing claim overrides on the live site. The pre-publish schema diff reports a new quiz-attempt table/index/foreign key and missing additive columns for age bands, learning state, reflections, duration, scores and discussion status; it reports no structural data loss or backwards-compatibility warning.
 
 ## Pointers
 
