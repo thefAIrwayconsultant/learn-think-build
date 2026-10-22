@@ -1,6 +1,51 @@
 import { randomInt } from "node:crypto";
 import { levels, getLessonsForAgeBand, normalizeLessonId, type AgeBand, type Question } from "@workspace/curriculum";
 
+export const DAILY_LEARNING_LIMIT_SECONDS = 10 * 60;
+const HEARTBEAT_MAX_GAP_SECONDS = 10;
+const LEARNING_WINDOW_MILLISECONDS = 24 * 60 * 60 * 1000;
+
+export type DailyLearningRecord = {
+  windowStartedAt: Date;
+  secondsUsed: number;
+  lastHeartbeatAt: Date;
+  active: boolean;
+};
+
+export type DailyLearningSummary = {
+  usedSeconds: number;
+  remainingSeconds: number;
+  resetAt: string;
+};
+
+export function summarizeDailyLearning(record: DailyLearningRecord | undefined, now = new Date()): DailyLearningSummary {
+  if (!record || now.getTime() - record.windowStartedAt.getTime() >= LEARNING_WINDOW_MILLISECONDS) {
+    return { usedSeconds: 0, remainingSeconds: DAILY_LEARNING_LIMIT_SECONDS,
+      resetAt: new Date(now.getTime() + LEARNING_WINDOW_MILLISECONDS).toISOString() };
+  }
+  const elapsed = record.active
+    ? Math.min(HEARTBEAT_MAX_GAP_SECONDS, Math.max(0, Math.floor((now.getTime() - record.lastHeartbeatAt.getTime()) / 1000)))
+    : 0;
+  const usedSeconds = Math.min(DAILY_LEARNING_LIMIT_SECONDS, Math.max(0, record.secondsUsed) + elapsed);
+  return { usedSeconds, remainingSeconds: Math.max(0, DAILY_LEARNING_LIMIT_SECONDS - usedSeconds),
+    resetAt: new Date(record.windowStartedAt.getTime() + LEARNING_WINDOW_MILLISECONDS).toISOString() };
+}
+
+export function advanceDailyLearning(
+  record: DailyLearningRecord | undefined,
+  active: boolean,
+  now = new Date(),
+): DailyLearningRecord {
+  const previous = summarizeDailyLearning(record, now);
+  const expired = !record || now.getTime() - record.windowStartedAt.getTime() >= LEARNING_WINDOW_MILLISECONDS;
+  return {
+    windowStartedAt: expired ? now : record.windowStartedAt,
+    secondsUsed: previous.usedSeconds,
+    lastHeartbeatAt: now,
+    active: active && previous.remainingSeconds > 0,
+  };
+}
+
 export type LearningState = {
   revision: number;
   weeklyGoal: number;

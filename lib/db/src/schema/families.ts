@@ -1,5 +1,6 @@
 import { createInsertSchema } from "drizzle-zod";
 import {
+  boolean,
   index,
   integer,
   jsonb,
@@ -74,6 +75,23 @@ export const childLevelMasteryTable = pgTable(
     primaryKey({ columns: [table.childId, table.levelId] }),
     index("child_level_mastery_child_id_idx").on(table.childId),
   ],
+);
+
+/**
+ * Server-owned active-learning time. One rolling 24-hour budget per learner;
+ * only the current window is retained, and completed lesson history is untouched.
+ */
+export const childDailyLearningTable = pgTable(
+  "child_daily_learning",
+  {
+    childId: uuid("child_id")
+      .primaryKey()
+      .references(() => childProfilesTable.id, { onDelete: "cascade" }),
+    windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull(),
+    secondsUsed: integer("seconds_used").notNull().default(0),
+    lastHeartbeatAt: timestamp("last_heartbeat_at", { withTimezone: true }).notNull(),
+    active: boolean("active").notNull().default(false),
+  },
 );
 
 export const insertChildProfileSchema = createInsertSchema(

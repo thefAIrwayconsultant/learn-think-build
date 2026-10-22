@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { levels, getLessonsForAgeBand } from "@workspace/curriculum";
+import { advanceDailyLearning, DAILY_LEARNING_LIMIT_SECONDS, summarizeDailyLearning } from "./learning-rules";
 import { canonicalIds, gradeQuestions, lessonReady, levelReady, normalizeState, pickQuestions, validReflection, mergeProgressRecords, weakTopicCounts } from "./learning-rules";
 
 test("legacy aliases are deduplicated without granting unknown credit", () => {
@@ -8,7 +9,24 @@ test("legacy aliases are deduplicated without granting unknown credit", () => {
     ["what-is-ai", "clear-instructions", "check-the-answer"]);
   assert.equal(normalizeState({ weeklyGoal: 3, pledgeLevel: 1, projects: {} }).learnerAgreedLevel, 0);
 });
-test("the whole 21-lesson path enforces pledges, sequence, mastery AND project", () => {
+test("the daily time limit counts visible intervals, pauses, and unlocks after 24 hours", () => {
+  const startedAt = new Date("2026-10-22T10:00:00.000Z");
+  const first = advanceDailyLearning(undefined, true, startedAt);
+  assert.equal(first.secondsUsed, 0);
+  assert.equal(summarizeDailyLearning(first, new Date("2026-10-22T10:00:05.000Z")).usedSeconds, 5);
+  const paused = advanceDailyLearning(first, false, new Date("2026-10-22T10:00:05.000Z"));
+  assert.equal(paused.secondsUsed, 5);
+  assert.equal(summarizeDailyLearning(paused, new Date("2026-10-22T10:50:00.000Z")).usedSeconds, 5);
+
+  const nearlyDone = { ...paused, active: true, secondsUsed: DAILY_LEARNING_LIMIT_SECONDS - 5,
+    lastHeartbeatAt: new Date("2026-10-22T10:00:05.000Z") };
+  const exhausted = advanceDailyLearning(nearlyDone, true, new Date("2026-10-22T10:00:10.000Z"));
+  assert.equal(summarizeDailyLearning(exhausted, new Date("2026-10-22T10:00:10.000Z")).remainingSeconds, 0);
+  assert.equal(summarizeDailyLearning(exhausted, new Date("2026-10-23T10:00:10.000Z")).remainingSeconds, 600);
+  assert.equal(advanceDailyLearning(exhausted, false, new Date("2026-10-22T10:10:05.000Z")).secondsUsed, 600);
+});
+
+test("the whole 80-session path enforces pledges, sequence, mastery AND project", () => {
   const state = normalizeState({});
   const complete = new Set<string>(), mastered = new Set<string>();
   assert.equal(lessonReady(levels[0].lessonIds[0], complete, mastered, state), false);
@@ -29,7 +47,7 @@ test("the whole 21-lesson path enforces pledges, sequence, mastery AND project",
       assert.equal(levelReady(i + 1, complete, mastered, state), true);
     }
   }
-  assert.equal(complete.size, 21);
+  assert.equal(complete.size, 80);
 });
 test("historical lesson remains reviewable even without a new pledge", () => {
   assert.equal(lessonReady("test-app", new Set(["test-app"]), new Set(), normalizeState({})), true);

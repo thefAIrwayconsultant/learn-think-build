@@ -55,6 +55,16 @@ Parent-guided AI literacy for learners ages 10+, with age-banded lessons, hands-
 
 ## User preferences
 
+### Sign-up and sign-in presentation
+
+- Refreshed the existing Clerk screens with one form panel instead of a nested tinted frame, consistent blue branding, clear input borders/focus states, 48px+ controls, readable button contrast, and 16px input text to avoid iPhone focus zoom.
+- Consolidated conflicting responsive auth styles and removed the duplicate in-form brand logo. The site header still links home. Footer links wrap as complete words on narrow screens.
+- Corrected the Tailwind/Clerk production stylesheet build configuration. Authentication keys, proxy, routes, provider choices, session transport, and verification behavior were not changed.
+- Visually checked signup at 320px, 390px, and 1280px, plus sign-in at 390px. Web typecheck and production build passed; workflow startup was clean. Real production account creation/OAuth and physical-iPhone interaction were not retested as part of this appearance-only change.
+- The live page inspected before this update was still the older published build with the $79.99 annual plan and Sample feedback link. Publish the updated build to replace it; the current signup shows $9.99/month with checkout coming soon.
+
+### Product scope
+
 - Keep learning intuitive while holding learners accountable.
 - Do not market the product for school sales; focus on parents introducing AI at home.
 - Position the app as a safe AI jumpstart for curious children: introduce the basics now and gradually build practical skills for future study and work. AI literacy is becoming table stakes in today's business world; do not promise employment or replace age-appropriate learning with job-training pressure.

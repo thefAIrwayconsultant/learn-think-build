@@ -1,5 +1,6 @@
 export type AgeBand = '10-12' | '13-15' | '16-plus';
-export type LevelId = 'ai-foundations' | 'responsible-use' | 'prompt-craft' | 'app-builder';
+export type LegacyLevelId = 'ai-foundations' | 'responsible-use' | 'prompt-craft' | 'app-builder';
+export type LevelId = LegacyLevelId | 'meet-the-ais' | 'prompting-power' | 'when-to-use-ai' | 'when-to-trust-ai';
 export type Question = {
   id: string;
   lessonId: string;
@@ -14,6 +15,8 @@ export type ActivityKind = 'predictor' | 'model-sorter' | 'hallucination' | 'rea
 export type Lesson = {
   id: string;
   levelId: LevelId;
+  sessionNumber: number;
+  chapterSessionCount: number;
   title: string;
   topic: string;
   summary: string;

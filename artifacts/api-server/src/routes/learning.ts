@@ -2,13 +2,13 @@ import { Router, type Request, type Response } from "express";
 import { getAuth } from "@clerk/express";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod/v4";
-import { db, childProfilesTable, childProgressTable, childLevelMasteryTable, quizAttemptsTable } from "@workspace/db";
+import { db, childProfilesTable, childProgressTable, childLevelMasteryTable, childDailyLearningTable, quizAttemptsTable } from "@workspace/db";
 import { levels, getLessonsForAgeBand, normalizeLessonId, type AgeBand, type Question } from "@workspace/curriculum";
 import {
   StartLearningQuizBody, StartLearningQuizResponse, SubmitReviewQuizBody, SubmitReviewQuizResponse,
   CompleteChildLessonBody, CompleteChildLessonResponse, SubmitLevelAssessmentBody, SubmitLevelAssessmentResponse,
 } from "@workspace/api-zod";
-import { canonicalIds, normalizeState, lessonReady, levelReady, pickQuestions, gradeQuestions, validReflection } from "../lib/learning-rules";
+import { canonicalIds, normalizeState, lessonReady, levelReady, pickQuestions, gradeQuestions, validReflection, summarizeDailyLearning } from "../lib/learning-rules";
 
 const router = Router();
 async function context(req: Request, res: Response) {
@@ -21,13 +21,23 @@ async function context(req: Request, res: Response) {
   if (!profile) { res.status(404).json({ error: "Learner profile not found." }); return null; }
   const progress = await db.select().from(childProgressTable).where(eq(childProgressTable.childId, profile.id));
   const mastery = await db.select().from(childLevelMasteryTable).where(eq(childLevelMasteryTable.childId, profile.id));
+  const [dailyRecord] = await db.select().from(childDailyLearningTable)
+    .where(eq(childDailyLearningTable.childId, profile.id)).limit(1);
   return { profile, completed: new Set(canonicalIds(progress.map(row => row.lessonId))),
     mastered: new Set(mastery.map(row => row.levelId)), state: normalizeState(profile.learningState),
+    dailyUsage: summarizeDailyLearning(dailyRecord),
     ageBand: (profile.ageBand ?? "10-12") as AgeBand };
+}
+
+function requireLearningTime(ctx: Awaited<ReturnType<typeof context>>, res: Response): boolean {
+  if (!ctx || ctx.dailyUsage.remainingSeconds > 0) return true;
+  res.status(429).json({ error: "Your ten minutes of learning time are up for now. Your daily time window will reset automatically." });
+  return false;
 }
 
 router.post("/family/children/:childId/quiz", async (req, res): Promise<void> => {
   const ctx = await context(req, res); if (!ctx) return;
+  if (!requireLearningTime(ctx, res)) return;
   const parsed = StartLearningQuizBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Choose a lesson, level, or mixed review." }); return; }
   const { kind } = parsed.data;
@@ -76,6 +86,7 @@ router.post("/family/children/:childId/quiz", async (req, res): Promise<void> =>
 
 router.post("/family/children/:childId/lessons/:lessonId/review", async (req, res): Promise<void> => {
   const ctx = await context(req, res); if (!ctx) return;
+  if (!requireLearningTime(ctx, res)) return;
   const lessonId = normalizeLessonId(String(req.params.lessonId));
   if (!ctx.completed.has(lessonId)) { res.status(403).json({ error: "Only completed lessons can be marked reviewed." }); return; }
   await db.transaction(async tx => {
@@ -137,6 +148,7 @@ function submissionError(error: unknown, res: Response) {
 
 router.post("/family/children/:childId/progress", async (req, res): Promise<void> => {
   const ctx = await context(req, res); if (!ctx) return;
+  if (!requireLearningTime(ctx, res)) return;
   const parsed = CompleteChildLessonBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Finish the explainer, activity, reflection, and all check questions." }); return; }
   const body = parsed.data;
@@ -170,6 +182,7 @@ router.post("/family/children/:childId/progress", async (req, res): Promise<void
 
 router.post("/family/children/:childId/assessments", async (req, res): Promise<void> => {
   const ctx = await context(req, res); if (!ctx) return;
+  if (!requireLearningTime(ctx, res)) return;
   const parsed = SubmitLevelAssessmentBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: "Answer every question in this mastery check." }); return; }
   const body = parsed.data;
@@ -192,6 +205,7 @@ router.post("/family/children/:childId/assessments", async (req, res): Promise<v
 
 router.post("/family/children/:childId/review-quiz", async (req, res): Promise<void> => {
   const ctx = await context(req, res); if (!ctx) return;
+  if (!requireLearningTime(ctx, res)) return;
   const body = SubmitReviewQuizBody.safeParse(req.body);
   if (!body.success) { res.status(400).json({ error: "Answer every mixed review question." }); return; }
   try {

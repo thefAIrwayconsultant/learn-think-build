@@ -109,6 +109,40 @@ paths:
           description: Sign-in required
         "404":
           description: Learner profile not found
+  /family/children/{childId}/daily-usage:
+    get:
+      operationId: getChildDailyUsage
+      tags: [family]
+      summary: Get active learning time remaining in the learner's 24-hour window
+      parameters:
+        - { name: childId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Server-calculated daily learning time
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyUsage" }
+        "401": { description: Sign-in required }
+        "404": { description: Learner profile not found }
+    post:
+      operationId: recordChildDailyUsage
+      tags: [family]
+      summary: Start, pause, or record active learning time
+      parameters:
+        - { name: childId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DailyUsageHeartbeat" }
+      responses:
+        "200":
+          description: Updated server-calculated daily learning time
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyUsage" }
+        "401": { description: Sign-in required }
+        "404": { description: Learner profile not found }
   /family/children/{childId}/quiz:
     post:
       operationId: startLearningQuiz
@@ -459,4 +493,16 @@ components:
         passed: { type: boolean }
         missedLessonIds: { type: array, items: { type: string } }
         feedback: { type: array, items: { type: string } }
+    DailyUsageHeartbeat:
+      type: object
+      required: [active]
+      properties:
+        active: { type: boolean }
+    DailyUsage:
+      type: object
+      required: [usedSeconds, remainingSeconds, resetAt]
+      properties:
+        usedSeconds: { type: integer, minimum: 0, maximum: 600 }
+        remainingSeconds: { type: integer, minimum: 0, maximum: 600 }
+        resetAt: { type: string, format: date-time }
 

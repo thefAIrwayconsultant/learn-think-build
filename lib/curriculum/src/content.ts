@@ -14,7 +14,7 @@ export type Seed = {
 };
 export const bands: AgeBand[] = ["10-12", "13-15", "16-plus"];
 
-export function makeLesson(seed: Seed, ageBand: AgeBand): Lesson {
+export function makeLesson(seed: Seed, ageBand: AgeBand, sessionNumber = 1, chapterSessionCount = 1): Lesson {
   const band = bands.indexOf(ageBand);
   const scenario = seed.scenarios[band];
   const questionSeeds: Check[] = [
@@ -38,8 +38,8 @@ export function makeLesson(seed: Seed, ageBand: AgeBand): Lesson {
   });
   const paragraphs = seed.scripts[band].split("~");
   return {
-    id: seed.id, levelId: seed.levelId, title: seed.title, topic: seed.topic, ageBand,
-    summary: seed.takeaway, durationMinutes: [11, 14, 18][band],
+    id: seed.id, levelId: seed.levelId, sessionNumber, chapterSessionCount, title: seed.title, topic: seed.topic, ageBand,
+    summary: seed.takeaway, durationMinutes: 10,
     hook: { scenario, prediction: band === 0 ? "What do you think you should do next?" : "What would you predict, and why?",
       options: [seed.action, seed.unsafe], feedback: seed.takeaway },
     scenes: paragraphs.map((narration, index) => ({

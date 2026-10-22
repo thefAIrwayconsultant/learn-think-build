@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm";
 import {
   childProfilesTable,
+  childDailyLearningTable,
   childLevelMasteryTable,
   childProgressTable,
   db,
@@ -17,7 +18,7 @@ import {
   quizAttemptsTable,
 } from "@workspace/db";
 import { levels, normalizeLessonId } from "@workspace/curriculum";
-import { canonicalIds, normalizeState, levelReady, mergeProgressRecords, weakTopicCounts } from "../lib/learning-rules";
+import { advanceDailyLearning, canonicalIds, normalizeState, levelReady, mergeProgressRecords, summarizeDailyLearning, weakTopicCounts } from "../lib/learning-rules";
 import learningRouter from "./learning";
 import {
   CompleteChildLessonBody,
@@ -50,6 +51,41 @@ router.use("/family/children/:childId", (req, res, next) => {
 function getGuardianId(req: Parameters<typeof getAuth>[0]): string | null {
   return getAuth(req).userId ?? null;
 }
+
+router.get("/family/children/:childId/daily-usage", async (req, res): Promise<void> => {
+  const guardianId = getGuardianId(req);
+  if (!guardianId) { res.status(401).json({ error: "Sign in with a parent or guardian account." }); return; }
+  const [profile] = await db.select({ id: childProfilesTable.id }).from(childProfilesTable)
+    .where(and(eq(childProfilesTable.id, req.params.childId), eq(childProfilesTable.guardianId, guardianId))).limit(1);
+  if (!profile) { res.status(404).json({ error: "Learner profile not found." }); return; }
+  const [record] = await db.select().from(childDailyLearningTable).where(eq(childDailyLearningTable.childId, profile.id)).limit(1);
+  res.json(summarizeDailyLearning(record));
+});
+
+router.post("/family/children/:childId/daily-usage", async (req, res): Promise<void> => {
+  const guardianId = getGuardianId(req);
+  if (!guardianId) { res.status(401).json({ error: "Sign in with a parent or guardian account." }); return; }
+  const body = z.object({ active: z.boolean() }).safeParse(req.body);
+  if (!body.success) { res.status(400).json({ error: "Choose whether the learner is actively learning." }); return; }
+  const summary = await db.transaction(async (tx) => {
+    const [profile] = await tx.select({ id: childProfilesTable.id }).from(childProfilesTable)
+      .where(and(eq(childProfilesTable.id, req.params.childId), eq(childProfilesTable.guardianId, guardianId)))
+      .limit(1).for("update");
+    if (!profile) return null;
+    const [record] = await tx.select().from(childDailyLearningTable)
+      .where(eq(childDailyLearningTable.childId, profile.id)).limit(1).for("update");
+    const now = new Date();
+    const next = advanceDailyLearning(record, body.data.active, now);
+    if (record) {
+      await tx.update(childDailyLearningTable).set(next).where(eq(childDailyLearningTable.childId, profile.id));
+    } else {
+      await tx.insert(childDailyLearningTable).values({ childId: profile.id, ...next });
+    }
+    return summarizeDailyLearning(next, now);
+  });
+  if (!summary) { res.status(404).json({ error: "Learner profile not found." }); return; }
+  res.json(summary);
+});
 
 async function ensureGuardian(id: string) {
   await db.insert(guardiansTable).values({ id }).onConflictDoNothing();
