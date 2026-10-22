@@ -6,7 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './ageBand';
+export * from './ageBandInput';
+export * from './ageBandResponse';
 export * from './childProfile';
+export * from './childProfileAgeBand';
 export * from './childProfileInput';
 export * from './guardianFamily';
 export * from './healthStatus';

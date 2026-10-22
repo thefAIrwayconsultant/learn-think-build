@@ -196,6 +196,9 @@
 .lesson-progress { height:5px; background:hsl(var(--primary) / .15); border-radius:9px; margin:22px 0 30px; overflow:hidden; }
 .lesson-progress div { height:100%; background:hsl(var(--accent)); transition:width .25s ease; border-radius:9px; }
 .step-card { border:1px solid hsl(var(--border)); background:hsl(var(--card)); border-radius:19px; padding:27px 29px 30px; box-shadow:var(--shadow-xs); animation:rise .35s ease both; }
+.lesson-introduction { margin:22px 0 16px; padding:22px 25px; border:1px solid hsl(var(--border)); border-left:4px solid hsl(var(--primary)); border-radius:16px; background:hsl(var(--card)); box-shadow:var(--shadow-xs); }
+.lesson-introduction h2 { margin:7px 0 8px; font:700 23px/1.2 'Space Grotesk',sans-serif; letter-spacing:-.04em; }
+.lesson-introduction p { max-width:760px; margin:0; color:hsl(var(--muted-foreground)); font-size:14px; line-height:1.75; }
 .step-label { color:hsl(var(--accent)); font:11px var(--app-font-mono); text-transform:uppercase; letter-spacing:.12em; }
 .step-card h2 { font:700 27px 'Space Grotesk',sans-serif; letter-spacing:-1px; margin:9px 0 12px; }
 .step-explanation { margin:0; color:hsl(var(--muted-foreground)); font-size:15px; line-height:1.8; max-width:720px; }
@@ -353,6 +356,11 @@
 .form-hint { font-size:11px; color:hsl(var(--muted-foreground)); }
 .family-note { display:flex; gap:12px; padding:15px; background:hsl(var(--secondary) / .28); border-radius:13px; color:hsl(var(--foreground)); font-size:12px; line-height:1.6; margin-top:15px; }
 .family-note svg { flex:none; color:hsl(var(--primary)); }
+.age-band-setup { max-width:850px; }
+.age-band-setup-card { margin:20px 0 38px; padding:clamp(22px,4vw,38px); border:1px solid hsl(var(--border)); border-radius:22px; background:hsl(var(--card)); box-shadow:var(--shadow-sm); }
+.age-band-setup-card h1 { margin:10px 0; font:700 clamp(32px,5vw,48px)/1.05 'Space Grotesk',sans-serif; letter-spacing:-.06em; }
+.age-band-setup-card > p { max-width:680px; margin:0 0 20px; color:hsl(var(--muted-foreground)); font-size:14px; line-height:1.7; }
+.age-band-setup-card > .primary-button { margin-top:20px; }
 .learn-header { display:flex; justify-content:space-between; align-items:center; margin:5px 0 30px; }
 .learn-greeting { display:flex; align-items:center; gap:14px; }
 .learn-greeting .child-avatar { width:54px; height:54px; font-size:21px; }
@@ -464,21 +472,21 @@
 .curriculum-card { min-height:190px; padding:22px; border:1px solid hsl(var(--border)); border-radius:17px; background:#fff; box-shadow:var(--shadow-xs); }
 .curriculum-card span { font:700 10px var(--app-font-mono); letter-spacing:.1em; color:hsl(var(--primary)); }
 .curriculum-card h3 { margin:18px 0 8px; font:700 19px 'Space Grotesk',sans-serif; letter-spacing:-.04em; }
-.curriculum-card p,.school-panel p,.school-panel li { color:hsl(var(--muted-foreground)); font-size:13px; line-height:1.65; }
+.curriculum-card p,.home-family-panel p,.home-family-panel li { color:hsl(var(--muted-foreground)); font-size:13px; line-height:1.65; }
 .curriculum-card p { margin:0; }
 .curriculum-note { display:flex; align-items:flex-start; gap:10px; padding:15px 17px; border-radius:13px; background:hsl(var(--muted)); color:hsl(var(--muted-foreground)); font-size:12px; line-height:1.6; }
 .curriculum-note svg { flex:none; color:hsl(var(--primary)); }
-.school-panel { display:grid; grid-template-columns:1fr 270px; gap:36px; align-items:center; padding:32px; background:#fff; border:1px solid hsl(var(--border)); border-radius:20px; box-shadow:var(--shadow-sm); }
-.school-panel h2 { margin:12px 0 9px; font:700 clamp(26px,4vw,36px)/1.1 'Space Grotesk',sans-serif; letter-spacing:-.05em; }
-.school-panel p { max-width:670px; }
-.school-panel ul { display:grid; gap:6px; padding-left:18px; }
-.school-callout { display:grid; gap:10px; padding:20px; border-radius:15px; background:#102b4e; color:#fff; }
-.school-callout strong { font:700 17px 'Space Grotesk',sans-serif; }
-.school-callout span { color:rgb(255 255 255 / .8); font-size:12px; line-height:1.6; }
+.home-family-panel { display:grid; grid-template-columns:1fr 270px; gap:36px; align-items:center; padding:32px; background:#fff; border:1px solid hsl(var(--border)); border-radius:20px; box-shadow:var(--shadow-sm); }
+.home-family-panel h2 { margin:12px 0 9px; font:700 clamp(26px,4vw,36px)/1.1 'Space Grotesk',sans-serif; letter-spacing:-.05em; }
+.home-family-panel p { max-width:670px; }
+.home-family-panel ul { display:grid; gap:6px; padding-left:18px; }
+.home-family-callout { display:grid; gap:10px; padding:20px; border-radius:15px; background:#102b4e; color:#fff; }
+.home-family-callout strong { font:700 17px 'Space Grotesk',sans-serif; }
+.home-family-callout span { color:rgb(255 255 255 / .8); font-size:12px; line-height:1.6; }
 @media (max-width:900px) { .curriculum-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:760px) {
-  .curriculum-grid,.school-panel { grid-template-columns:1fr; }
-  .school-panel { gap:20px; padding:24px; }
+  .curriculum-grid,.home-family-panel { grid-template-columns:1fr; }
+  .home-family-panel { gap:20px; padding:24px; }
   .curriculum-card { min-height:auto; }
 }
 .levels-list { display:grid; gap:21px; }
@@ -511,6 +519,7 @@
   .level-test-link { width:100%; }
   .assessment-card { padding:18px 15px; }
   .assessment-result h2 { font-size:25px; }
+  .lesson-introduction { padding:18px; }
 }
 .feedback-page { max-width:1020px; }
 .feedback-hero { max-width:720px; margin:30px 0 26px; }

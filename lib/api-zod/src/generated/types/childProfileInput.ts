@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AgeBand } from './ageBand';
 
 export interface ChildProfileInput {
   /**
@@ -12,4 +13,5 @@ export interface ChildProfileInput {
      * @maxLength 40
      */
   displayName: string;
+  ageBand: AgeBand;
 }

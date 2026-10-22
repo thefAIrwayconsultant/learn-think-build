@@ -27,6 +27,7 @@ export const childProfilesTable = pgTable(
       .notNull()
       .references(() => guardiansTable.id, { onDelete: "cascade" }),
     displayName: varchar("display_name", { length: 40 }).notNull(),
+    ageBand: varchar("age_band", { length: 10 }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

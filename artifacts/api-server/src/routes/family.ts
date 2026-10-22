@@ -21,6 +21,9 @@ import {
   DeleteChildProfileParams,
   GetFamilyResponse,
   CompleteChildLessonResponse,
+  UpdateChildAgeBandBody,
+  UpdateChildAgeBandParams,
+  UpdateChildAgeBandResponse,
   SubmitLevelAssessmentBody,
   SubmitLevelAssessmentParams,
   SubmitLevelAssessmentResponse,
@@ -130,6 +133,7 @@ router.get("/family", async (req, res): Promise<void> => {
     children: profiles.map((profile) => ({
       id: profile.id,
       displayName: profile.displayName,
+      ageBand: profile.ageBand,
       completedLessonIds: completedByChild.get(profile.id) ?? [],
       masteredLevelIds: masteredByChild.get(profile.id) ?? [],
       createdAt: profile.createdAt.toISOString(),
@@ -161,7 +165,7 @@ router.post("/family/children", async (req, res): Promise<void> => {
   }
   const [profile] = await db
     .insert(childProfilesTable)
-    .values({ guardianId, displayName })
+    .values({ guardianId, displayName, ageBand: parsed.data.ageBand })
     .returning();
 
   res
@@ -174,6 +178,42 @@ router.post("/family/children", async (req, res): Promise<void> => {
       }),
     );
 });
+
+router.patch(
+  "/family/children/:childId/age-band",
+  async (req, res): Promise<void> => {
+    const guardianId = getGuardianId(req);
+    if (!guardianId) {
+      res.status(401).json({ error: "Sign in with a parent or guardian account." });
+      return;
+    }
+
+    const params = UpdateChildAgeBandParams.safeParse(req.params);
+    const body = UpdateChildAgeBandBody.safeParse(req.body);
+    if (!params.success || !body.success) {
+      res.status(400).json({ error: "Choose one of the available age-band paths." });
+      return;
+    }
+
+    const [updated] = await db
+      .update(childProfilesTable)
+      .set({ ageBand: body.data.ageBand })
+      .where(
+        and(
+          eq(childProfilesTable.id, params.data.childId),
+          eq(childProfilesTable.guardianId, guardianId),
+        ),
+      )
+      .returning({ ageBand: childProfilesTable.ageBand });
+
+    if (!updated) {
+      res.status(404).json({ error: "Learner profile not found." });
+      return;
+    }
+
+    res.json(UpdateChildAgeBandResponse.parse(updated));
+  },
+);
 
 router.delete("/family/children/:childId", async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);

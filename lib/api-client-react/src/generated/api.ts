@@ -20,6 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AgeBandInput,
+  AgeBandResponse,
   ChildProfile,
   ChildProfileInput,
   GuardianFamily,
@@ -372,6 +374,95 @@ export const useDeleteChildProfile = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getDeleteChildProfileMutationOptions(options));
+    }
+
+export const getUpdateChildAgeBandUrl = (childId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/age-band`
+}
+
+/**
+ * @summary Update the learner's recommended age-band path
+ */
+export const updateChildAgeBand = async (childId: string,
+    ageBandInput: AgeBandInput, options?: Parameters<typeof customFetch>[1]): Promise<AgeBandResponse> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<AgeBandResponse>(getUpdateChildAgeBandUrl(childId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(ageBandInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateChildAgeBandMutationKey = () => ['updateChildAgeBand'] as const;
+
+export const getUpdateChildAgeBandMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildAgeBand>>, TError,UpdateChildAgeBandMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateChildAgeBand>>, TError,UpdateChildAgeBandMutationVariables, TContext> => {
+
+const mutationKey = getUpdateChildAgeBandMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChildAgeBand>>, UpdateChildAgeBandMutationVariables> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  updateChildAgeBand(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateChildAgeBandMutationResult = NonNullable<Awaited<ReturnType<typeof updateChildAgeBand>>>
+    export type UpdateChildAgeBandMutationBody = BodyType<AgeBandInput>
+    export type UpdateChildAgeBandMutationError = ErrorType<void>
+    export type UpdateChildAgeBandMutationVariables = {childId: string;data: BodyType<AgeBandInput>}
+
+    /**
+ * @summary Update the learner's recommended age-band path
+ */
+export const useUpdateChildAgeBand = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChildAgeBand>>, TError,UpdateChildAgeBandMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateChildAgeBand>>,
+        TError,
+        UpdateChildAgeBandMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateChildAgeBandMutationOptions(options));
     }
 
 export const getCompleteChildLessonUrl = (childId: string,) => {

@@ -9,13 +9,36 @@ export interface HealthStatus {
   status: string;
 }
 
+/**
+ * @nullable
+ */
+export type ChildProfileAgeBand = typeof ChildProfileAgeBand[keyof typeof ChildProfileAgeBand] | null;
+
+
+export const ChildProfileAgeBand = {
+  '10-12': '10-12',
+  '13-15': '13-15',
+  '16-plus': '16-plus',
+} as const;
+
 export interface ChildProfile {
   id: string;
   displayName: string;
+  /** @nullable */
+  ageBand: ChildProfileAgeBand;
   completedLessonIds: string[];
   masteredLevelIds: string[];
   createdAt: string;
 }
+
+export type AgeBand = typeof AgeBand[keyof typeof AgeBand];
+
+
+export const AgeBand = {
+  '10-12': '10-12',
+  '13-15': '13-15',
+  '16-plus': '16-plus',
+} as const;
 
 export interface ChildProfileInput {
   /**
@@ -23,6 +46,15 @@ export interface ChildProfileInput {
      * @maxLength 40
      */
   displayName: string;
+  ageBand: AgeBand;
+}
+
+export interface AgeBandInput {
+  ageBand: AgeBand;
+}
+
+export interface AgeBandResponse {
+  ageBand: AgeBand;
 }
 
 export interface GuardianFamily {

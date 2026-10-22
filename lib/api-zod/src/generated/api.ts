@@ -24,6 +24,7 @@ export const GetFamilyResponse = zod.object({
   "children": zod.array(zod.object({
   "id": zod.string(),
   "displayName": zod.string(),
+  "ageBand": zod.union([zod.literal('10-12'),zod.literal('13-15'),zod.literal('16-plus'),zod.literal(null)]).nullable(),
   "completedLessonIds": zod.array(zod.string()),
   "masteredLevelIds": zod.array(zod.string()),
   "createdAt": zod.coerce.date()
@@ -39,12 +40,14 @@ export const createChildProfileBodyDisplayNameMax = 40;
 
 
 export const CreateChildProfileBody = zod.object({
-  "displayName": zod.string().min(1).max(createChildProfileBodyDisplayNameMax)
+  "displayName": zod.string().min(1).max(createChildProfileBodyDisplayNameMax),
+  "ageBand": zod.enum(['10-12', '13-15', '16-plus'])
 })
 
 export const CreateChildProfileResponse = zod.object({
   "id": zod.string(),
   "displayName": zod.string(),
+  "ageBand": zod.union([zod.literal('10-12'),zod.literal('13-15'),zod.literal('16-plus'),zod.literal(null)]).nullable(),
   "completedLessonIds": zod.array(zod.string()),
   "masteredLevelIds": zod.array(zod.string()),
   "createdAt": zod.coerce.date()
@@ -59,6 +62,22 @@ export const DeleteChildProfileParams = zod.object({
 })
 
 export const DeleteChildProfileResponse = zod.void()
+
+
+/**
+ * @summary Update the learner's recommended age-band path
+ */
+export const UpdateChildAgeBandParams = zod.object({
+  "childId": zod.coerce.string()
+})
+
+export const UpdateChildAgeBandBody = zod.object({
+  "ageBand": zod.enum(['10-12', '13-15', '16-plus'])
+})
+
+export const UpdateChildAgeBandResponse = zod.object({
+  "ageBand": zod.enum(['10-12', '13-15', '16-plus'])
+})
 
 
 /**

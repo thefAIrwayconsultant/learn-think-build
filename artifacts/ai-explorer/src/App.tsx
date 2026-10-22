@@ -5,12 +5,15 @@ import { shadcn } from '@clerk/themes';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, BookOpen, Check, CheckCircle2, Clock3, Compass, Lightbulb, LockKeyhole, LogOut, RotateCcw, ShieldCheck, Sparkles, Trash2, UserRoundPlus } from 'lucide-react';
 import { Link, Redirect, Route, Router as WouterRouter, Switch, useLocation, useRoute } from 'wouter';
-import { getGetFamilyQueryKey, useCompleteChildLesson, useCreateChildProfile, useDeleteChildProfile, useGetFamily, useSubmitLevelAssessment } from '@workspace/api-client-react';
+import { getGetFamilyQueryKey, useCompleteChildLesson, useCreateChildProfile, useDeleteChildProfile, useGetFamily, useSubmitLevelAssessment, useUpdateChildAgeBand } from '@workspace/api-client-react';
 import type { ChildProfile, GuardianFamily } from '@workspace/api-client-react';
 import type { LessonProgressInputLessonId } from '@workspace/api-client-react';
-import { lessons, type Lesson } from './lessons';
+import { getLessonsForAgeBand, type Lesson } from './lessons';
 import { learningLevels, passingScore, type LearningLevelId } from './levels';
 import { Mascot } from './Mascot';
+import { AgeBandPicker } from './AgeBandPicker';
+import { LessonVisualDemo } from './LessonVisualDemo';
+import { getAgeBand, type AgeBand } from './audience';
 import './index.css';
 
 const clerkPubKey = publishableKeyFromHost(
@@ -122,9 +125,9 @@ function SampleFeedbackPage() {
       quote: 'I like that it asks kids to check AI answers and talk about when a tool should not be used—not just how to get a quick answer.',
     },
     {
-      role: 'Fictional educator persona',
-      title: 'Responsible use comes first',
-      quote: 'The lessons make room for classroom rules and academic honesty, so students can learn that AI is not a shortcut around their own thinking.',
+      role: 'Fictional guardian persona',
+      title: 'A thoughtful place to explore at home',
+      quote: 'The lessons give us a calm way to talk about what AI can do, where it can be wrong, and how to make something of our own.',
     },
     {
       role: 'Fictional learner persona',
@@ -140,7 +143,7 @@ function SampleFeedbackPage() {
         <h1>What learners could say.</h1>
         <p>These sample quotes are fictional examples written to show the kinds of outcomes Learn Think Build aims to support.</p>
       </header>
-      <aside className="feedback-disclosure" role="note"><ShieldCheck size={20} /><span><strong>Not actual reviews.</strong> These examples are fictional and are not endorsements from real customers, families, educators, or learners.</span></aside>
+      <aside className="feedback-disclosure" role="note"><ShieldCheck size={20} /><span><strong>Not actual reviews.</strong> These examples are fictional and are not endorsements from real customers, families, or learners.</span></aside>
       <section className="feedback-grid" aria-label="Fictional sample feedback">
         {examples.map((example) => <article className="feedback-card" key={example.title}>
           <div className="feedback-card-top"><span className="feedback-icon"><CheckCircle2 size={19} /></span><span className="feedback-role">{example.role}</span></div>
@@ -149,7 +152,7 @@ function SampleFeedbackPage() {
           <p className="feedback-caption">Illustrative sample · not a real testimonial</p>
         </article>)}
       </section>
-      <div className="feedback-cta"><div><h2>See the learning path for yourself.</h2><p>Explore the curriculum, safety approach, and annual family plan.</p></div><Link href="/" className="primary-button">Explore Learn Think Build <ArrowRight size={16} /></Link></div>
+      <div className="feedback-cta"><div><h2>See the learning path for yourself.</h2><p>Explore the curriculum, safety approach, and monthly family plan.</p></div><Link href="/" className="primary-button">Explore Learn Think Build <ArrowRight size={16} /></Link></div>
     </main>
     <Footer />
   </>;
@@ -165,12 +168,12 @@ function LandingPage() {
           <div className="landing-copy">
             <div className="eyebrow">A year of skills, not shortcuts</div>
             <h1>Learn AI.<br />Think clearly.<br /><em>Build something real.</em></h1>
-            <p>A guided AI learning path for ages 10+. Start with the basics, learn when AI is—and isn’t—appropriate, then practice prompting, planning, and building toward a basic app by the end of year one.</p>
+            <p>A parent-guided AI learning path for ages 10+, designed for learning together at home. Start with the basics, learn when AI is—and isn’t—appropriate, then practice prompting, planning, and building toward a basic app by the end of year one.</p>
             <div className="landing-ctas">
-              <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Explore the annual program <ArrowRight size={17} /></Link>
+              <Link href="/sign-up" className="primary-button" data-testid="link-start-family">Explore the family program <ArrowRight size={17} /></Link>
               <a href="#curriculum" className="secondary-button">See the year-one path</a>
             </div>
-            <div className="landing-trust"><ShieldCheck size={17} /><span>Adults own the account. Learners use a display name—no child email required.</span></div>
+            <div className="landing-trust"><ShieldCheck size={17} /><span>Adults own the account. Learners use a display name and broad age range—no birth date or child email required.</span></div>
           </div>
           <div className="landing-art" aria-label="Illustrated Learn Think Build field notebook">
             <div className="art-paper" />
@@ -188,31 +191,31 @@ function LandingPage() {
         <section className="landing-section" aria-labelledby="how-heading">
           <div className="section-heading"><div><div className="eyebrow">A practical curriculum</div><h2 id="how-heading">Skills before tools. Safety throughout.</h2><p>Interactive lessons teach judgment, prompt writing, and responsible project habits.</p></div></div>
           <div className="feature-grid">
-            <article className="feature-note"><div className="feature-number">01 / RESPONSIBLE USE</div><h3>Know when to use AI—and when not to.</h3><p>Practice privacy, fact-checking, bias awareness, and school integrity. Follow teacher rules; never submit AI work as your own.</p></article>
+            <article className="feature-note"><div className="feature-number">01 / RESPONSIBLE USE</div><h3>Know when to use AI—and when not to.</h3><p>Practice privacy, fact-checking, bias awareness, and honest use. Learn to use AI as a coach—not a replacement for your own thinking.</p></article>
             <article className="feature-note"><div className="feature-number">02 / BUILDING SKILLS</div><h3>Write prompts with purpose.</h3><p>Learn to give clear goals, safe context, formats, and limits. Plan small apps, test results, and explain every change.</p></article>
           </div>
         </section>
         <section className="landing-section curriculum-section" id="curriculum" aria-labelledby="curriculum-heading">
-          <div className="section-heading"><div><div className="eyebrow">Year one · beginner to builder</div><h2 id="curriculum-heading">A clear path to a basic app.</h2><p>Four stages build on each other. Later AI tool practice is planned to be adult- or teacher-supervised.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">Year one · beginner to builder</div><h2 id="curriculum-heading">A clear path to a basic app.</h2><p>Four stages build on each other. Later AI tool practice is planned to be parent-approved and supervised by an adult.</p></div></div>
           <div className="curriculum-grid">
             <article className="curriculum-card"><span>QUARTER 01</span><h3>Understand AI</h3><p>Learn patterns, strengths, limits, privacy, accuracy, and how to check answers.</p></article>
-            <article className="curriculum-card"><span>QUARTER 02</span><h3>Use it responsibly</h3><p>Write clear prompts, protect personal information, recognize bias, and follow school rules.</p></article>
+            <article className="curriculum-card"><span>QUARTER 02</span><h3>Use it responsibly</h3><p>Write clear prompts, protect personal information, recognize bias, and make thoughtful choices about when to use AI.</p></article>
             <article className="curriculum-card"><span>QUARTER 03</span><h3>Plan & prototype</h3><p>Choose a small problem, sketch an app, and practice supervised AI-assisted building in safe steps.</p></article>
             <article className="curriculum-card"><span>QUARTER 04</span><h3>Build & explain</h3><p>Test, improve, and present a simple app the learner understands and can explain.</p></article>
           </div>
           <p className="curriculum-note"><ShieldCheck size={17} /> Current interactive lessons cover the foundations and early builder habits. AI tool access is not built into this app yet; later tool practice should be adult-approved and tightly scoped.</p>
         </section>
-        <section className="landing-section school-section" aria-labelledby="school-heading">
-          <div className="school-panel"><div><div className="eyebrow">For schools & educators</div><h2 id="school-heading">A student-first introduction to AI.</h2><p>Designed around annual per-student licensing, age-appropriate lessons, and safe classroom habits. Educators can teach when AI is appropriate, how to verify it, and why academic honesty matters.</p><ul><li>Planned annual per-student license model</li><li>Prompting, critical thinking, and app-building pathway</li><li>Privacy-first learner profiles; no child email required</li></ul></div><div className="school-callout"><strong>School access</strong><span>Annual per-student pricing and school purchasing workflows are still being developed. Teacher accounts, classroom rosters, and school billing are not enabled yet.</span></div></div>
+        <section className="landing-section home-family-section" aria-labelledby="family-learning-heading">
+          <div className="home-family-panel"><div><div className="eyebrow">For parents & guardians</div><h2 id="family-learning-heading">A thoughtful first step into AI, at home.</h2><p>Explore AI together outside the classroom with guided lessons that build curiosity, sound judgment, and creative skills at a family-friendly pace.</p><ul><li>Age-based paths for learners 10+</li><li>Interactive demos for learning by trying</li><li>Parent-owned profiles with no child email or birth date</li></ul></div><div className="home-family-callout"><strong>Made for family learning</strong><span>One adult manages the account and learner profiles. Choose a path together, work through the lessons at your own pace, and keep real AI tools under adult supervision.</span></div></div>
         </section>
         <section className="landing-section" aria-labelledby="price-heading">
-          <div className="section-heading"><div><div className="eyebrow">One annual family plan</div><h2 id="price-heading">A full year of learning and making.</h2><p>One adult account manages billing and learner profiles.</p></div></div>
+          <div className="section-heading"><div><div className="eyebrow">One monthly family plan</div><h2 id="price-heading">A full year of learning and making.</h2><p>One adult account manages billing and learner profiles.</p></div></div>
           <div className="price-panel">
-            <div><div className="price-amount">$79.99 <small>USD / year · billed upfront</small></div><p>Full-year access to the guided curriculum and learner profiles. About $6.67 per month.</p></div>
+            <div><div className="price-amount">$9.99 <small>USD / month</small></div><p>Planned monthly pricing for the guided curriculum and learner profiles. Family plan checkout is coming soon.</p></div>
           <div className="price-action"><Link className="primary-button" href="/sign-up" data-testid="button-pricing-signup">Create a guardian account <ArrowRight size={16} /></Link><span>Family plan checkout is coming soon.</span></div>
           </div>
         </section>
-        <p className="footnote"><ShieldCheck size={16} /> Parent-owned account and billing. Learner profiles ask for display name only.</p>
+        <p className="footnote"><ShieldCheck size={16} /> Parent-owned account and billing. Learner profiles ask for a display name and broad age range only.</p>
       </main>
       <Footer />
     </>
@@ -224,7 +227,7 @@ function SignInPage() {
 }
 
 function SignUpPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Make room for a year of learning.</h1><p>Create the adult-owned account first. You’ll manage the $79.99 annual plan and learner profiles here, with no child email addresses or personal details needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Make room for a year of learning.</h1><p>Create the adult-owned account first. The family plan is $9.99 per month, with checkout coming soon. Learners use a display name and broad age range; no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
 }
 
 function ClerkCacheInvalidator() {
@@ -270,6 +273,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
   const deleteProfile = useDeleteChildProfile();
   const [adding, setAdding] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [ageBand, setAgeBand] = useState<AgeBand>('10-12');
   const [formError, setFormError] = useState('');
   const invalidateFamily = () => client.invalidateQueries({ queryKey: getGetFamilyQueryKey() });
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
@@ -277,8 +281,8 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
     const cleanName = displayName.trim();
     if (!cleanName || cleanName.length > 40) { setFormError('Choose a display name between 1 and 40 characters.'); return; }
     setFormError('');
-    createProfile.mutate({ data: { displayName: cleanName } }, {
-      onSuccess: () => { setDisplayName(''); setAdding(false); void invalidateFamily(); },
+    createProfile.mutate({ data: { displayName: cleanName, ageBand } }, {
+      onSuccess: () => { setDisplayName(''); setAgeBand('10-12'); setAdding(false); void invalidateFamily(); },
       onError: () => setFormError('That profile could not be created. Please try again.'),
     });
   };
@@ -299,20 +303,20 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
         <div className="family-grid">
           <section className="family-panel subscription-panel" aria-labelledby="subscription-heading">
             <div className="panel-head"><h2 id="subscription-heading">Family plan</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />Coming soon</span></div>
-            <div className="subscription-price">$79.99 <small>USD / year</small></div>
+            <div className="subscription-price">$9.99 <small>USD / month</small></div>
             <p>Family plan checkout and billing management are paused while launch details are finalized.</p>
             <p className="plan-terms-note">Learner profiles, interactive lessons, and saved progress are available while checkout is coming soon.</p>
             <div className="subscription-actions"><button type="button" className="primary-button" disabled aria-disabled="true" data-testid="button-subscribe">Coming soon</button></div>
-            <div className="family-note"><ShieldCheck size={18} /><span>An adult owns the account and family controls. Learners use a display name only.</span></div>
+            <div className="family-note"><ShieldCheck size={18} /><span>An adult owns the account and family controls. Learner profiles store a display name and broad age range, not a birth date.</span></div>
           </section>
           <section className="family-panel" aria-labelledby="learners-heading">
-            <div className="panel-head"><div><h2 id="learners-heading">Learner profiles</h2><p style={{ margin: '5px 0 0', color: 'hsl(var(--muted-foreground))', fontSize: 12 }}>Just a display name—no personal details.</p></div><button type="button" className="secondary-button" onClick={() => { setAdding((value) => !value); setFormError(''); }} data-testid="button-add-profile"><UserRoundPlus size={15} /> Add learner</button></div>
+            <div className="panel-head"><div><h2 id="learners-heading">Learner profiles</h2><p style={{ margin: '5px 0 0', color: 'hsl(var(--muted-foreground))', fontSize: 12 }}>Display name and broad age range only—no birth date.</p></div><button type="button" className="secondary-button" onClick={() => { setAdding((value) => !value); setFormError(''); }} data-testid="button-add-profile"><UserRoundPlus size={15} /> Add learner</button></div>
             {family.children.length ? <div className="child-list">{family.children.map((child, index) => (
               <div className="child-row" key={child.id} data-testid={`row-learner-${child.id}`}>
                 <span className="child-avatar">{child.displayName.trim().charAt(0).toUpperCase()}</span>
-                <div className="child-info"><strong>{child.displayName}</strong><span>{child.completedLessonIds.length} lessons · {child.masteredLevelIds.length} of {learningLevels.length} levels graduated</span></div>
+                <div className="child-info"><strong>{child.displayName}</strong><span>{getAgeBand(child.ageBand)?.label ?? 'Learning path not selected'} · {child.completedLessonIds.length} lessons · {child.masteredLevelIds.length} of {learningLevels.length} levels graduated</span></div>
                 <div className="child-actions">
-                  <Link className="secondary-button" href={`/learn/${child.id}`} data-testid={`link-learner-${child.id}`}>Open workshop <ArrowRight size={14} /></Link>
+                  <Link className="secondary-button" href={`/learn/${child.id}`} data-testid={`link-learner-${child.id}`}>{child.ageBand ? 'Open workshop' : 'Choose path'} <ArrowRight size={14} /></Link>
                   <button type="button" className="icon-button" aria-label={`Remove ${child.displayName}`} title="Remove learner profile" onClick={() => removeProfile(child)} disabled={deleteProfile.isPending} data-testid={`button-remove-${child.id}`}><Trash2 size={16} /></button>
                 </div>
               </div>
@@ -320,7 +324,8 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
             {adding && <form className="add-child-form" onSubmit={submitProfile} noValidate>
               <label htmlFor="learner-name">Learner display name</label>
               <input id="learner-name" name="displayName" autoComplete="off" maxLength={40} value={displayName} onChange={(event) => setDisplayName(event.target.value)} placeholder="What should we call this explorer?" data-testid="input-learner-name" />
-              <div className="form-actions"><span className="form-hint">No email or other personal information.</span><button className="primary-button" type="submit" disabled={createProfile.isPending} data-testid="button-save-profile">{createProfile.isPending ? 'Saving…' : 'Create profile'} <ArrowRight size={15} /></button></div>
+              <AgeBandPicker value={ageBand} onChange={setAgeBand} />
+              <div className="form-actions"><span className="form-hint">No birth date, email, or exact age is collected.</span><button className="primary-button" type="submit" disabled={createProfile.isPending} data-testid="button-save-profile">{createProfile.isPending ? 'Saving…' : 'Create profile'} <ArrowRight size={15} /></button></div>
             </form>}
             {formError && <p role="alert" style={{ color: 'hsl(var(--destructive))', fontSize: 12 }} data-testid="status-profile-error">{formError}</p>}
           </section>
@@ -337,7 +342,35 @@ function FamilyDataGate({ childId, children }: { childId?: string; children: (fa
   if (isError || !family) return <main className="page-content"><StatusMessage title="The workshop is taking a breather." message="We couldn’t load your family details. Your saved progress is safe." retry={() => void refetch()} /></main>;
   const child = childId ? family.children.find((item) => item.id === childId) : undefined;
   if (childId && !child) return <NotFound />;
+  if (child && !child.ageBand) return <AgeBandSetup child={child} />;
   return <>{children(family, child)}</>;
+}
+
+function AgeBandSetup({ child }: { child: ChildProfile }) {
+  const [ageBand, setAgeBand] = useState<AgeBand>('10-12');
+  const update = useUpdateChildAgeBand();
+  const client = useQueryClient();
+  const [, setLocation] = useLocation();
+  const savePath = () => update.mutate({ childId: child.id, data: { ageBand } }, {
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: getGetFamilyQueryKey() });
+      setLocation(`/learn/${child.id}`);
+    },
+  });
+
+  return <main className="page-content age-band-setup">
+    <Link href="/family" className="back-link"><ArrowLeft size={15} /> Family account</Link>
+    <section className="age-band-setup-card">
+      <div className="eyebrow">A quick starting point</div>
+      <h1>Choose {child.displayName}’s learning path.</h1>
+      <p>This age-range recommendation helps us choose examples and explanations. It is self-reported guidance, not identity verification; no birth date is needed.</p>
+      <AgeBandPicker value={ageBand} onChange={setAgeBand} />
+      <button className="primary-button" type="button" onClick={savePath} disabled={update.isPending} data-testid="button-save-age-band">
+        {update.isPending ? 'Saving path…' : `Start ${getAgeBand(ageBand)?.pathName ?? 'learning path'}`} <ArrowRight size={16} />
+      </button>
+      {update.isError && <p role="alert" data-testid="status-age-band-error">We couldn’t save this path. Please try again.</p>}
+    </section>
+  </main>;
 }
 
 function LearnerRoute() {
@@ -346,6 +379,9 @@ function LearnerRoute() {
 }
 
 function LearnerHub({ child }: { child: ChildProfile }) {
+  const ageBand = child.ageBand ?? '10-12';
+  const learningLessons = getLessonsForAgeBand(ageBand);
+  const path = getAgeBand(ageBand);
   const completed = new Set(child.completedLessonIds);
   const mastered = new Set(child.masteredLevelIds);
   const graduatedCount = learningLevels.filter((level) => mastered.has(level.id)).length;
@@ -353,17 +389,17 @@ function LearnerHub({ child }: { child: ChildProfile }) {
     <>
       <main className="page-content">
         <Link href="/family" className="back-link"><ArrowLeft size={15} /> Family account</Link>
-        <section className="learn-header"><div className="learn-greeting"><span className="child-avatar">{child.displayName.trim().charAt(0).toUpperCase()}</span><div><div className="eyebrow">Your field guide</div><h1>Welcome, {child.displayName}.</h1><p>Pick a trail. There’s no rush to get anywhere.</p></div></div><Link href="/family" className="secondary-button">Family controls</Link></section>
+        <section className="learn-header"><div className="learn-greeting"><span className="child-avatar">{child.displayName.trim().charAt(0).toUpperCase()}</span><div><div className="eyebrow">{path?.label} · {path?.pathName}</div><h1>Welcome, {child.displayName}.</h1><p>Pick a trail. There’s no rush to get anywhere.</p></div></div><Link href="/family" className="secondary-button">Family controls</Link></section>
         <aside className="pip-nudge"><Mascot mood="bright" size={94} /><div><span className="eyebrow">Pip’s field note</span><strong>Stay curious. Check the answer.</strong><p>AI can sound sure and still be wrong. Your judgment is part of every trail.</p></div></aside>
-        <div className="learn-progress" data-testid="progress-summary"><strong>Level {graduatedCount} / {learningLevels.length}</strong><span>{graduatedCount === learningLevels.length ? 'Learn Think Build graduate' : 'mastery levels earned'}</span><div className="progress-track" role="progressbar" aria-valuenow={graduatedCount} aria-valuemin={0} aria-valuemax={learningLevels.length} aria-label="Mastery levels graduated"><div className="progress-fill" style={{ width: `${(graduatedCount / learningLevels.length) * 100}%` }} /></div><span>{child.completedLessonIds.length} of {lessons.length} lessons complete</span></div>
+        <div className="learn-progress" data-testid="progress-summary"><strong>Level {graduatedCount} / {learningLevels.length}</strong><span>{graduatedCount === learningLevels.length ? 'Learn Think Build graduate' : 'mastery levels earned'}</span><div className="progress-track" role="progressbar" aria-valuenow={graduatedCount} aria-valuemin={0} aria-valuemax={learningLevels.length} aria-label="Mastery levels graduated"><div className="progress-fill" style={{ width: `${(graduatedCount / learningLevels.length) * 100}%` }} /></div><span>{child.completedLessonIds.length} of {learningLessons.length} lessons complete</span></div>
         <section className="levels-list" aria-labelledby="trails-heading"><div className="section-heading"><div><h2 id="trails-heading">Your learning path</h2><p>Learn it, show what you know, then unlock the next level.</p></div></div>{learningLevels.map((level, levelIndex) => {
           const unlocked = levelIndex === 0 || mastered.has(learningLevels[levelIndex - 1].id);
-          const levelLessons = level.lessonIds.map((id) => lessons.find((lesson) => lesson.id === id)).filter((lesson): lesson is Lesson => Boolean(lesson));
+          const levelLessons = level.lessonIds.map((id) => learningLessons.find((lesson) => lesson.id === id)).filter((lesson): lesson is Lesson => Boolean(lesson));
           const levelComplete = level.lessonIds.every((id) => completed.has(lessonApiIds[id]));
           const graduated = mastered.has(level.id);
           return <section className={`level-section${unlocked ? '' : ' level-locked'}`} key={level.id} aria-labelledby={`level-${level.id}`}>
             <div className="level-heading"><div><div className="eyebrow">{unlocked ? `Level ${levelIndex + 1} of ${learningLevels.length}` : 'Locked until you graduate'}</div><h3 id={`level-${level.id}`}>{level.shortTitle}</h3><p>{level.description}</p></div><span className={`level-status${graduated ? ' is-graduated' : ''}`}>{graduated ? 'Graduated' : unlocked ? 'In progress' : 'Locked'}</span></div>
-            {unlocked ? <><div className="lesson-list">{levelLessons.map((lesson) => <LessonCard key={lesson.id} lesson={lesson} index={lessons.indexOf(lesson)} childId={child.id} completed={completed.has(lessonApiIds[lesson.id])} />)}</div>
+            {unlocked ? <><div className="lesson-list">{levelLessons.map((lesson) => <LessonCard key={lesson.id} lesson={lesson} index={learningLessons.indexOf(lesson)} childId={child.id} completed={completed.has(lessonApiIds[lesson.id])} />)}</div>
               {graduated ? <div className="level-result"><CheckCircle2 size={18} /> Level assessment passed. Next level unlocked.</div> : levelComplete ? <Link href={`/learn/${child.id}/level/${level.id}/test`} className="primary-button level-test-link" data-testid={`link-assessment-${level.id}`}>Take the Level {levelIndex + 1} mastery check <ArrowRight size={16} /></Link> : <p className="level-hint">Complete every lesson in this level to unlock its mastery check. You need {passingScore}% to graduate.</p>}
             </> : <p className="level-hint"><LockKeyhole size={15} /> Pass the previous level’s mastery check to unlock these lessons.</p>}
           </section>;
@@ -435,7 +471,9 @@ function LessonRoute() {
 }
 
 function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string }) {
-  const lesson = lessons.find((item) => item.id === lessonId);
+  const ageBand = child.ageBand ?? '10-12';
+  const learningLessons = getLessonsForAgeBand(ageBand);
+  const lesson = learningLessons.find((item) => item.id === lessonId);
   const [, setLocation] = useLocation();
   const client = useQueryClient();
   const complete = useCompleteChildLesson();
@@ -477,8 +515,14 @@ function LessonPage({ child, lessonId }: { child: ChildProfile; lessonId: string
     <>
       <main className="page-content lesson-page">
         <Link href={`/learn/${child.id}`} className="back-link" data-testid="link-back-lessons"><ArrowLeft size={16} /> All trails</Link>
-        <header className="lesson-top"><div className="lesson-kicker">{lesson.topic} · Trail {lessons.findIndex((item) => item.id === lesson.id) + 1} of {lessons.length}</div><h1>{lesson.title}</h1><p>{lesson.summary}</p><div className="lesson-meta-row"><span><Clock3 size={13} style={{ verticalAlign: '-2px' }} /> {lesson.durationMinutes} minutes</span><span><BookOpen size={13} style={{ verticalAlign: '-2px' }} /> {lesson.steps.length} quick activities</span></div></header>
+        <header className="lesson-top"><div className="lesson-kicker">{lesson.topic} · Trail {learningLessons.findIndex((item) => item.id === lesson.id) + 1} of {learningLessons.length}</div><h1>{lesson.title}</h1><p>{lesson.summary}</p><div className="lesson-meta-row"><span><Clock3 size={13} style={{ verticalAlign: '-2px' }} /> {lesson.durationMinutes + 2} minutes</span><span><BookOpen size={13} style={{ verticalAlign: '-2px' }} /> {lesson.steps.length} learning checks</span></div></header>
         {!finished ? <>
+          <section className="lesson-introduction" aria-labelledby="lesson-introduction-heading">
+            <div className="step-label">Before the questions</div>
+            <h2 id="lesson-introduction-heading">Build the idea first</h2>
+            <p>{lesson.introduction}</p>
+          </section>
+          <LessonVisualDemo kind={lesson.demoKind} ageBand={lesson.ageBand} />
           <div className="lesson-progress" role="progressbar" aria-valuenow={stepIndex + (isCorrect ? 1 : 0)} aria-valuemin={0} aria-valuemax={lesson.steps.length} aria-label="Lesson step progress"><div style={{ width: `${((stepIndex + (isCorrect ? 1 : 0)) / lesson.steps.length) * 100}%` }} /></div>
           <section className="step-card" key={`${lesson.id}-${stepIndex}`} aria-labelledby="step-heading" data-testid={`lesson-step-${stepIndex + 1}`}>
             <div className="step-label">Field note {String(stepIndex + 1).padStart(2, '0')} / {String(lesson.steps.length).padStart(2, '0')}</div><h2 id="step-heading">{step.heading}</h2><p className="step-explanation">{step.explanation}</p>

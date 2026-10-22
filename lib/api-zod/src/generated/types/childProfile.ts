@@ -5,10 +5,13 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ChildProfileAgeBand } from './childProfileAgeBand';
 
 export interface ChildProfile {
   id: string;
   displayName: string;
+  /** @nullable */
+  ageBand: ChildProfileAgeBand;
   completedLessonIds: string[];
   masteredLevelIds: string[];
   createdAt: Date;

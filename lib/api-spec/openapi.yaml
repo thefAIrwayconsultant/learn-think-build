@@ -80,6 +80,35 @@ paths:
           description: Sign-in required
         "404":
           description: Learner profile not found
+  /family/children/{childId}/age-band:
+    patch:
+      operationId: updateChildAgeBand
+      tags: [family]
+      summary: Update the learner's recommended age-band path
+      parameters:
+        - name: childId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgeBandInput"
+      responses:
+        "200":
+          description: Updated age-band recommendation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgeBandResponse"
+        "400":
+          description: Invalid age band
+        "401":
+          description: Sign-in required
+        "404":
+          description: Learner profile not found
   /family/children/{childId}/progress:
     post:
       operationId: completeChildLesson
@@ -148,10 +177,13 @@ components:
         - status
     ChildProfile:
       type: object
-      required: [id, displayName, completedLessonIds, masteredLevelIds, createdAt]
+      required: [id, displayName, ageBand, completedLessonIds, masteredLevelIds, createdAt]
       properties:
         id: { type: string }
         displayName: { type: string }
+        ageBand:
+          type: ["string", "null"]
+          enum: ["10-12", "13-15", "16-plus", null]
         completedLessonIds:
           type: array
           items: { type: string }
@@ -161,9 +193,26 @@ components:
         createdAt: { type: string, format: date-time }
     ChildProfileInput:
       type: object
-      required: [displayName]
+      required: [displayName, ageBand]
       properties:
         displayName: { type: string, minLength: 1, maxLength: 40 }
+        ageBand:
+          $ref: "#/components/schemas/AgeBand"
+    AgeBand:
+      type: string
+      enum: ["10-12", "13-15", "16-plus"]
+    AgeBandInput:
+      type: object
+      required: [ageBand]
+      properties:
+        ageBand:
+          $ref: "#/components/schemas/AgeBand"
+    AgeBandResponse:
+      type: object
+      required: [ageBand]
+      properties:
+        ageBand:
+          $ref: "#/components/schemas/AgeBand"
     GuardianFamily:
       type: object
       required: [children]
