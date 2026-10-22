@@ -7,4 +7,10 @@ Learn Think Build is a parent-focused, at-home introduction to AI for learners s
 
 **Why:** The user wants Learn Think Build marketed to parents for at-home AI introduction, with gradual practical skills, age-appropriate detail, and a playful shift from passive screen time toward safe creation.
 
+**Illustrative quote exception:** The user requested made-up quotes about how helpful, fun, and intuitive the app is, rather than an empty testimonials page. These are illustrative marketing examples, not genuine testimonials.
+
+**Why:** Preserve the requested positive copy without misrepresenting fictional statements as real customer endorsements.
+
+**How to apply:** Clearly label fictional quotes as illustrative and not real reviews. Do not add fabricated names, ratings, or claims of verified users. The genuine-testimonial rules still apply to real endorsements.
+
 **How to apply:** Market the product to parents and guardians for guided learning at home. Make lessons progressively richer by age and mastery; use game mechanics to reward understanding and building, not pressure or screen time. Describe high scores, badges, and personal-best features as planned until live. Use integrated learning modes in every lesson rather than learning-style matching. Keep classroom/teacher rules only where they support responsible-use lessons, not as a school-sales pitch. Use authentic, permissioned family testimonials only. Preserve the distinction between planned curriculum/tool access and features currently implemented. Keep internal artifact and billing identifiers stable unless they are intentionally migrated. Keep the learning app independent from Stripe until the LLC details are ready.

@@ -21,15 +21,25 @@ export const ChildProfileAgeBand = {
   '16-plus': '16-plus',
 } as const;
 
+export type ChildProfileWeakTopicsItem = {
+  lessonId: string;
+  misses: number;
+};
+
+export type ChildProfileLevelScores = {[key: string]: number};
+
 export type LearningStateProjects = {[key: string]: {
   /** @maxLength 4000 */
   content?: string;
   approved?: boolean;
   /** @nullable */
   reviewedAt?: string | null;
+  rubric?: boolean[];
 }};
 
 export interface LearningState {
+  /** @minimum 0 */
+  revision?: number;
   /**
      * @minimum 1
      * @maximum 7
@@ -69,6 +79,10 @@ export interface ChildProfile {
   masteredLevelIds: string[];
   learningState: LearningState;
   lessonRecords: LessonRecord[];
+  reviewCount?: number;
+  bestReviewScore?: number;
+  weakTopics?: ChildProfileWeakTopicsItem[];
+  levelScores?: ChildProfileLevelScores;
   createdAt: string;
 }
 
@@ -102,24 +116,25 @@ export interface GuardianFamily {
   children: ChildProfile[];
 }
 
-export type LessonProgressInputLessonId = typeof LessonProgressInputLessonId[keyof typeof LessonProgressInputLessonId];
-
-
-export const LessonProgressInputLessonId = {
-  'what-is-ai': 'what-is-ai',
-  'clear-instructions': 'clear-instructions',
-  'check-the-answer': 'check-the-answer',
-  'privacy-safe-use': 'privacy-safe-use',
-  'school-integrity': 'school-integrity',
-  'responsible-use': 'responsible-use',
-  'prompt-design': 'prompt-design',
-  'plan-an-app': 'plan-an-app',
-  'test-app': 'test-app',
-  'iterate-app': 'iterate-app',
-} as const;
+/**
+ * @minItems 1
+ * @maxItems 8
+ * @items.minItems 1
+ * @items.maxItems 12
+ * @items.items.minimum 0
+ * @items.items.maximum 20
+ */
+export type QuizAnswers = number[][];
 
 export interface LessonProgressInput {
-  lessonId: LessonProgressInputLessonId;
+  lessonId: string;
+  attemptId: string;
+  answers: QuizAnswers;
+  /**
+     * @minLength 10
+     * @maxLength 8000
+     */
+  activityEvidence: string;
   /**
      * @minLength 30
      * @maxLength 2000
@@ -131,10 +146,10 @@ export interface LessonProgressInput {
      */
   durationSeconds: number;
   /**
-     * @minimum 80
+     * @minimum 0
      * @maximum 100
      */
-  quizScore: number;
+  quizScore?: number;
   activityCompleted: true;
   watchCompleted: true;
 }
@@ -155,13 +170,8 @@ export const LevelAssessmentInputLevelId = {
 
 export interface LevelAssessmentInput {
   levelId: LevelAssessmentInputLevelId;
-  /**
-     * @minItems 5
-     * @maxItems 5
-     * @items.minimum 0
-     * @items.maximum 2
-     */
-  answers: number[];
+  attemptId: string;
+  answers: QuizAnswers;
 }
 
 export type LevelAssessmentResultLevelId = typeof LevelAssessmentResultLevelId[keyof typeof LevelAssessmentResultLevelId];
@@ -183,6 +193,56 @@ export interface LevelAssessmentResult {
   score: number;
   passed: boolean;
   masteredLevelIds: string[];
+  missedLessonIds?: string[];
+  feedback?: string[];
+}
+
+export type StartQuizInputKind = typeof StartQuizInputKind[keyof typeof StartQuizInputKind];
+
+
+export const StartQuizInputKind = {
+  lesson: 'lesson',
+  level: 'level',
+  review: 'review',
+} as const;
+
+export interface StartQuizInput {
+  kind: StartQuizInputKind;
+  targetId?: string;
+}
+
+export interface ReviewQuizInput {
+  attemptId: string;
+  answers: QuizAnswers;
+}
+
+export type QuizAttemptQuestionsItemType = typeof QuizAttemptQuestionsItemType[keyof typeof QuizAttemptQuestionsItemType];
+
+
+export const QuizAttemptQuestionsItemType = {
+  choice: 'choice',
+  order: 'order',
+  sort: 'sort',
+} as const;
+
+export type QuizAttemptQuestionsItem = {
+  id: string;
+  lessonId: string;
+  type: QuizAttemptQuestionsItemType;
+  prompt: string;
+  options: string[];
+};
+
+export interface QuizAttempt {
+  attemptId: string;
+  questions: QuizAttemptQuestionsItem[];
+}
+
+export interface QuizGrade {
+  score: number;
+  passed: boolean;
+  missedLessonIds: string[];
+  feedback: string[];
 }
 
 export type MarkLessonTalkDiscussed200 = {

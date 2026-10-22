@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 56" role="img" aria-label="Learn Think Build">
-  <rect x="2" y="4" width="48" height="48" rx="15" fill="#28695d"/>
+  <rect x="2" y="4" width="48" height="48" rx="15" fill="#1687d9"/>
   <circle cx="26" cy="28" r="14" fill="none" stroke="#fff9e9" stroke-width="2"/>
   <path d="m30 22-3 9-8 4 4-9 7-4Z" fill="#f5c85f" stroke="#fff9e9" stroke-linejoin="round" stroke-width="1.5"/>
   <circle cx="26" cy="28" r="2" fill="#fff9e9"/>
-  <text x="61" y="36" fill="#243d39" font-family="Nunito Sans, sans-serif" font-size="21" font-weight="800" letter-spacing="-0.8">Learn Think Build</text>
+  <text x="61" y="36" fill="#102b4e" font-family="Nunito Sans, sans-serif" font-size="21" font-weight="800" letter-spacing="-0.8">Learn Think Build</text>
 </svg>

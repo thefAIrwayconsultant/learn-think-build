@@ -1,5 +1,6 @@
 import type { AgeBand } from './audience';
 import { ageBands } from './audience';
+import './learning-widgets.css';
 
 type AgeBandPickerProps = {
   value: AgeBand;

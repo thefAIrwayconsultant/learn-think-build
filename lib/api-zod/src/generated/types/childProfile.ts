@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ChildProfileAgeBand } from './childProfileAgeBand';
+import type { ChildProfileLevelScores } from './childProfileLevelScores';
+import type { ChildProfileWeakTopicsItem } from './childProfileWeakTopicsItem';
 import type { LearningState } from './learningState';
 import type { LessonRecord } from './lessonRecord';
 
@@ -18,5 +20,9 @@ export interface ChildProfile {
   masteredLevelIds: string[];
   learningState: LearningState;
   lessonRecords: LessonRecord[];
+  reviewCount?: number;
+  bestReviewScore?: number;
+  weakTopics?: ChildProfileWeakTopicsItem[];
+  levelScores?: ChildProfileLevelScores;
   createdAt: Date;
 }

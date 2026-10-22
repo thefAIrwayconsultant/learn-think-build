@@ -8,6 +8,8 @@
 import type { LearningStateProjects } from './learningStateProjects';
 
 export interface LearningState {
+  /** @minimum 0 */
+  revision?: number;
   /**
      * @minimum 1
      * @maximum 7

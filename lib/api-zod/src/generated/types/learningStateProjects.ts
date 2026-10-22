@@ -12,4 +12,5 @@ export type LearningStateProjects = {[key: string]: {
   approved?: boolean;
   /** @nullable */
   reviewedAt?: Date | null;
+  rubric?: boolean[];
 }};

@@ -5,10 +5,17 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { LessonProgressInputLessonId } from './lessonProgressInputLessonId';
+import type { QuizAnswers } from './quizAnswers';
 
 export interface LessonProgressInput {
-  lessonId: LessonProgressInputLessonId;
+  lessonId: string;
+  attemptId: string;
+  answers: QuizAnswers;
+  /**
+     * @minLength 10
+     * @maxLength 8000
+     */
+  activityEvidence: string;
   /**
      * @minLength 30
      * @maxLength 2000
@@ -20,10 +27,10 @@ export interface LessonProgressInput {
      */
   durationSeconds: number;
   /**
-     * @minimum 80
+     * @minimum 0
      * @maximum 100
      */
-  quizScore: number;
+  quizScore?: number;
   activityCompleted: true;
   watchCompleted: true;
 }

@@ -1,0 +1,30 @@
+export type AgeBand = '10-12' | '13-15' | '16-plus';
+export type LevelId = 'ai-foundations' | 'responsible-use' | 'prompt-craft' | 'app-builder';
+export type Question = {
+  id: string;
+  lessonId: string;
+  type: 'choice' | 'order' | 'sort';
+  mode?: 'scenario' | 'recall';
+  prompt: string;
+  options: string[];
+  answer: number[];
+  explanation: string;
+};
+export type ActivityKind = 'predictor' | 'model-sorter' | 'hallucination' | 'real-or-ai' | 'redactor' | 'prompt-fixer' | 'ai-sorter' | 'branching' | 'app-planner';
+export type Lesson = {
+  id: string;
+  levelId: LevelId;
+  title: string;
+  topic: string;
+  summary: string;
+  ageBand: AgeBand;
+  durationMinutes: number;
+  hook: { scenario: string; prediction: string; options: string[]; feedback: string };
+  scenes: { title: string; narration: string; visual: string }[];
+  activity: { kind: ActivityKind; title: string; instruction: string; [key: string]: unknown };
+  reflectionPrompt: string;
+  sentenceStarters?: string[];
+  familyPrompt: string;
+  questionBank: Question[];
+};
+export type Level = { id: LevelId; title: string; domain: string; description: string; lessonIds: string[]; project: { prompt: string; rubric: string[] } };

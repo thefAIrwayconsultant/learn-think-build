@@ -1,2 +1,3 @@
 - [Stripe connector access](stripe-connector-access.md) — Use the connected proxy API; the integration may withhold raw keys from app code.
-- [Learn Think Build learning and sales scope](ai-explorer-learning-and-sales.md) — Keep real AI use supervised and school sales positioned as annual per-student licensing.
+- [Learn Think Build learning and sales scope](ai-explorer-learning-and-sales.md) — Parent-led at-home learning, supervised real AI use, gradual skills, and honest coming-soon family pricing.
+- [Responsive Clerk styling](clerk-responsive-styling.md) — Use app-owned appearance classes for phone sizing; internal Clerk selectors can break as hosted UI updates.

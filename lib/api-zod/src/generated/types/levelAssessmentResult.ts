@@ -16,4 +16,6 @@ export interface LevelAssessmentResult {
   score: number;
   passed: boolean;
   masteredLevelIds: string[];
+  missedLessonIds?: string[];
+  feedback?: string[];
 }

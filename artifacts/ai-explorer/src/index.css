@@ -125,7 +125,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--app-font-sans);
-    min-width: 320px;
+    min-width: 0;
   }
   button, a { -webkit-tap-highlight-color: transparent; }
   button:focus-visible, a:focus-visible { outline: 3px solid hsl(var(--accent)); outline-offset: 3px; }
@@ -677,4 +677,27 @@
     box-shadow:none !important;
     overflow:visible;
   }
+}
+
+/* Keep intrinsic Clerk/grid widths from widening phone layouts. */
+.family-grid > *, .family-panel, .child-list-item, .family-learning-summary { min-width:0; }
+.auth-card-wrap .ltb-auth-root, .auth-card-wrap .ltb-auth-inner,
+.auth-card-wrap .ltb-auth-card {
+  width:100% !important; max-width:100% !important; min-width:0 !important; box-sizing:border-box;
+}
+@media (max-width:760px) {
+  .family-grid { grid-template-columns:minmax(0,1fr); }
+  .family-panel { padding:16px; }
+  .child-row { display:grid; grid-template-columns:43px minmax(0,1fr); }
+  .child-actions { grid-column:1 / -1; width:100%; }
+  .child-actions > a { flex:1; justify-content:center; min-width:0; }
+  .child-actions > button { width:44px; min-height:44px; flex-shrink:0; }
+  .guardian-pledge, .guardian-project, .weekly-goal-control { flex-wrap:wrap; }
+  .insights { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:600px) {
+  .primary-nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); overflow:visible; gap:4px; }
+  .nav-tab { min-width:0; white-space:normal; text-align:center; justify-content:center; }
+  .auth-card-wrap .ltb-auth-inner { padding-inline:12px !important; }
+  .auth-card-wrap .ltb-auth-input { min-width:0; width:100%; }
 }

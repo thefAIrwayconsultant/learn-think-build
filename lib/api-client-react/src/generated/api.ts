@@ -31,7 +31,11 @@ import type {
   LessonProgressInput,
   LevelAssessmentInput,
   LevelAssessmentResult,
-  MarkLessonTalkDiscussed200
+  MarkLessonTalkDiscussed200,
+  QuizAttempt,
+  QuizGrade,
+  ReviewQuizInput,
+  StartQuizInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -465,6 +469,242 @@ export const useUpdateChildAgeBand = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateChildAgeBandMutationOptions(options));
+    }
+
+export const getStartLearningQuizUrl = (childId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/quiz`
+}
+
+export const startLearningQuiz = async (childId: string,
+    startQuizInput: StartQuizInput, options?: Parameters<typeof customFetch>[1]): Promise<QuizAttempt> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<QuizAttempt>(getStartLearningQuizUrl(childId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(startQuizInput)
+  }
+);}
+
+
+
+
+
+export const getStartLearningQuizMutationKey = () => ['startLearningQuiz'] as const;
+
+export const getStartLearningQuizMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startLearningQuiz>>, TError,StartLearningQuizMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof startLearningQuiz>>, TError,StartLearningQuizMutationVariables, TContext> => {
+
+const mutationKey = getStartLearningQuizMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof startLearningQuiz>>, StartLearningQuizMutationVariables> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  startLearningQuiz(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StartLearningQuizMutationResult = NonNullable<Awaited<ReturnType<typeof startLearningQuiz>>>
+    export type StartLearningQuizMutationBody = BodyType<StartQuizInput>
+    export type StartLearningQuizMutationError = ErrorType<unknown>
+    export type StartLearningQuizMutationVariables = {childId: string;data: BodyType<StartQuizInput>}
+
+    export const useStartLearningQuiz = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof startLearningQuiz>>, TError,StartLearningQuizMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof startLearningQuiz>>,
+        TError,
+        StartLearningQuizMutationVariables,
+        TContext
+      > => {
+      return useMutation(getStartLearningQuizMutationOptions(options));
+    }
+
+export const getSubmitReviewQuizUrl = (childId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/review-quiz`
+}
+
+export const submitReviewQuiz = async (childId: string,
+    reviewQuizInput: ReviewQuizInput, options?: Parameters<typeof customFetch>[1]): Promise<QuizGrade> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<QuizGrade>(getSubmitReviewQuizUrl(childId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reviewQuizInput)
+  }
+);}
+
+
+
+
+
+export const getSubmitReviewQuizMutationKey = () => ['submitReviewQuiz'] as const;
+
+export const getSubmitReviewQuizMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitReviewQuiz>>, TError,SubmitReviewQuizMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitReviewQuiz>>, TError,SubmitReviewQuizMutationVariables, TContext> => {
+
+const mutationKey = getSubmitReviewQuizMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitReviewQuiz>>, SubmitReviewQuizMutationVariables> = (props) => {
+          const {childId,data} = props ?? {};
+
+          return  submitReviewQuiz(childId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitReviewQuizMutationResult = NonNullable<Awaited<ReturnType<typeof submitReviewQuiz>>>
+    export type SubmitReviewQuizMutationBody = BodyType<ReviewQuizInput>
+    export type SubmitReviewQuizMutationError = ErrorType<unknown>
+    export type SubmitReviewQuizMutationVariables = {childId: string;data: BodyType<ReviewQuizInput>}
+
+    export const useSubmitReviewQuiz = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitReviewQuiz>>, TError,SubmitReviewQuizMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitReviewQuiz>>,
+        TError,
+        SubmitReviewQuizMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSubmitReviewQuizMutationOptions(options));
+    }
+
+export const getRecordLessonReviewUrl = (childId: string,
+    lessonId: string,) => {
+
+
+
+
+  return `/api/family/children/${childId}/lessons/${lessonId}/review`
+}
+
+export const recordLessonReview = async (childId: string,
+    lessonId: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRecordLessonReviewUrl(childId,lessonId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRecordLessonReviewMutationKey = () => ['recordLessonReview'] as const;
+
+export const getRecordLessonReviewMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordLessonReview>>, TError,RecordLessonReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordLessonReview>>, TError,RecordLessonReviewMutationVariables, TContext> => {
+
+const mutationKey = getRecordLessonReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordLessonReview>>, RecordLessonReviewMutationVariables> = (props) => {
+          const {childId,lessonId} = props ?? {};
+
+          return  recordLessonReview(childId,lessonId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordLessonReviewMutationResult = NonNullable<Awaited<ReturnType<typeof recordLessonReview>>>
+
+    export type RecordLessonReviewMutationError = ErrorType<unknown>
+    export type RecordLessonReviewMutationVariables = {childId: string;lessonId: string}
+
+    export const useRecordLessonReview = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordLessonReview>>, TError,RecordLessonReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordLessonReview>>,
+        TError,
+        RecordLessonReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRecordLessonReviewMutationOptions(options));
     }
 
 export const getCompleteChildLessonUrl = (childId: string,) => {

@@ -6,14 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { LevelAssessmentInputLevelId } from './levelAssessmentInputLevelId';
+import type { QuizAnswers } from './quizAnswers';
 
 export interface LevelAssessmentInput {
   levelId: LevelAssessmentInputLevelId;
-  /**
-     * @minItems 5
-     * @maxItems 5
-     * @items.minimum 0
-     * @items.maximum 2
-     */
-  answers: number[];
+  attemptId: string;
+  answers: QuizAnswers;
 }
