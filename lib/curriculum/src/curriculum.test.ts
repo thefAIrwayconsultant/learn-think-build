@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { getLessonsForAgeBand, levels, normalizeLessonId, type AgeBand } from "./index";
+import { getLessonsForAgeBand, getSampleMissionPreview, levels, normalizeLessonId, type AgeBand } from "./index";
 
 const bands: AgeBand[] = ["10-12", "13-15", "16-plus"];
 const ids = levels.flatMap(level => level.lessonIds);
@@ -63,4 +63,15 @@ test("all modes have real data, and every band has distinct scenarios/scripts/ba
     assert.equal(new Set(versions.map(l => l.scenes[0].narration)).size, 3);
     assert.equal(new Set(versions.flatMap(l => l.questionBank.map(q => q.id))).size, 24);
   }
+});
+
+test("sample mission preview uses the real first mission goal and steps", () => {
+  const preview = getSampleMissionPreview();
+  const firstMission = getLessonsForAgeBand("10-12")[0];
+  assert.equal(preview.chapterTitle, levels[0].title);
+  assert.equal(preview.id, levels[0].lessonIds[0]);
+  assert.equal(preview.title, firstMission.title);
+  assert.equal(preview.goal, "Ask what it predicts and test its guess.");
+  assert.deepEqual(preview.steps, ["Name the task", "Look at the examples", "Test a prediction", "Decide whether to trust it"]);
+  assert.equal(preview.durationMinutes, firstMission.durationMinutes);
 });

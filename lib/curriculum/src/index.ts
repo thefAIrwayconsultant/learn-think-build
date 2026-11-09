@@ -135,4 +135,21 @@ export function getLessonsForAgeBand(ageBand: AgeBand): Lesson[] {
   }));
 }
 
+export function getSampleMissionPreview() {
+  const chapter = levels[0];
+  const lesson = getLessonsForAgeBand("10-12").find((item) => item.id === chapter?.lessonIds[0]);
+  const seed = lesson ? oldSeedsById.get(lesson.id) : undefined;
+  if (!chapter || !lesson || !seed) {
+    throw new Error("The first chapter sample mission is missing curriculum content.");
+  }
+  return {
+    chapterTitle: chapter.title,
+    id: lesson.id,
+    title: lesson.title,
+    goal: seed.action,
+    steps: [...seed.steps],
+    durationMinutes: lesson.durationMinutes,
+  };
+}
+
 export const lessons: Lesson[] = bands.flatMap((age) => getLessonsForAgeBand(age));

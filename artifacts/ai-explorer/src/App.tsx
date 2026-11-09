@@ -19,6 +19,11 @@ import { Mascot } from './Mascot';
 import { AgeBandPicker } from './AgeBandPicker';
 import { getAgeBand, type AgeBand } from './audience';
 import { FAMILY_MONTHLY_PRICE } from './pricing';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import FAQPage from './pages/FAQPage';
+import ContactPage from './pages/ContactPage';
+import SampleMissionPage from './pages/SampleMissionPage';
 import './index.css';
 
 const clerkPubKey = publishableKeyFromHost(
@@ -119,7 +124,20 @@ function BrandHeader() {
 }
 
 function Footer() {
-  return <footer className="site-footer"><span><strong>Learn Think Build</strong> · Learn thoughtfully. Build responsibly.</span><span>For learners 10+ · An adult owns the account.</span></footer>;
+  return <footer className="site-footer">
+    <span><strong>Learn Think Build</strong> · Learn thoughtfully. Build responsibly.</span>
+    <span>For learners 10+ · An adult owns the account.</span>
+    <nav className="site-footer-links" aria-label="Policies and support">
+      <Link href="/privacy">Privacy Policy</Link>
+      <Link href="/terms">Terms of Service</Link>
+      <Link href="/faq">FAQ</Link>
+      <Link href="/contact">Contact</Link>
+    </nav>
+  </footer>;
+}
+
+function PublicPageWithFooter({ children }: { children: ReactNode }) {
+  return <>{children}<Footer /></>;
 }
 
 function TestimonialsPage() {
@@ -394,6 +412,11 @@ function RouterContent() {
     <Route path="/" component={LandingPage} />
     <Route path="/testimonials" component={TestimonialsPage} />
     <Route path="/sample-feedback" component={() => <Redirect to="/testimonials" />} />
+    <Route path="/privacy" component={() => <PublicPageWithFooter><PrivacyPage /></PublicPageWithFooter>} />
+    <Route path="/terms" component={() => <PublicPageWithFooter><TermsPage /></PublicPageWithFooter>} />
+    <Route path="/faq" component={() => <PublicPageWithFooter><FAQPage /></PublicPageWithFooter>} />
+    <Route path="/contact" component={() => <PublicPageWithFooter><ContactPage /></PublicPageWithFooter>} />
+    <Route path="/sample-mission" component={() => <PublicPageWithFooter><SampleMissionPage /></PublicPageWithFooter>} />
     <Route path="/sign-in/*?" component={SignInPage} />
     <Route path="/sign-up/*?" component={SignUpPage} />
     <Route path="/family" component={() => <GuardianGate><FamilyPage /></GuardianGate>} />
