@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: family
     description: Guardian family accounts, learner profiles, and progress
+  - name: discounts
+    description: Owner-managed family access codes
 paths:
   /healthz:
     get:
@@ -40,6 +42,74 @@ paths:
                 $ref: "#/components/schemas/GuardianFamily"
         "401":
           description: Sign-in required
+  /family/redeem-code:
+    post:
+      operationId: redeemDiscountCode
+      tags: [family]
+      summary: Redeem a family access code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiscountCodeRedemptionInput" }
+      responses:
+        "200":
+          description: Full family access unlocked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FamilyAccess" }
+        "400": { description: "Code is invalid, expired, disabled, or fully used" }
+        "401": { description: Sign-in required }
+        "409": { description: Family already redeemed a code }
+  /admin/discount-codes:
+    get:
+      operationId: listDiscountCodes
+      tags: [discounts]
+      summary: List owner-managed access codes
+      responses:
+        "200":
+          description: Discount codes and redemption counts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiscountCodeList" }
+        "403": { description: Owner access required }
+    post:
+      operationId: createDiscountCode
+      tags: [discounts]
+      summary: Create an owner-managed access code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiscountCodeInput" }
+      responses:
+        "201":
+          description: Discount code created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiscountCode" }
+        "400": { description: Invalid or duplicate code }
+        "403": { description: Owner access required }
+  /admin/discount-codes/{codeId}/active:
+    patch:
+      operationId: setDiscountCodeActive
+      tags: [discounts]
+      summary: Enable or disable a discount code
+      parameters:
+        - { name: codeId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DiscountCodeActiveInput" }
+      responses:
+        "200":
+          description: Updated discount code
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DiscountCode" }
+        "403": { description: Owner access required }
+        "404": { description: Discount code not found }
   /family/children:
     post:
       operationId: createChildProfile
@@ -378,12 +448,61 @@ components:
           $ref: "#/components/schemas/AgeBand"
     GuardianFamily:
       type: object
-      required: [children, testingAdmin]
+      required: [children, testingAdmin, access]
       properties:
         children:
           type: array
           items: { $ref: "#/components/schemas/ChildProfile" }
         testingAdmin: { type: boolean }
+        access: { $ref: "#/components/schemas/FamilyAccess" }
+    FamilyAccess:
+      type: object
+      required: [freeAccess, code, label, discountPercent, redeemedAt]
+      properties:
+        freeAccess: { type: boolean }
+        code: { type: ["string", "null"] }
+        label: { type: ["string", "null"] }
+        discountPercent: { type: ["integer", "null"], minimum: 0, maximum: 100 }
+        redeemedAt: { type: ["string", "null"], format: date-time }
+    DiscountCode:
+      type: object
+      required: [id, code, label, discountPercent, useLimit, expiresAt, active, redeemedCount, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        label: { type: string }
+        discountPercent: { type: integer, minimum: 0, maximum: 100 }
+        useLimit: { type: ["integer", "null"], minimum: 1 }
+        expiresAt: { type: ["string", "null"], format: date-time }
+        active: { type: boolean }
+        redeemedCount: { type: integer, minimum: 0 }
+        createdAt: { type: string, format: date-time }
+    DiscountCodeList:
+      type: object
+      required: [codes]
+      properties:
+        codes:
+          type: array
+          items: { $ref: "#/components/schemas/DiscountCode" }
+    DiscountCodeInput:
+      type: object
+      required: [code, label, discountPercent]
+      properties:
+        code: { type: string, minLength: 4, maxLength: 32, pattern: "^[A-Za-z0-9-]+$" }
+        label: { type: string, minLength: 1, maxLength: 100 }
+        discountPercent: { type: integer, minimum: 0, maximum: 100 }
+        useLimit: { type: ["integer", "null"], minimum: 1 }
+        expiresAt: { type: ["string", "null"], format: date-time }
+    DiscountCodeActiveInput:
+      type: object
+      required: [active]
+      properties:
+        active: { type: boolean }
+    DiscountCodeRedemptionInput:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, minLength: 4, maxLength: 32 }
     LessonProgressInput:
       type: object
       required: [lessonId, reflection, durationSeconds, activityCompleted, watchCompleted, attemptId, answers, activityEvidence]

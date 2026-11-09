@@ -14,7 +14,9 @@ import {
   childLevelMasteryTable,
   childProgressTable,
   db,
+  discountCodesTable,
   guardiansTable,
+  familyDiscountRedemptionsTable,
   quizAttemptsTable,
 } from "@workspace/db";
 import { isLegacyChapterId, levels, normalizeLessonId } from "@workspace/curriculum";
@@ -111,6 +113,16 @@ router.get("/family", async (req, res): Promise<void> => {
     return;
   }
   const testingAdmin = await isTestingAdmin(guardianId);
+  const [redemption] = await db.select({
+    code: discountCodesTable.code,
+    label: discountCodesTable.label,
+    discountPercent: discountCodesTable.discountPercent,
+    redeemedAt: familyDiscountRedemptionsTable.redeemedAt,
+  })
+    .from(familyDiscountRedemptionsTable)
+    .innerJoin(discountCodesTable, eq(familyDiscountRedemptionsTable.codeId, discountCodesTable.id))
+    .where(eq(familyDiscountRedemptionsTable.guardianId, guardianId))
+    .limit(1);
 
   const profiles = await db
     .select()
@@ -155,6 +167,19 @@ router.get("/family", async (req, res): Promise<void> => {
 
   const response = {
     testingAdmin,
+    access: redemption ? {
+      freeAccess: true,
+      code: redemption.code,
+      label: redemption.label,
+      discountPercent: redemption.discountPercent,
+      redeemedAt: redemption.redeemedAt.toISOString(),
+    } : {
+      freeAccess: false,
+      code: null,
+      label: null,
+      discountPercent: null,
+      redeemedAt: null,
+    },
     children: profiles.map((profile) => {
       const completedLessonIds = canonicalIds(completedByChild.get(profile.id) ?? []);
       const masteredLevelIds = (masteredByChild.get(profile.id) ?? []).filter((id) => levels.some((level) => level.id === id));

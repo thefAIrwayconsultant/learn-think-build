@@ -15,6 +15,7 @@ import { LearnerHub } from './learn/Hub';
 import { ReviewFlow } from './learn/ReviewFlow';
 import { GuardianPanel } from './family/GuardianPanel';
 import { FamilyLeaderboard } from './family/FamilyLeaderboard';
+import { DiscountCodeAdminPanel, FamilyAccessCard, SignUpDiscountCode } from './family/DiscountAccess';
 import { Mascot } from './Mascot';
 import { AgeBandPicker } from './AgeBandPicker';
 import { getAgeBand, type AgeBand } from './audience';
@@ -232,7 +233,7 @@ function SignInPage() {
 }
 
 function SignUpPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Start a safe AI adventure.</h1><p>Create the adult-owned account first. Your family plan is {FAMILY_MONTHLY_PRICE} per month, with checkout coming soon. Learners explore four chapters of short, hands-on missions using a display name and broad age range—no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} fallbackRedirectUrl={`${basePath}/family`} /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Start a safe AI adventure.</h1><p>Create the adult-owned account first. Your family plan is {FAMILY_MONTHLY_PRICE} per month, with checkout coming soon. Learners explore four chapters of short, hands-on missions using a display name and broad age range—no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} fallbackRedirectUrl={`${basePath}/family`} /><SignUpDiscountCode /></div></main>;
 }
 
 function ClerkCacheInvalidator() {
@@ -315,6 +316,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
             <p className="plan-terms-note">Learner profiles, interactive lessons, and saved progress are available while checkout is coming soon.</p>
             <div className="subscription-actions"><button type="button" className="primary-button" disabled aria-disabled="true" data-testid="button-subscribe">Coming soon</button></div>
             <div className="family-note"><ShieldCheck size={18} /><span>An adult owns the account and family controls. Learner profiles store a display name and broad age range, not a birth date.</span></div>
+            <FamilyAccessCard access={family.access} />
           </section>
           <section className="family-panel" aria-labelledby="learners-heading">
             <div className="panel-head"><div><h2 id="learners-heading">Learner profiles</h2><p style={{ margin: '5px 0 0', color: 'hsl(var(--muted-foreground))', fontSize: 12 }}>Display name and broad age range only—no birth date.</p></div><button type="button" className="secondary-button" onClick={() => { setAdding((value) => !value); setFormError(''); }} data-testid="button-add-profile"><UserRoundPlus size={15} /> Add learner</button></div>
@@ -340,6 +342,7 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
             {formError && <p role="alert" style={{ color: 'hsl(var(--destructive))', fontSize: 12 }} data-testid="status-profile-error">{formError}</p>}
           </section>
         </div>
+        {family.testingAdmin && <DiscountCodeAdminPanel />}
       </main>
       <Footer />
     </>

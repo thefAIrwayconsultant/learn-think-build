@@ -42,6 +42,9 @@ export const getFamilyResponseChildrenItemScoreBreakdownChapterPointsMin = 0;
 
 export const getFamilyResponseChildrenItemScoreBreakdownReviewPointsMin = 0;
 
+export const getFamilyResponseAccessDiscountPercentMin = 0;
+export const getFamilyResponseAccessDiscountPercentMax = 100;
+
 
 
 export const GetFamilyResponse = zod.object({
@@ -87,7 +90,143 @@ export const GetFamilyResponse = zod.object({
 }),
   "createdAt": zod.coerce.date()
 })),
-  "testingAdmin": zod.boolean()
+  "testingAdmin": zod.boolean(),
+  "access": zod.object({
+  "freeAccess": zod.boolean(),
+  "code": zod.string().nullable(),
+  "label": zod.string().nullable(),
+  "discountPercent": zod.number().int().min(getFamilyResponseAccessDiscountPercentMin).max(getFamilyResponseAccessDiscountPercentMax).nullable(),
+  "redeemedAt": zod.coerce.date().nullable()
+})
+})
+
+
+/**
+ * @summary Redeem a family access code
+ */
+export const redeemDiscountCodeBodyCodeMin = 4;
+export const redeemDiscountCodeBodyCodeMax = 32;
+
+
+
+export const RedeemDiscountCodeBody = zod.object({
+  "code": zod.string().min(redeemDiscountCodeBodyCodeMin).max(redeemDiscountCodeBodyCodeMax)
+})
+
+export const redeemDiscountCodeResponseDiscountPercentMin = 0;
+export const redeemDiscountCodeResponseDiscountPercentMax = 100;
+
+
+
+export const RedeemDiscountCodeResponse = zod.object({
+  "freeAccess": zod.boolean(),
+  "code": zod.string().nullable(),
+  "label": zod.string().nullable(),
+  "discountPercent": zod.number().int().min(redeemDiscountCodeResponseDiscountPercentMin).max(redeemDiscountCodeResponseDiscountPercentMax).nullable(),
+  "redeemedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary List owner-managed access codes
+ */
+export const listDiscountCodesResponseCodesItemDiscountPercentMin = 0;
+export const listDiscountCodesResponseCodesItemDiscountPercentMax = 100;
+
+
+export const listDiscountCodesResponseCodesItemRedeemedCountMin = 0;
+
+
+
+export const ListDiscountCodesResponse = zod.object({
+  "codes": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "code": zod.string(),
+  "label": zod.string(),
+  "discountPercent": zod.number().int().min(listDiscountCodesResponseCodesItemDiscountPercentMin).max(listDiscountCodesResponseCodesItemDiscountPercentMax),
+  "useLimit": zod.number().int().min(1).nullable(),
+  "expiresAt": zod.coerce.date().nullable(),
+  "active": zod.boolean(),
+  "redeemedCount": zod.number().int().min(listDiscountCodesResponseCodesItemRedeemedCountMin),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
+ * @summary Create an owner-managed access code
+ */
+export const createDiscountCodeBodyCodeMin = 4;
+export const createDiscountCodeBodyCodeMax = 32;
+
+
+export const createDiscountCodeBodyCodeRegExp = new RegExp('^[A-Za-z0-9-]+$');
+export const createDiscountCodeBodyLabelMax = 100;
+
+export const createDiscountCodeBodyDiscountPercentMin = 0;
+export const createDiscountCodeBodyDiscountPercentMax = 100;
+
+
+
+
+export const CreateDiscountCodeBody = zod.object({
+  "code": zod.string().min(createDiscountCodeBodyCodeMin).max(createDiscountCodeBodyCodeMax).regex(createDiscountCodeBodyCodeRegExp),
+  "label": zod.string().min(1).max(createDiscountCodeBodyLabelMax),
+  "discountPercent": zod.number().int().min(createDiscountCodeBodyDiscountPercentMin).max(createDiscountCodeBodyDiscountPercentMax),
+  "useLimit": zod.number().int().min(1).nullish(),
+  "expiresAt": zod.coerce.date().nullish()
+})
+
+export const createDiscountCodeResponseDiscountPercentMin = 0;
+export const createDiscountCodeResponseDiscountPercentMax = 100;
+
+
+export const createDiscountCodeResponseRedeemedCountMin = 0;
+
+
+
+export const CreateDiscountCodeResponse = zod.object({
+  "id": zod.string().uuid(),
+  "code": zod.string(),
+  "label": zod.string(),
+  "discountPercent": zod.number().int().min(createDiscountCodeResponseDiscountPercentMin).max(createDiscountCodeResponseDiscountPercentMax),
+  "useLimit": zod.number().int().min(1).nullable(),
+  "expiresAt": zod.coerce.date().nullable(),
+  "active": zod.boolean(),
+  "redeemedCount": zod.number().int().min(createDiscountCodeResponseRedeemedCountMin),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Enable or disable a discount code
+ */
+export const SetDiscountCodeActiveParams = zod.object({
+  "codeId": zod.coerce.string().uuid()
+})
+
+export const SetDiscountCodeActiveBody = zod.object({
+  "active": zod.boolean()
+})
+
+export const setDiscountCodeActiveResponseDiscountPercentMin = 0;
+export const setDiscountCodeActiveResponseDiscountPercentMax = 100;
+
+
+export const setDiscountCodeActiveResponseRedeemedCountMin = 0;
+
+
+
+export const SetDiscountCodeActiveResponse = zod.object({
+  "id": zod.string().uuid(),
+  "code": zod.string(),
+  "label": zod.string(),
+  "discountPercent": zod.number().int().min(setDiscountCodeActiveResponseDiscountPercentMin).max(setDiscountCodeActiveResponseDiscountPercentMax),
+  "useLimit": zod.number().int().min(1).nullable(),
+  "expiresAt": zod.coerce.date().nullable(),
+  "active": zod.boolean(),
+  "redeemedCount": zod.number().int().min(setDiscountCodeActiveResponseRedeemedCountMin),
+  "createdAt": zod.coerce.date()
 })
 
 

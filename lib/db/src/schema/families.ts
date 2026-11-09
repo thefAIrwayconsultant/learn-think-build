@@ -8,6 +8,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -20,6 +21,41 @@ export const guardiansTable = pgTable("guardians", {
     .notNull()
     .defaultNow(),
 });
+
+export const discountCodesTable = pgTable(
+  "discount_codes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    code: varchar("code", { length: 32 }).notNull().unique(),
+    label: varchar("label", { length: 100 }).notNull(),
+    discountPercent: integer("discount_percent").notNull(),
+    useLimit: integer("use_limit"),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    active: boolean("active").notNull().default(true),
+    createdBy: text("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("discount_codes_active_idx").on(table.active)],
+);
+
+export const familyDiscountRedemptionsTable = pgTable(
+  "family_discount_redemptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    codeId: uuid("code_id")
+      .notNull()
+      .references(() => discountCodesTable.id, { onDelete: "restrict" }),
+    guardianId: text("guardian_id")
+      .notNull()
+      .references(() => guardiansTable.id, { onDelete: "cascade" }),
+    redeemedAt: timestamp("redeemed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("family_discount_redemptions_guardian_id_unique").on(table.guardianId),
+    uniqueIndex("family_discount_redemptions_code_guardian_unique").on(table.codeId, table.guardianId),
+    index("family_discount_redemptions_code_id_idx").on(table.codeId),
+  ],
+);
 
 export const childProfilesTable = pgTable(
   "child_profiles",

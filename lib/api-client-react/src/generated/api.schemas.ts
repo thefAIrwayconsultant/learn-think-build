@@ -126,9 +126,90 @@ export interface AgeBandResponse {
   ageBand: AgeBand;
 }
 
+export interface FamilyAccess {
+  freeAccess: boolean;
+  /** @nullable */
+  code: string | null;
+  /** @nullable */
+  label: string | null;
+  /**
+     * @minimum 0
+     * @maximum 100
+     * @nullable
+     */
+  discountPercent: number | null;
+  /** @nullable */
+  redeemedAt: string | null;
+}
+
 export interface GuardianFamily {
   children: ChildProfile[];
   testingAdmin: boolean;
+  access: FamilyAccess;
+}
+
+export interface DiscountCode {
+  id: string;
+  code: string;
+  label: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  discountPercent: number;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  useLimit: number | null;
+  /** @nullable */
+  expiresAt: string | null;
+  active: boolean;
+  /** @minimum 0 */
+  redeemedCount: number;
+  createdAt: string;
+}
+
+export interface DiscountCodeList {
+  codes: DiscountCode[];
+}
+
+export interface DiscountCodeInput {
+  /**
+     * @minLength 4
+     * @maxLength 32
+     * @pattern ^[A-Za-z0-9-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  label: string;
+  /**
+     * @minimum 0
+     * @maximum 100
+     */
+  discountPercent: number;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  useLimit?: number | null;
+  /** @nullable */
+  expiresAt?: string | null;
+}
+
+export interface DiscountCodeActiveInput {
+  active: boolean;
+}
+
+export interface DiscountCodeRedemptionInput {
+  /**
+     * @minLength 4
+     * @maxLength 32
+     */
+  code: string;
 }
 
 /**

@@ -6,8 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ChildProfile } from './childProfile';
+import type { FamilyAccess } from './familyAccess';
 
 export interface GuardianFamily {
   children: ChildProfile[];
   testingAdmin: boolean;
+  access: FamilyAccess;
 }
