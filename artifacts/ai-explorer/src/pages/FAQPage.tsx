@@ -35,7 +35,7 @@ export default function FAQPage() {
         </details>
         <details className="faq-item">
           <summary>How do I cancel?</summary>
-          <div className="faq-answer">[CONFIRM THE STEPS — account settings link / email to cancel.] Access continues until the end of the month you already paid for.</div>
+          <div className="faq-answer">A subscription can be cancelled at any time. Access continues until the end of the current billing period. There are no refunds for partial months.</div>
         </details>
         <details className="faq-item">
           <summary>I forgot my password — what do I do?</summary>
@@ -43,7 +43,7 @@ export default function FAQPage() {
         </details>
         <details className="faq-item">
           <summary>Who do I contact with a question?</summary>
-          <div className="faq-answer">[CONTACT EMAIL]</div>
+          <div className="faq-answer"><a href="mailto:btkolb@gmail.com">btkolb@gmail.com</a></div>
         </details>
       </div>
     </PublicPageLayout>

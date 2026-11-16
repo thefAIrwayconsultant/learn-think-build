@@ -9,8 +9,8 @@ export default function ContactPage() {
     >
       <section className="public-copy-card">
         <h2>Questions about Learn Think Build?</h2>
-        <p>A parent can reach us at <a href="mailto:[CONTACT EMAIL]">[CONTACT EMAIL]</a>.</p>
-        <p>We reply within [NUMBER] business days.</p>
+        <p>A parent can reach us at <a href="mailto:btkolb@gmail.com">btkolb@gmail.com</a>.</p>
+        <p>We reply within 3 days.</p>
       </section>
     </PublicPageLayout>
   );

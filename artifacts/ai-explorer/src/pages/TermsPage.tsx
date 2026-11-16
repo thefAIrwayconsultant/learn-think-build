@@ -7,10 +7,10 @@ export default function TermsPage() {
       title="Learn Think Build — Terms of Service"
       metaDescription="Review the terms for parent-owned Learn Think Build family accounts and AI learning missions."
     >
-      <p className="public-updated">Last updated: [DATE].</p>
+      <p className="public-updated">Last updated: November 16, 2026.</p>
       <section className="public-copy-card">
         <h2>The service</h2>
-        <p>Access to Learn Think Build 4 chapters / 80 daily missions (20 per chapter, 10 minutes a day) for kids ages 10 and up, for $4.99/month per family account, billed by [Stripe].</p>
+        <p>Access to Learn Think Build 4 chapters / 80 daily missions (20 per chapter, 10 minutes a day) for kids ages 10 and up, for $4.99/month per family account, billed by Stripe for the Monthly Learning Plan family subscription.</p>
       </section>
       <section className="public-copy-card">
         <h2>Who can use it</h2>
@@ -18,8 +18,7 @@ export default function TermsPage() {
       </section>
       <section className="public-copy-card">
         <h2>Billing and cancellation</h2>
-        <p>The subscription renews monthly at $4.99 until cancelled. Cancel any time from [ACCOUNT SETTINGS / LINK]; access continues until the end of the paid month.</p>
-        <p>[CONFIRM REFUND RULE: no refunds for a partial month / refunds on request within X days — pick one before publishing.]</p>
+        <p>The subscription renews monthly at $4.99 until cancelled. A subscription can be cancelled at any time. Access continues until the end of the current billing period. There are no refunds for partial months.</p>
       </section>
       <section className="public-copy-card">
         <h2>The missions</h2>
@@ -35,7 +34,7 @@ export default function TermsPage() {
       </section>
       <section className="public-copy-card">
         <h2>Contact / governing law</h2>
-        <p>[LEGAL BUSINESS NAME], [CONTACT EMAIL]. These terms are governed by the laws of [STATE].</p>
+        <p>Kolb Enterprises LLC, <a href="mailto:btkolb@gmail.com">btkolb@gmail.com</a>. These terms are governed by the laws of the Commonwealth of Massachusetts.</p>
       </section>
     </PublicPageLayout>
   );
