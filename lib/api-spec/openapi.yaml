@@ -457,9 +457,12 @@ components:
         access: { $ref: "#/components/schemas/FamilyAccess" }
     FamilyAccess:
       type: object
-      required: [freeAccess, code, label, discountPercent, redeemedAt]
+      required: [freeAccess, subscriptionActive, subscriptionStatus, hasAccess, code, label, discountPercent, redeemedAt]
       properties:
         freeAccess: { type: boolean }
+        subscriptionActive: { type: boolean }
+        subscriptionStatus: { type: string }
+        hasAccess: { type: boolean }
         code: { type: ["string", "null"] }
         label: { type: ["string", "null"] }
         discountPercent: { type: ["integer", "null"], minimum: 0, maximum: 100 }

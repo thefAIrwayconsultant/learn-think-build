@@ -20,6 +20,7 @@ import { Mascot } from './Mascot';
 import { AgeBandPicker } from './AgeBandPicker';
 import { getAgeBand, type AgeBand } from './audience';
 import { FAMILY_MONTHLY_PRICE } from './pricing';
+import { getFamilyCheckoutUrl } from './billing';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import FAQPage from './pages/FAQPage';
@@ -167,6 +168,8 @@ function TestimonialsPage() {
 }
 
 function LandingPage() {
+  const { user } = useUser();
+  const checkoutUrl = getFamilyCheckoutUrl(user?.primaryEmailAddress?.emailAddress);
   return (
     <>
       <main className="page-content">
@@ -217,8 +220,8 @@ function LandingPage() {
         <section className="landing-section" aria-labelledby="price-heading">
           <div className="section-heading"><div><div className="eyebrow">One monthly family plan</div><h2 id="price-heading">An AI jumpstart for {FAMILY_MONTHLY_PRICE} a month.</h2><p>Age-appropriate learning today. Practical foundations for tomorrow. One parent or guardian owns the family account.</p></div></div>
           <div className="price-panel">
-            <div><div className="price-amount">{FAMILY_MONTHLY_PRICE} <small>USD / month</small></div><p>The monthly family plan includes the guided curriculum and learner profiles. Checkout is coming soon; creating an account does not start a paid subscription.</p></div>
-          <div className="price-action"><Link className="primary-button" href="/sign-up" data-testid="button-pricing-signup">Create a guardian account <ArrowRight size={16} /></Link><span>Family plan checkout is coming soon.</span></div>
+            <div><div className="price-amount">{FAMILY_MONTHLY_PRICE} <small>USD / month</small></div><p>The monthly family plan includes the guided curriculum and learner profiles. Secure recurring checkout is handled by Stripe.</p></div>
+          <div className="price-action"><a className="primary-button" href={checkoutUrl} data-testid="button-pricing-checkout">Start for {FAMILY_MONTHLY_PRICE}/month <ArrowRight size={16} /></a><span>One recurring plan for your family.</span></div>
           </div>
         </section>
         <p className="footnote"><ShieldCheck size={16} /> Parent-owned account and billing. Learner profiles ask for a display name and broad age range only.</p>
@@ -233,7 +236,7 @@ function SignInPage() {
 }
 
 function SignUpPage() {
-  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Start a safe AI adventure.</h1><p>Create the adult-owned account first. Your family plan is {FAMILY_MONTHLY_PRICE} per month, with checkout coming soon. Learners explore four chapters of short, hands-on missions using a display name and broad age range—no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} fallbackRedirectUrl={`${basePath}/family`} /><SignUpDiscountCode /></div></main>;
+  return <main className="auth-layout"><section className="auth-message"><div className="eyebrow">For parents & guardians</div><h1>Start a safe AI adventure.</h1><p>Create the adult-owned account first. The family plan is {FAMILY_MONTHLY_PRICE} per month, with secure checkout handled by Stripe. Learners explore four chapters of short, hands-on missions using a display name and broad age range—no birth date or child email is needed.</p><Link href="/" className="back-link"><ArrowLeft size={15} /> Back to Learn Think Build</Link></section><div className="auth-card-wrap"><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} fallbackRedirectUrl={`${basePath}/family`} /><SignUpDiscountCode /></div></main>;
 }
 
 function ClerkCacheInvalidator() {
@@ -268,10 +271,10 @@ function FamilyPage() {
   const { data: family, isLoading, isError, refetch } = useGetFamily();
   if (isLoading) return <FamilyLoading />;
   if (isError || !family) return <main className="page-content family-page"><StatusMessage title="Your family page didn’t load." message="We couldn’t reach your family details just now. Your learner profiles and saved progress are still safe." retry={() => void refetch()} /></main>;
-  return <FamilyDashboard family={family} parentName={user?.fullName || user?.primaryEmailAddress?.emailAddress || 'Parent or guardian'} />;
+  return <FamilyDashboard family={family} parentName={user?.fullName || user?.primaryEmailAddress?.emailAddress || 'Parent or guardian'} parentEmail={user?.primaryEmailAddress?.emailAddress} />;
 }
 
-function FamilyDashboard({ family, parentName }: { family: GuardianFamily; parentName: string }) {
+function FamilyDashboard({ family, parentName, parentEmail }: { family: GuardianFamily; parentName: string; parentEmail?: string }) {
   const client = useQueryClient();
   const [, setLocation] = useLocation();
   const { signOut } = useClerk();
@@ -282,6 +285,13 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
   const [ageBand, setAgeBand] = useState<AgeBand>('10-12');
   const [formError, setFormError] = useState('');
   const invalidateFamily = () => client.invalidateQueries({ queryKey: getGetFamilyQueryKey() });
+  const paidActive = family.access.subscriptionActive;
+  const planStatus = paidActive ? 'Paid plan active'
+    : family.access.freeAccess ? 'Free access code'
+      : family.access.subscriptionStatus === 'past_due' ? 'Payment needs attention'
+        : family.access.subscriptionStatus === 'canceled' ? 'Canceled'
+          : family.access.subscriptionStatus === 'incomplete' ? 'Payment processing'
+            : 'No active plan';
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const cleanName = displayName.trim();
@@ -310,11 +320,11 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
         {family.children.length > 0 && <FamilyLeaderboard learners={family.children} />}
         <div className="family-grid">
           <section className="family-panel subscription-panel" aria-labelledby="subscription-heading">
-            <div className="panel-head"><h2 id="subscription-heading">Family plan</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />Coming soon</span></div>
+            <div className="panel-head"><h2 id="subscription-heading">Family plan</h2><span className="subscription-status" data-testid="status-subscription"><span className="status-dot" />{planStatus}</span></div>
             <div className="subscription-price">{FAMILY_MONTHLY_PRICE} <small>USD / month</small></div>
-            <p>Family plan checkout and billing management are paused while launch details are finalized.</p>
-            <p className="plan-terms-note">Learner profiles, interactive lessons, and saved progress are available while checkout is coming soon.</p>
-            <div className="subscription-actions"><button type="button" className="primary-button" disabled aria-disabled="true" data-testid="button-subscribe">Coming soon</button></div>
+            <p>{paidActive ? 'Your family has an active monthly subscription.' : family.access.freeAccess ? 'Your family has full access through a redeemed code.' : 'Subscribe to unlock the full learning program for your family.'}</p>
+            <p className="plan-terms-note">{family.access.subscriptionStatus !== 'inactive' && !paidActive ? `Stripe subscription status: ${family.access.subscriptionStatus}.` : 'One monthly subscription covers your family account.'}</p>
+            {!paidActive && <div className="subscription-actions"><a className="primary-button" href={getFamilyCheckoutUrl(parentEmail)} data-testid="button-subscribe">Start for {FAMILY_MONTHLY_PRICE}/month <ArrowRight size={16} /></a></div>}
             <div className="family-note"><ShieldCheck size={18} /><span>An adult owns the account and family controls. Learner profiles store a display name and broad age range, not a birth date.</span></div>
             <FamilyAccessCard access={family.access} />
           </section>
@@ -350,13 +360,45 @@ function FamilyDashboard({ family, parentName }: { family: GuardianFamily; paren
 }
 
 function FamilyDataGate({ childId, children }: { childId?: string; children: (family: GuardianFamily, child?: ChildProfile) => ReactNode }) {
+  const { user } = useUser();
   const { data: family, isLoading, isError, refetch } = useGetFamily();
   if (isLoading) return <main className="page-content"><div className="skeleton" style={{ height: 160 }} /><div className="skeleton large" style={{ marginTop: 20 }} /></main>;
   if (isError || !family) return <main className="page-content"><StatusMessage title="The workshop is taking a breather." message="We couldn’t load your family details. Your saved progress is safe." retry={() => void refetch()} /></main>;
   const child = childId ? family.children.find((item) => item.id === childId) : undefined;
   if (childId && !child) return <NotFound />;
   if (child && !child.ageBand) return <AgeBandSetup child={child} />;
+  if (child && !family.access.hasAccess) return <FamilyAccessRequired email={user?.primaryEmailAddress?.emailAddress} />;
   return <>{children(family, child)}</>;
+}
+
+function FamilyAccessRequired({ email }: { email?: string }) {
+  return <main className="page-content">
+    <section className="error-card" aria-labelledby="access-required-heading">
+      <div className="eyebrow">Family plan</div>
+      <h1 id="access-required-heading">Unlock the learning path.</h1>
+      <p>Start the $4.99/month Family Plan or redeem an access code from your family dashboard to open lessons.</p>
+      <div className="complete-actions">
+        <a className="primary-button" href={getFamilyCheckoutUrl(email)}>Start for {FAMILY_MONTHLY_PRICE}/month <ArrowRight size={16} /></a>
+        <Link className="secondary-button" href="/family">Go to family dashboard</Link>
+      </div>
+    </section>
+  </main>;
+}
+
+function BillingSuccessPage() {
+  return <PublicPageWithFooter>
+    <main className="page-content">
+      <section className="complete-card" aria-labelledby="billing-success-heading">
+        <div className="eyebrow">Payment received</div>
+        <h1 id="billing-success-heading">We’re activating your family plan.</h1>
+        <p>It can take a short moment for Stripe to confirm your subscription. Check your family dashboard to see your plan status and open the learning path.</p>
+        <div className="complete-actions">
+          <Link className="primary-button" href="/family">Check family dashboard <ArrowRight size={16} /></Link>
+          <Link className="secondary-button" href="/">Back to home</Link>
+        </div>
+      </section>
+    </main>
+  </PublicPageWithFooter>;
 }
 
 function AgeBandSetup({ child }: { child: ChildProfile }) {
@@ -420,6 +462,7 @@ function RouterContent() {
     <Route path="/faq" component={() => <PublicPageWithFooter><FAQPage /></PublicPageWithFooter>} />
     <Route path="/contact" component={() => <PublicPageWithFooter><ContactPage /></PublicPageWithFooter>} />
     <Route path="/sample-mission" component={() => <PublicPageWithFooter><SampleMissionPage /></PublicPageWithFooter>} />
+    <Route path="/billing/success" component={BillingSuccessPage} />
     <Route path="/sign-in/*?" component={SignInPage} />
     <Route path="/sign-up/*?" component={SignUpPage} />
     <Route path="/family" component={() => <GuardianGate><FamilyPage /></GuardianGate>} />

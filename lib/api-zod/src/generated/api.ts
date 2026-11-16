@@ -93,6 +93,9 @@ export const GetFamilyResponse = zod.object({
   "testingAdmin": zod.boolean(),
   "access": zod.object({
   "freeAccess": zod.boolean(),
+  "subscriptionActive": zod.boolean(),
+  "subscriptionStatus": zod.string(),
+  "hasAccess": zod.boolean(),
   "code": zod.string().nullable(),
   "label": zod.string().nullable(),
   "discountPercent": zod.number().int().min(getFamilyResponseAccessDiscountPercentMin).max(getFamilyResponseAccessDiscountPercentMax).nullable(),
@@ -120,6 +123,9 @@ export const redeemDiscountCodeResponseDiscountPercentMax = 100;
 
 export const RedeemDiscountCodeResponse = zod.object({
   "freeAccess": zod.boolean(),
+  "subscriptionActive": zod.boolean(),
+  "subscriptionStatus": zod.string(),
+  "hasAccess": zod.boolean(),
   "code": zod.string().nullable(),
   "label": zod.string().nullable(),
   "discountPercent": zod.number().int().min(redeemDiscountCodeResponseDiscountPercentMin).max(redeemDiscountCodeResponseDiscountPercentMax).nullable(),

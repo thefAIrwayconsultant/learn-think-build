@@ -22,6 +22,7 @@ import {
 import { isLegacyChapterId, levels, normalizeLessonId } from "@workspace/curriculum";
 import { advanceDailyLearning, calculateLearningScore, canonicalIds, normalizeState, levelReady, mergeProgressRecords, summarizeDailyLearning, weakTopicCounts } from "../lib/learning-rules";
 import { isTestingAdmin } from "../lib/testing-admin";
+import { requireFamilyAccess } from "../lib/require-family-access";
 import learningRouter from "./learning";
 import {
   CompleteChildLessonBody,
@@ -55,7 +56,7 @@ function getGuardianId(req: Parameters<typeof getAuth>[0]): string | null {
   return getAuth(req).userId ?? null;
 }
 
-router.get("/family/children/:childId/daily-usage", async (req, res): Promise<void> => {
+router.get("/family/children/:childId/daily-usage", requireFamilyAccess, async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
   if (!guardianId) { res.status(401).json({ error: "Sign in with a parent or guardian account." }); return; }
   const [profile] = await db.select({ id: childProfilesTable.id }).from(childProfilesTable)
@@ -65,7 +66,7 @@ router.get("/family/children/:childId/daily-usage", async (req, res): Promise<vo
   res.json(summarizeDailyLearning(record));
 });
 
-router.post("/family/children/:childId/daily-usage", async (req, res): Promise<void> => {
+router.post("/family/children/:childId/daily-usage", requireFamilyAccess, async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
   if (!guardianId) { res.status(401).json({ error: "Sign in with a parent or guardian account." }); return; }
   const body = z.object({ active: z.boolean(), sessionId: z.uuid() }).safeParse(req.body);
@@ -169,12 +170,18 @@ router.get("/family", async (req, res): Promise<void> => {
     testingAdmin,
     access: redemption ? {
       freeAccess: true,
+      subscriptionActive: guardian.subscriptionStatus === "active",
+      subscriptionStatus: guardian.subscriptionStatus,
+      hasAccess: true,
       code: redemption.code,
       label: redemption.label,
       discountPercent: redemption.discountPercent,
       redeemedAt: redemption.redeemedAt.toISOString(),
     } : {
       freeAccess: false,
+      subscriptionActive: guardian.subscriptionStatus === "active",
+      subscriptionStatus: guardian.subscriptionStatus,
+      hasAccess: guardian.subscriptionStatus === "active",
       code: null,
       label: null,
       discountPercent: null,
@@ -305,7 +312,7 @@ router.patch(
   },
 );
 
-router.patch("/family/children/:childId/learning-state", async (req, res): Promise<void> => {
+router.patch("/family/children/:childId/learning-state", requireFamilyAccess, async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
   if (!guardianId) {
     res.status(401).json({ error: "Sign in with a parent or guardian account." });
@@ -375,7 +382,7 @@ router.patch("/family/children/:childId/learning-state", async (req, res): Promi
   res.json(UpdateChildLearningStateResponse.parse(updated.learningState));
 });
 
-router.patch("/family/children/:childId/lessons/:lessonId/talk", async (req, res): Promise<void> => {
+router.patch("/family/children/:childId/lessons/:lessonId/talk", requireFamilyAccess, async (req, res): Promise<void> => {
   const guardianId = getGuardianId(req);
   if (!guardianId) {
     res.status(401).json({ error: "Sign in with a parent or guardian account." });

@@ -36,7 +36,7 @@ export default function SampleMissionPage() {
           <Link className="primary-button" href="/sign-up">Start the full program — {FAMILY_MONTHLY_PRICE}/month <ArrowRight size={16} /></Link>
           <Link className="secondary-button" href="/sign-up">Create a free parent account</Link>
         </div>
-        <p className="sample-checkout-note">Family plan checkout is coming soon; creating an account does not start a paid subscription.</p>
+        <p className="sample-checkout-note">The full program is {FAMILY_MONTHLY_PRICE} per month. Families with an access code can redeem it at sign-up or from the family dashboard.</p>
       </section>
     </PublicPageLayout>
   );

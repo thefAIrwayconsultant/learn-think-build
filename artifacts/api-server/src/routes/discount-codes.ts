@@ -27,9 +27,13 @@ function accessFromRedemption(redemption: {
   label: string;
   discountPercent: number;
   redeemedAt: Date;
-}) {
+}, subscriptionStatus: string) {
+  const subscriptionActive = subscriptionStatus === "active";
   return {
     freeAccess: true,
+    subscriptionActive,
+    subscriptionStatus,
+    hasAccess: true,
     code: redemption.code,
     label: redemption.label,
     discountPercent: redemption.discountPercent,
@@ -56,7 +60,7 @@ router.post("/family/redeem-code", async (req, res): Promise<void> => {
 
   await db.insert(guardiansTable).values({ id: guardianId }).onConflictDoNothing();
   const result = await db.transaction(async (tx) => {
-    await tx.select({ id: guardiansTable.id }).from(guardiansTable)
+    const [guardian] = await tx.select({ id: guardiansTable.id, subscriptionStatus: guardiansTable.subscriptionStatus }).from(guardiansTable)
       .where(eq(guardiansTable.id, guardianId)).limit(1).for("update");
 
     const [existing] = await tx.select({
@@ -71,7 +75,7 @@ router.post("/family/redeem-code", async (req, res): Promise<void> => {
       .limit(1);
     if (existing) {
       return existing.code === code
-        ? { kind: "access" as const, access: accessFromRedemption(existing) }
+        ? { kind: "access" as const, access: accessFromRedemption(existing, guardian.subscriptionStatus) }
         : { kind: "already-redeemed" as const };
     }
 
@@ -91,7 +95,7 @@ router.post("/family/redeem-code", async (req, res): Promise<void> => {
       .returning({ redeemedAt: familyDiscountRedemptionsTable.redeemedAt });
     return {
       kind: "access" as const,
-      access: accessFromRedemption({ ...discountCode, redeemedAt: redemption.redeemedAt }),
+      access: accessFromRedemption({ ...discountCode, redeemedAt: redemption.redeemedAt }, guardian.subscriptionStatus),
     };
   });
 

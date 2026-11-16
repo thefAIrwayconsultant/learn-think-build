@@ -8,6 +8,9 @@
 
 export interface FamilyAccess {
   freeAccess: boolean;
+  subscriptionActive: boolean;
+  subscriptionStatus: string;
+  hasAccess: boolean;
   /** @nullable */
   code: string | null;
   /** @nullable */

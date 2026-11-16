@@ -4,6 +4,7 @@ import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import pinoHttp from "pino-http";
 import router from "./routes";
+import stripeWebhookRouter from "./routes/stripe-webhook";
 import { logger } from "./lib/logger";
 import {
   CLERK_PROXY_PATH,
@@ -44,6 +45,8 @@ app.use(
     ),
   })),
 );
+// Stripe signatures must be checked against the exact raw request bytes.
+app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookRouter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

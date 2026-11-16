@@ -10,8 +10,10 @@ import {
 } from "@workspace/api-zod";
 import { canonicalIds, normalizeState, lessonReady, levelReady, pickQuestions, gradeQuestions, validReflection, summarizeDailyLearning } from "../lib/learning-rules";
 import { isTestingAdmin } from "../lib/testing-admin";
+import { requireFamilyAccess } from "../lib/require-family-access";
 
 const router = Router();
+router.use("/family/children/:childId", requireFamilyAccess);
 async function context(req: Request, res: Response) {
   const guardianId = getAuth(req).userId;
   if (!guardianId) { res.status(401).json({ error: "Sign in with a parent or guardian account." }); return null; }

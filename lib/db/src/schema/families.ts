@@ -17,6 +17,8 @@ import { z } from "zod/v4";
 export const guardiansTable = pgTable("guardians", {
   id: text("id").primaryKey(),
   stripeCustomerId: text("stripe_customer_id").unique(),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: varchar("subscription_status", { length: 32 }).notNull().default("inactive"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
