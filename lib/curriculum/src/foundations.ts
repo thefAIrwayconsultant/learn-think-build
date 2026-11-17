@@ -1,4 +1,4 @@
-import { sorting, type Seed } from "./content";
+import { sorting, withAgeActivities, type Seed } from "./content";
 
 export const foundations: Seed[] = [
   {
@@ -140,4 +140,4 @@ export const foundations: Seed[] = [
     reflect: "Give a safe example of useful context and explain a private detail you would remove. Do not include real private details.",
     family: "What information should our family never paste or upload into an AI tool?",
   },
-];
+].map(withAgeActivities);

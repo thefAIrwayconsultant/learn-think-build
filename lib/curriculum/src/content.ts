@@ -10,9 +10,28 @@ export type Seed = {
   steps: [string, string, string, string];
   checks: Check[];
   activity: Lesson["activity"];
+  activitiesByAgeBand?: [Lesson["activity"], Lesson["activity"], Lesson["activity"]];
   reflect: string; family: string;
 };
 export const bands: AgeBand[] = ["10-12", "13-15", "16-plus"];
+
+const ageActivityChallenges = [
+  "Find one clue in this moment and choose a next move.",
+  "A friend has a different guess. Compare the clues before deciding.",
+  "Weigh the upside and downside. Name one test that could change your call.",
+] as const;
+
+export function withAgeActivities(seed: Seed): Seed {
+  if (seed.activitiesByAgeBand) return seed;
+  const activitiesByAgeBand = seed.scenarios.map((scenario, band) => {
+    const activity = structuredClone(seed.activity);
+    activity.scenario = scenario;
+    activity.instruction = `${ageActivityChallenges[band]} ${activity.instruction}`;
+    activity.prompt = `${scenario} ${ageActivityChallenges[band]}`;
+    return activity;
+  }) as [Lesson["activity"], Lesson["activity"], Lesson["activity"]];
+  return { ...seed, activitiesByAgeBand };
+}
 
 export function makeLesson(seed: Seed, ageBand: AgeBand, sessionNumber = 1, chapterSessionCount = 1): Lesson {
   const band = bands.indexOf(ageBand);
@@ -37,6 +56,15 @@ export function makeLesson(seed: Seed, ageBand: AgeBand, sessionNumber = 1, chap
     answer: [1, 3, 0, 2], explanation: seed.steps.join(" → "),
   });
   const paragraphs = seed.scripts[band].split("~");
+  const activity = structuredClone(seed.activitiesByAgeBand?.[band] ?? seed.activity);
+  if (sessionNumber === 19 || sessionNumber === 20) {
+    const bossChallenge = band === 0
+      ? "Boss mission: use two clues, make a guess, and check it."
+      : band === 1
+        ? "Boss mission: combine two clues, test a tempting guess, and explain your choice."
+        : "Boss mission: weigh the tradeoff, test an edge case, and defend your call with evidence.";
+    activity.instruction = `${bossChallenge} ${activity.instruction}`;
+  }
   return {
     id: seed.id, levelId: seed.levelId, sessionNumber, chapterSessionCount, title: seed.title, topic: seed.topic, ageBand,
     summary: seed.takeaway, durationMinutes: 10,
@@ -47,7 +75,7 @@ export function makeLesson(seed: Seed, ageBand: AgeBand, sessionNumber = 1, chap
       narration: band === 0 && index === 0 ? `Hi, I'm Pip! ${narration.trim()}` : narration.trim(),
       visual: seed.visuals[index],
     })),
-    activity: { ...seed.activity, scenario },
+    activity: { ...activity, scenario },
     reflectionPrompt: seed.reflect,
     sentenceStarters: band === 0 ? ["I used to think… Now I know…", "One safe choice I can make is… because…", "If this happened to me, I would…"] : undefined,
     familyPrompt: seed.family, questionBank,

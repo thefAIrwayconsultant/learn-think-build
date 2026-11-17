@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getLessonsForAgeBand, getSampleMissionPreview, levels, normalizeLessonId, type AgeBand } from "./index";
+import { makeLesson, type Seed } from "./content";
 
 const bands: AgeBand[] = ["10-12", "13-15", "16-plus"];
 const ids = levels.flatMap(level => level.lessonIds);
@@ -63,6 +64,36 @@ test("all modes have real data, and every band has distinct scenarios/scripts/ba
     assert.equal(new Set(versions.map(l => l.scenes[0].narration)).size, 3);
     assert.equal(new Set(versions.flatMap(l => l.questionBank.map(q => q.id))).size, 24);
   }
+});
+
+test("age-specific seed activities are selected with a shared-activity fallback", () => {
+  const seed: Seed = {
+    id: "activity-band-test",
+    levelId: "ai-foundations" as const,
+    title: "Activity selection",
+    topic: "Activity selection",
+    scenarios: ["A child sees a red card.", "A friend shares a confusing card.", "Two plausible cards compete."] ,
+    scripts: ["A short scene.~A second scene.~A final scene.", "A short scene.~A second scene.~A final scene.", "A short scene.~A second scene.~A final scene."],
+    visuals: ["First visual", "Second visual", "Third visual"],
+    action: "Choose the checked card.",
+    unsafe: "Choose without checking.",
+    takeaway: "The card needs a clue.",
+    steps: ["Notice", "Compare", "Choose", "Check"],
+    checks: [],
+    activity: { kind: "branching" as const, title: "Shared activity", instruction: "Use the shared activity.", choices: [{ text: "Shared choice", correct: true, feedback: "Good check." }] },
+    activitiesByAgeBand: [
+      { kind: "branching" as const, title: "Starter activity", instruction: "Spot one clue.", choices: [{ text: "Starter choice", correct: true, feedback: "One clue is enough here." }] },
+      { kind: "branching" as const, title: "Explorer activity", instruction: "Compare the clues.", choices: [{ text: "Explorer choice", correct: true, feedback: "Compare before choosing." }] },
+      { kind: "branching" as const, title: "Builder activity", instruction: "Weigh the tradeoff.", choices: [{ text: "Builder choice", correct: true, feedback: "The tradeoff matters." }] },
+    ],
+    reflect: "What clue changes your choice, and why?",
+    family: "Which clue would you check together?",
+  };
+  const [starter, explorer, builder] = bands.map((band) => makeLesson(seed, band));
+  assert.deepEqual([starter.activity.title, explorer.activity.title, builder.activity.title],
+    ["Starter activity", "Explorer activity", "Builder activity"]);
+  const fallback = { ...seed, activitiesByAgeBand: undefined };
+  assert.equal(makeLesson(fallback, "16-plus").activity.title, "Shared activity");
 });
 
 test("sample mission preview uses the real first mission goal and steps", () => {

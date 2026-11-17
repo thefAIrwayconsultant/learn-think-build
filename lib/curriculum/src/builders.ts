@@ -1,4 +1,4 @@
-import { branching, sorting, type Seed } from "./content";
+import { branching, sorting, withAgeActivities, type Seed } from "./content";
 
 export const builders: Seed[] = [
   {
@@ -131,4 +131,4 @@ export const builders: Seed[] = [
     reflect: "Explain one design choice, one test result, and one honest limit of your project. Credit any help.",
     family: "Can the learner explain what they built and why, not just show a polished result?",
   },
-];
+].map(withAgeActivities);

@@ -1,4 +1,4 @@
-import { branching, sorting, type Seed } from "./content";
+import { branching, sorting, withAgeActivities, type Seed } from "./content";
 
 export const responsible: Seed[] = [
   {
@@ -136,4 +136,4 @@ export const responsible: Seed[] = [
     reflect: "Name two pressure tactics and explain how you would check a suspicious request safely.",
     family: "What should a learner do immediately if they click a scam link or share a code?",
   },
-];
+].map(withAgeActivities);

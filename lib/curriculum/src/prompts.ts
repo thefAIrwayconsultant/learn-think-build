@@ -1,4 +1,4 @@
-import { branching, sorting, type Seed } from "./content";
+import { branching, sorting, withAgeActivities, type Seed } from "./content";
 
 export const prompts: Seed[] = [
   {
@@ -156,4 +156,4 @@ export const prompts: Seed[] = [
     reflect: "Describe what you would record and credit in an AI-assisted creative project, including your own contribution.",
     family: "What would honest credits look like for something we made together using several kinds of help?",
   },
-];
+].map(withAgeActivities);
